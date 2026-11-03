@@ -1150,6 +1150,176 @@ label.btn { display: inline-block; }
   .bk-tab.on { transform: translateY(0); }
 }
 
+
+/* ===== grimoire: heavy wear (overrides) ===== */
+.bk-cover { background:
+    radial-gradient(circle at 18% 12%, rgb(255 255 255 / .06), transparent 35%),
+    radial-gradient(ellipse at 80% 90%, rgb(0 0 0 / .5), transparent 50%),
+    radial-gradient(ellipse at 10% 95%, rgb(0 0 0 / .35), transparent 40%),
+    repeating-linear-gradient(115deg, rgb(255 255 255 / .018) 0 1px, transparent 1px 4px),
+    linear-gradient(135deg, color-mix(in srgb, var(--sky) 55%, #0a0612), color-mix(in srgb, var(--sky) 30%, #07040d) 60%, color-mix(in srgb, var(--sky) 20%, #050309)); }
+.bk-cover::before { border-color: rgb(196 160 82 / .55); }
+.bk-corner { stroke: #b99547; filter: drop-shadow(0 0 2px rgb(0 0 0 / .6)); opacity: .85; }
+.bk-corner circle { fill: #b99547; }
+.bk-pages { --solid: #d9c08a; --ink: #2a1a10; --muted: color-mix(in srgb, #2a1a10 62%, #d9c08a); --line: rgb(70 40 15 / .28); --line-strong: rgb(70 40 15 / .5);
+  box-shadow: none; filter: drop-shadow(4px 6px 6px rgb(0 0 0 / .55)); }
+.bk-pages::before, .bk-pages::after { content: ""; position: absolute; z-index: 0; top: 4px; bottom: -6px; background: #c7aa6c; pointer-events: none; }
+.bk-pages::before { left: -5px; right: 50%; clip-path: polygon(0.00% 4.1px, 3.57% 5.0px, 7.14% 8.3px, 10.71% 4.2px, 14.29% 4.6px, 17.86% 5.3px, 21.43% 1.7px, 25.00% 4.6px, 28.57% 5.7px, 32.14% 7.1px, 35.71% 0.8px, 39.29% 2.7px, 42.86% 0.8px, 46.43% 7.3px, 50.00% 6.2px, 53.57% 0.4px, 57.14% 8.8px, 60.71% 8.7px, 64.29% 5.9px, 67.86% 5.5px, 71.43% 1.4px, 75.00% 0.1px, 78.57% 4.8px, 82.14% 0.5px, 85.71% 1.7px, 89.29% 2.2px, 92.86% 0.3px, 96.43% 4.2px, 100.00% 4.0px, 100.00% calc(100% - 7.6px), 96.43% calc(100% - 4.7px), 92.86% calc(100% - 5.8px), 89.29% calc(100% - 4.5px), 85.71% calc(100% - 6.0px), 82.14% calc(100% - 4.1px), 78.57% calc(100% - 2.5px), 75.00% calc(100% - 9.0px), 71.43% calc(100% - 9.0px), 67.86% calc(100% - 7.6px), 64.29% calc(100% - 6.4px), 60.71% calc(100% - 2.8px), 57.14% calc(100% - 2.1px), 53.57% calc(100% - 2.6px), 50.00% calc(100% - 0.6px), 46.43% calc(100% - 6.9px), 42.86% calc(100% - 3.6px), 39.29% calc(100% - 7.6px), 35.71% calc(100% - 3.5px), 32.14% calc(100% - 8.6px), 28.57% calc(100% - 7.6px), 25.00% calc(100% - 0.0px), 21.43% calc(100% - 1.9px), 17.86% calc(100% - 8.2px), 14.29% calc(100% - 4.2px), 10.71% calc(100% - 8.8px), 7.14% calc(100% - 3.6px), 3.57% calc(100% - 0.7px), 0.00% calc(100% - 5.7px), 7.0px 96.43%, 2.4px 92.86%, 0.8px 89.29%, 3.0px 85.71%, 8.7px 82.14%, 6.8px 78.57%, 1.1px 75.00%, 2.2px 71.43%, 0.9px 67.86%, 0.5px 64.29%, 7.2px 60.71%, 1.6px 57.14%, 5.0px 53.57%, 4.0px 50.00%, 1.7px 46.43%, 6.6px 42.86%, 1.2px 39.29%, 5.8px 35.71%, 1.0px 32.14%, 3.8px 28.57%, 1.9px 25.00%, 2.4px 21.43%, 8.7px 17.86%, 7.2px 14.29%, 2.7px 10.71%, 8.0px 7.14%, 1.9px 3.57%); filter: brightness(.82); }
+.bk-pages::after { left: 30%; right: -7px; clip-path: polygon(0.00% 3.5px, 3.57% 7.7px, 7.14% 5.8px, 10.71% 0.9px, 14.29% 8.9px, 17.86% 1.9px, 21.43% 2.3px, 25.00% 7.0px, 28.57% 3.0px, 32.14% 2.7px, 35.71% 0.7px, 39.29% 0.8px, 42.86% 5.2px, 46.43% 2.2px, 50.00% 5.4px, 53.57% 3.3px, 57.14% 4.1px, 60.71% 8.6px, 64.29% 4.4px, 67.86% 5.2px, 71.43% 7.8px, 75.00% 1.6px, 78.57% 1.4px, 82.14% 8.2px, 85.71% 7.4px, 89.29% 2.2px, 92.86% 1.7px, 96.43% 6.7px, 100.00% 8.5px, calc(100% - 1.8px) 3.57%, calc(100% - 8.6px) 7.14%, calc(100% - 7.9px) 10.71%, calc(100% - 5.4px) 14.29%, calc(100% - 3.8px) 17.86%, calc(100% - 0.9px) 21.43%, calc(100% - 0.3px) 25.00%, calc(100% - 8.7px) 28.57%, calc(100% - 2.1px) 32.14%, calc(100% - 6.3px) 35.71%, calc(100% - 2.3px) 39.29%, calc(100% - 7.4px) 42.86%, calc(100% - 5.4px) 46.43%, calc(100% - 2.6px) 50.00%, calc(100% - 1.6px) 53.57%, calc(100% - 6.5px) 57.14%, calc(100% - 0.6px) 60.71%, calc(100% - 2.1px) 64.29%, calc(100% - 5.0px) 67.86%, calc(100% - 7.7px) 71.43%, calc(100% - 5.5px) 75.00%, calc(100% - 2.5px) 78.57%, calc(100% - 8.3px) 82.14%, calc(100% - 1.8px) 85.71%, calc(100% - 0.1px) 89.29%, calc(100% - 2.4px) 92.86%, calc(100% - 4.0px) 96.43%, 100.00% calc(100% - 0.5px), 96.43% calc(100% - 1.6px), 92.86% calc(100% - 3.3px), 89.29% calc(100% - 5.1px), 85.71% calc(100% - 1.2px), 82.14% calc(100% - 3.3px), 78.57% calc(100% - 8.0px), 75.00% calc(100% - 8.8px), 71.43% calc(100% - 5.9px), 67.86% calc(100% - 6.2px), 64.29% calc(100% - 5.3px), 60.71% calc(100% - 1.3px), 57.14% calc(100% - 0.3px), 53.57% calc(100% - 0.2px), 50.00% calc(100% - 8.2px), 46.43% calc(100% - 6.3px), 42.86% calc(100% - 8.7px), 39.29% calc(100% - 0.2px), 35.71% calc(100% - 5.7px), 32.14% calc(100% - 4.3px), 28.57% calc(100% - 6.6px), 25.00% calc(100% - 2.9px), 21.43% calc(100% - 9.0px), 17.86% calc(100% - 0.7px), 14.29% calc(100% - 4.9px), 10.71% calc(100% - 6.6px), 7.14% calc(100% - 8.1px), 3.57% calc(100% - 6.6px), 0.00% calc(100% - 6.3px)); filter: brightness(.78); }
+.bk-page { background-color: #d8bd85;
+  background-image:
+    radial-gradient(closest-side, transparent 58%, rgb(110 60 20 / .32) 64%, rgb(110 60 20 / .12) 70%, transparent 74%),
+    radial-gradient(ellipse at 0% 0%, rgb(70 30 5 / .75), transparent 22%),
+    radial-gradient(ellipse at 100% 100%, rgb(70 30 5 / .7), transparent 24%),
+    radial-gradient(ellipse at 100% 0%, rgb(80 40 10 / .55), transparent 20%),
+    radial-gradient(ellipse at 0% 100%, rgb(80 40 10 / .55), transparent 20%),
+    radial-gradient(ellipse at 30% 40%, rgb(150 95 35 / .28), transparent 30%),
+    radial-gradient(ellipse at 72% 68%, rgb(160 105 40 / .3), transparent 26%),
+    radial-gradient(circle at 63% 14%, rgb(110 60 20 / .35) 0 2px, transparent 3px),
+    radial-gradient(circle at 22% 71%, rgb(110 60 20 / .3) 0 3px, transparent 5px),
+    radial-gradient(circle at 78% 46%, rgb(110 60 20 / .25) 0 1.5px, transparent 3px),
+    radial-gradient(circle at 46% 83%, rgb(110 60 20 / .25) 0 2.5px, transparent 4px),
+    radial-gradient(circle at 12% 34%, rgb(110 60 20 / .22) 0 1.5px, transparent 3px),
+    linear-gradient(104deg, transparent 49.6%, rgb(70 40 15 / .14) 50%, rgb(255 240 200 / .12) 50.4%, transparent 51%),
+    repeating-linear-gradient(0deg, rgb(90 55 20 / .05) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgb(90 55 20 / .025) 0 1px, transparent 1px 5px);
+  background-size: 260px 260px, auto, auto, auto, auto, auto, auto, auto, auto, auto, auto, auto, auto, auto, auto;
+  background-position: 78% 18%, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat;
+  box-shadow: inset 0 0 90px rgb(90 45 10 / .55), inset 0 0 22px rgb(60 25 5 / .6); }
+.bk-left { clip-path: polygon(0.00% 4.1px, 3.57% 5.0px, 7.14% 8.3px, 10.71% 4.2px, 14.29% 4.6px, 17.86% 5.3px, 21.43% 1.7px, 25.00% 4.6px, 28.57% 5.7px, 32.14% 7.1px, 35.71% 0.8px, 39.29% 2.7px, 42.86% 0.8px, 46.43% 7.3px, 50.00% 6.2px, 53.57% 0.4px, 57.14% 8.8px, 60.71% 8.7px, 64.29% 5.9px, 67.86% 5.5px, 71.43% 1.4px, 75.00% 0.1px, 78.57% 4.8px, 82.14% 0.5px, 85.71% 1.7px, 89.29% 2.2px, 92.86% 0.3px, 96.43% 4.2px, 100.00% 4.0px, 100.00% calc(100% - 7.6px), 96.43% calc(100% - 4.7px), 92.86% calc(100% - 5.8px), 89.29% calc(100% - 4.5px), 85.71% calc(100% - 6.0px), 82.14% calc(100% - 4.1px), 78.57% calc(100% - 2.5px), 75.00% calc(100% - 9.0px), 71.43% calc(100% - 9.0px), 67.86% calc(100% - 7.6px), 64.29% calc(100% - 6.4px), 60.71% calc(100% - 2.8px), 57.14% calc(100% - 2.1px), 53.57% calc(100% - 2.6px), 50.00% calc(100% - 0.6px), 46.43% calc(100% - 6.9px), 42.86% calc(100% - 3.6px), 39.29% calc(100% - 7.6px), 35.71% calc(100% - 3.5px), 32.14% calc(100% - 8.6px), 28.57% calc(100% - 7.6px), 25.00% calc(100% - 0.0px), 21.43% calc(100% - 1.9px), 17.86% calc(100% - 8.2px), 14.29% calc(100% - 4.2px), 10.71% calc(100% - 8.8px), 7.14% calc(100% - 3.6px), 3.57% calc(100% - 0.7px), 0.00% calc(100% - 5.7px), 7.0px 96.43%, 2.4px 92.86%, 0.8px 89.29%, 3.0px 85.71%, 8.7px 82.14%, 6.8px 78.57%, 1.1px 75.00%, 2.2px 71.43%, 0.9px 67.86%, 0.5px 64.29%, 7.2px 60.71%, 1.6px 57.14%, 5.0px 53.57%, 4.0px 50.00%, 1.7px 46.43%, 6.6px 42.86%, 1.2px 39.29%, 5.8px 35.71%, 1.0px 32.14%, 3.8px 28.57%, 1.9px 25.00%, 2.4px 21.43%, 8.7px 17.86%, 7.2px 14.29%, 2.7px 10.71%, 8.0px 7.14%, 1.9px 3.57%); }
+.bk-right { clip-path: polygon(0.00% 3.5px, 3.57% 7.7px, 7.14% 5.8px, 10.71% 0.9px, 14.29% 8.9px, 17.86% 1.9px, 21.43% 2.3px, 25.00% 7.0px, 28.57% 3.0px, 32.14% 2.7px, 35.71% 0.7px, 39.29% 0.8px, 42.86% 5.2px, 46.43% 2.2px, 50.00% 5.4px, 53.57% 3.3px, 57.14% 4.1px, 60.71% 8.6px, 64.29% 4.4px, 67.86% 5.2px, 71.43% 7.8px, 75.00% 1.6px, 78.57% 1.4px, 82.14% 8.2px, 85.71% 7.4px, 89.29% 2.2px, 92.86% 1.7px, 96.43% 6.7px, 100.00% 8.5px, calc(100% - 1.8px) 3.57%, calc(100% - 8.6px) 7.14%, calc(100% - 7.9px) 10.71%, calc(100% - 5.4px) 14.29%, calc(100% - 3.8px) 17.86%, calc(100% - 0.9px) 21.43%, calc(100% - 0.3px) 25.00%, calc(100% - 8.7px) 28.57%, calc(100% - 2.1px) 32.14%, calc(100% - 6.3px) 35.71%, calc(100% - 2.3px) 39.29%, calc(100% - 7.4px) 42.86%, calc(100% - 5.4px) 46.43%, calc(100% - 2.6px) 50.00%, calc(100% - 1.6px) 53.57%, calc(100% - 6.5px) 57.14%, calc(100% - 0.6px) 60.71%, calc(100% - 2.1px) 64.29%, calc(100% - 5.0px) 67.86%, calc(100% - 7.7px) 71.43%, calc(100% - 5.5px) 75.00%, calc(100% - 2.5px) 78.57%, calc(100% - 8.3px) 82.14%, calc(100% - 1.8px) 85.71%, calc(100% - 0.1px) 89.29%, calc(100% - 2.4px) 92.86%, calc(100% - 4.0px) 96.43%, 100.00% calc(100% - 0.5px), 96.43% calc(100% - 1.6px), 92.86% calc(100% - 3.3px), 89.29% calc(100% - 5.1px), 85.71% calc(100% - 1.2px), 82.14% calc(100% - 3.3px), 78.57% calc(100% - 8.0px), 75.00% calc(100% - 8.8px), 71.43% calc(100% - 5.9px), 67.86% calc(100% - 6.2px), 64.29% calc(100% - 5.3px), 60.71% calc(100% - 1.3px), 57.14% calc(100% - 0.3px), 53.57% calc(100% - 0.2px), 50.00% calc(100% - 8.2px), 46.43% calc(100% - 6.3px), 42.86% calc(100% - 8.7px), 39.29% calc(100% - 0.2px), 35.71% calc(100% - 5.7px), 32.14% calc(100% - 4.3px), 28.57% calc(100% - 6.6px), 25.00% calc(100% - 2.9px), 21.43% calc(100% - 9.0px), 17.86% calc(100% - 0.7px), 14.29% calc(100% - 4.9px), 10.71% calc(100% - 6.6px), 7.14% calc(100% - 8.1px), 3.57% calc(100% - 6.6px), 0.00% calc(100% - 6.3px)); }
+.bk-stain { position: absolute; z-index: 0; pointer-events: none; width: 210px; height: 150px; right: 6%; bottom: 9%; border-radius: 48% 52% 40% 60% / 55% 45% 55% 45%;
+  background: radial-gradient(ellipse at 45% 50%, rgb(120 70 25 / .18), rgb(120 70 25 / .07) 60%, transparent 72%); box-shadow: inset 0 0 0 2px rgb(110 60 20 / .12); rotate: -14deg; }
+.bk-stain.l { right: auto; left: -40px; bottom: auto; top: 58%; width: 170px; height: 200px; rotate: 30deg; }
+.bk-ribbon { position: absolute; z-index: 5; top: -14px; right: 12px; width: 13px; height: calc(100% + 54px); pointer-events: none;
+  background: linear-gradient(90deg, rgb(0 0 0 / .25), transparent 30%, transparent 70%, rgb(0 0 0 / .3)), color-mix(in srgb, #3a2470 85%, #000);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 10px), 0 100%); box-shadow: 1px 0 3px rgb(0 0 0 / .4); }
+/* worn, broken ink */
+.bk-pages .field label, .bk-pages .lbl, .bk-pages .dv .lbl { color: color-mix(in srgb, #2a1a10 78%, #d9c08a); }
+.bk-pages .bk-name, .bk-pages .bk-kana, .bk-pages .bk-sub, .bk-pages .bk-kicker, .bk-pages .bk-head, .bk-pages .bk-folio,
+.bk-pages label, .bk-pages .lbl, .bk-pages th, .bk-pages .sec-title, .bk-pages .sub-title, .bk-pages .ab-name, .bk-pages .skill-name, .bk-pages .pbar b,
+.bk-pages .dv .lbl, .bk-pages .chart-fig figcaption, .bk-pages .radar-svg text, .bk-pages .sk-n, .bk-pages .pt, .bk-pages .sys-badge, .bk-pages .bk-tools .btn { filter: url(#ink-wear); }
+.bk-pages .inp, .bk-pages .tbl .c-in, .bk-pages .tbl td.out-num, .bk-pages .dv .val, .bk-pages textarea.inp, .bk-pages .sk-v { filter: url(#ink-wear-soft); }
+.bk-pages .inp:focus, .bk-pages .tbl .c-in:focus, .bk-pages textarea.inp:focus { filter: none; }
+.bk-pages .bk-head h3 { color: #3a1408; letter-spacing: .06em; }
+.bk-pages .bk-name { color: #2a0e06; }
+.bk-pages .bk-head h3, .bk-pages .bk-name { text-shadow: .5px .5px 0 rgb(70 30 10 / .35); }
+.bk-portrait { background: #e1cfa2; }
+.bk-portrait img { filter: sepia(.65) contrast(.9) brightness(.92) saturate(.8); }
+.bk-portrait::after { content: ""; position: absolute; inset: 9px 9px 24px; pointer-events: none; box-shadow: inset 0 0 26px rgb(70 35 10 / .55); }
+.bk-flip .leaf { background-color: #d4b97f; clip-path: polygon(0.00% 3.5px, 3.57% 7.7px, 7.14% 5.8px, 10.71% 0.9px, 14.29% 8.9px, 17.86% 1.9px, 21.43% 2.3px, 25.00% 7.0px, 28.57% 3.0px, 32.14% 2.7px, 35.71% 0.7px, 39.29% 0.8px, 42.86% 5.2px, 46.43% 2.2px, 50.00% 5.4px, 53.57% 3.3px, 57.14% 4.1px, 60.71% 8.6px, 64.29% 4.4px, 67.86% 5.2px, 71.43% 7.8px, 75.00% 1.6px, 78.57% 1.4px, 82.14% 8.2px, 85.71% 7.4px, 89.29% 2.2px, 92.86% 1.7px, 96.43% 6.7px, 100.00% 8.5px, calc(100% - 1.8px) 3.57%, calc(100% - 8.6px) 7.14%, calc(100% - 7.9px) 10.71%, calc(100% - 5.4px) 14.29%, calc(100% - 3.8px) 17.86%, calc(100% - 0.9px) 21.43%, calc(100% - 0.3px) 25.00%, calc(100% - 8.7px) 28.57%, calc(100% - 2.1px) 32.14%, calc(100% - 6.3px) 35.71%, calc(100% - 2.3px) 39.29%, calc(100% - 7.4px) 42.86%, calc(100% - 5.4px) 46.43%, calc(100% - 2.6px) 50.00%, calc(100% - 1.6px) 53.57%, calc(100% - 6.5px) 57.14%, calc(100% - 0.6px) 60.71%, calc(100% - 2.1px) 64.29%, calc(100% - 5.0px) 67.86%, calc(100% - 7.7px) 71.43%, calc(100% - 5.5px) 75.00%, calc(100% - 2.5px) 78.57%, calc(100% - 8.3px) 82.14%, calc(100% - 1.8px) 85.71%, calc(100% - 0.1px) 89.29%, calc(100% - 2.4px) 92.86%, calc(100% - 4.0px) 96.43%, 100.00% calc(100% - 0.5px), 96.43% calc(100% - 1.6px), 92.86% calc(100% - 3.3px), 89.29% calc(100% - 5.1px), 85.71% calc(100% - 1.2px), 82.14% calc(100% - 3.3px), 78.57% calc(100% - 8.0px), 75.00% calc(100% - 8.8px), 71.43% calc(100% - 5.9px), 67.86% calc(100% - 6.2px), 64.29% calc(100% - 5.3px), 60.71% calc(100% - 1.3px), 57.14% calc(100% - 0.3px), 53.57% calc(100% - 0.2px), 50.00% calc(100% - 8.2px), 46.43% calc(100% - 6.3px), 42.86% calc(100% - 8.7px), 39.29% calc(100% - 0.2px), 35.71% calc(100% - 5.7px), 32.14% calc(100% - 4.3px), 28.57% calc(100% - 6.6px), 25.00% calc(100% - 2.9px), 21.43% calc(100% - 9.0px), 17.86% calc(100% - 0.7px), 14.29% calc(100% - 4.9px), 10.71% calc(100% - 6.6px), 7.14% calc(100% - 8.1px), 3.57% calc(100% - 6.6px), 0.00% calc(100% - 6.3px));
+  background-image: linear-gradient(to right, rgb(60 30 10 / .45), transparent 40px), radial-gradient(ellipse at 100% 0%, rgb(70 30 5 / .6), transparent 22%), radial-gradient(ellipse at 100% 100%, rgb(70 30 5 / .6), transparent 22%), radial-gradient(ellipse at 40% 50%, rgb(150 95 35 / .25), transparent 35%);
+  box-shadow: inset 0 0 50px rgb(90 45 10 / .5); }
+.bk-tab { background-color: color-mix(in srgb, var(--bc) 26%, #c9ad74); opacity: .9;
+  background-image: radial-gradient(circle at 74% 30%, rgb(100 60 20 / .3), transparent 26%), radial-gradient(circle at 20% 70%, rgb(100 60 20 / .22), transparent 20%), linear-gradient(100deg, transparent 47%, rgb(0 0 0 / .1) 50%, transparent 53%), linear-gradient(to bottom, transparent 55%, rgb(60 30 10 / .18)); }
+.bk-tab.on { background-color: color-mix(in srgb, var(--bc) 48%, #c9ad74); }
+@media (max-width: 900px) {
+  .bk-left, .bk-right { clip-path: polygon(0.00% 7.1px, 3.57% 8.2px, 7.14% 3.2px, 10.71% 6.2px, 14.29% 8.1px, 17.86% 7.8px, 21.43% 3.8px, 25.00% 7.1px, 28.57% 7.8px, 32.14% 5.2px, 35.71% 5.6px, 39.29% 3.4px, 42.86% 5.2px, 46.43% 5.5px, 50.00% 0.7px, 53.57% 5.8px, 57.14% 8.9px, 60.71% 7.9px, 64.29% 6.6px, 67.86% 3.5px, 71.43% 6.6px, 75.00% 5.2px, 78.57% 4.0px, 82.14% 7.5px, 85.71% 0.8px, 89.29% 6.8px, 92.86% 0.3px, 96.43% 5.4px, 100.00% 4.3px, calc(100% - 2.1px) 3.57%, calc(100% - 6.3px) 7.14%, calc(100% - 4.5px) 10.71%, calc(100% - 5.5px) 14.29%, calc(100% - 8.3px) 17.86%, calc(100% - 2.3px) 21.43%, calc(100% - 0.1px) 25.00%, calc(100% - 2.7px) 28.57%, calc(100% - 6.1px) 32.14%, calc(100% - 1.8px) 35.71%, calc(100% - 1.5px) 39.29%, calc(100% - 8.2px) 42.86%, calc(100% - 5.9px) 46.43%, calc(100% - 4.0px) 50.00%, calc(100% - 8.0px) 53.57%, calc(100% - 2.9px) 57.14%, calc(100% - 6.0px) 60.71%, calc(100% - 1.8px) 64.29%, calc(100% - 3.9px) 67.86%, calc(100% - 7.3px) 71.43%, calc(100% - 8.2px) 75.00%, calc(100% - 7.9px) 78.57%, calc(100% - 3.5px) 82.14%, calc(100% - 5.2px) 85.71%, calc(100% - 2.8px) 89.29%, calc(100% - 1.2px) 92.86%, calc(100% - 4.5px) 96.43%, 100.00% calc(100% - 7.5px), 96.43% calc(100% - 7.6px), 92.86% calc(100% - 6.4px), 89.29% calc(100% - 8.6px), 85.71% calc(100% - 2.5px), 82.14% calc(100% - 1.5px), 78.57% calc(100% - 4.1px), 75.00% calc(100% - 2.5px), 71.43% calc(100% - 1.9px), 67.86% calc(100% - 3.7px), 64.29% calc(100% - 5.6px), 60.71% calc(100% - 4.4px), 57.14% calc(100% - 2.8px), 53.57% calc(100% - 7.6px), 50.00% calc(100% - 8.8px), 46.43% calc(100% - 4.1px), 42.86% calc(100% - 0.7px), 39.29% calc(100% - 0.3px), 35.71% calc(100% - 7.9px), 32.14% calc(100% - 0.4px), 28.57% calc(100% - 6.4px), 25.00% calc(100% - 5.1px), 21.43% calc(100% - 2.8px), 17.86% calc(100% - 7.1px), 14.29% calc(100% - 0.2px), 10.71% calc(100% - 1.2px), 7.14% calc(100% - 4.1px), 3.57% calc(100% - 0.2px), 0.00% calc(100% - 7.5px), 2.1px 96.43%, 1.3px 92.86%, 0.4px 89.29%, 5.7px 85.71%, 4.0px 82.14%, 5.7px 78.57%, 5.9px 75.00%, 7.3px 71.43%, 8.6px 67.86%, 6.2px 64.29%, 1.8px 60.71%, 4.3px 57.14%, 1.6px 53.57%, 0.1px 50.00%, 4.2px 46.43%, 6.4px 42.86%, 1.6px 39.29%, 2.5px 35.71%, 3.1px 32.14%, 6.3px 28.57%, 4.7px 25.00%, 5.5px 21.43%, 6.8px 17.86%, 3.5px 14.29%, 7.1px 10.71%, 8.2px 7.14%, 0.8px 3.57%); }
+  .bk-pages::before, .bk-pages::after { display: none; }
+  .bk-ribbon { right: 4px; width: 10px; top: -6px; height: 55%; }
+  .bk-stain.l { display: none; }
+}
+
+
+/* ===== grimoire v3: realistic decayed book, TOC on the left, writing on the right ===== */
+.book { padding: 66px 8px 24px; }
+.bk-cover { padding: 20px 22px 22px 18px; border-radius: 8px 18px 18px 8px;
+  background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22300%22%20height%3D%22300%22%3E%3Cfilter%20id%3D%22f%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.6%22%20numOctaves%3D%223%22%20stitchTiles%3D%22stitch%22%2F%3E%3CfeColorMatrix%20values%3D%220%200%200%200%201%20%200%200%200%200%201%20%200%200%200%200%201%20%200%200%200%20.14%20-.04%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23f%29%22%2F%3E%3C%2Fsvg%3E"), radial-gradient(ellipse at 20% 10%, rgb(255 255 255 / .06), transparent 40%), radial-gradient(ellipse at 85% 90%, rgb(0 0 0 / .55), transparent 55%),
+    linear-gradient(135deg, color-mix(in srgb, var(--sky) 42%, #090612), color-mix(in srgb, var(--sky) 24%, #06040b) 65%, #05030a);
+  box-shadow: 0 46px 80px -34px rgb(0 0 0 / .9), 0 0 0 1px rgb(0 0 0 / .6), inset 0 0 40px rgb(0 0 0 / .6), inset 0 0 0 2px rgb(185 149 71 / .18); }
+.bk-cover::before { inset: 8px; border: 2px solid rgb(185 149 71 / .55); border-radius: 6px 14px 14px 6px; box-shadow: inset 0 0 0 4px transparent, inset 0 0 0 5px rgb(185 149 71 / .25); }
+.bk-corner { width: 58px; height: 58px; stroke: #c9a24e; stroke-width: 2.4; opacity: .9; filter: drop-shadow(0 1px 1px rgb(0 0 0 / .8)) drop-shadow(0 0 4px rgb(201 162 78 / .3)); }
+.bk-corner circle { fill: #c9a24e; }
+.bk-clasp { position: absolute; z-index: 4; right: -16px; top: 46%; width: 34px; height: 64px; border-radius: 6px; pointer-events: none;
+  background: linear-gradient(90deg, #6d5320, #d2ad5a 40%, #f2d58f 50%, #a7802f 62%, #5a4316); box-shadow: 0 4px 8px rgb(0 0 0 / .6), inset 0 0 0 2px rgb(60 40 10 / .5); }
+.bk-clasp::after { content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; translate: -50% -50%; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff2c8, #8b6a24 70%); box-shadow: 0 1px 2px rgb(0 0 0 / .6); }
+.bk-pages { --solid: #d6b880; --ink: #2b170a; --sky: #6b1a0e; --cyan: #6e4a22; --hp: #8e1f12; --mp: #263f6a; --san: #4f2a74;
+  --muted: color-mix(in srgb, #2b170a 66%, #d6b880); --line: rgb(70 35 10 / .3); --line-strong: rgb(70 35 10 / .55); }
+.bk-page { background-color: #d3b47a;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22240%22%3E%3Cfilter%20id%3D%22f%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.9%22%20numOctaves%3D%224%22%20stitchTiles%3D%22stitch%22%2F%3E%3CfeColorMatrix%20values%3D%220%200%200%200%20.32%20%200%200%200%200%20.2%20%200%200%200%200%20.07%20%200%200%200%20.6%20-.12%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23f%29%22%2F%3E%3C%2Fsvg%3E"), url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22400%22%20height%3D%22400%22%3E%3Cfilter%20id%3D%22f%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.02%20.4%22%20numOctaves%3D%222%22%20seed%3D%228%22%20stitchTiles%3D%22stitch%22%2F%3E%3CfeColorMatrix%20values%3D%220%200%200%200%20.3%20%200%200%200%200%20.18%20%200%200%200%200%20.06%20%200%200%200%20.5%20-.18%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23f%29%22%2F%3E%3C%2Fsvg%3E"), url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22700%22%20height%3D%22700%22%3E%3Cfilter%20id%3D%22f%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.008%22%20numOctaves%3D%224%22%20seed%3D%223%22%20stitchTiles%3D%22stitch%22%2F%3E%3CfeColorMatrix%20values%3D%220%200%200%200%20.45%20%200%200%200%200%20.27%20%200%200%200%200%20.08%20%200%200%200%201.6%20-.75%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23f%29%22%2F%3E%3C%2Fsvg%3E"),
+    radial-gradient(closest-side, transparent 58%, rgb(110 55 15 / .35) 64%, rgb(110 55 15 / .12) 70%, transparent 74%),
+    radial-gradient(ellipse at 0% 0%, rgb(55 22 3 / .85), transparent 20%), radial-gradient(ellipse at 100% 100%, rgb(55 22 3 / .85), transparent 22%),
+    radial-gradient(ellipse at 100% 0%, rgb(65 28 5 / .7), transparent 18%), radial-gradient(ellipse at 0% 100%, rgb(65 28 5 / .7), transparent 18%),
+    radial-gradient(circle at 63% 14%, rgb(100 50 15 / .45) 0 2px, transparent 3.5px), radial-gradient(circle at 22% 71%, rgb(100 50 15 / .4) 0 3px, transparent 5px),
+    radial-gradient(circle at 78% 46%, rgb(100 50 15 / .35) 0 1.5px, transparent 3px), radial-gradient(circle at 46% 83%, rgb(100 50 15 / .35) 0 2.5px, transparent 4px),
+    radial-gradient(circle at 12% 34%, rgb(100 50 15 / .3) 0 1.5px, transparent 3px), radial-gradient(circle at 88% 64%, rgb(100 50 15 / .3) 0 2px, transparent 4px),
+    linear-gradient(97deg, transparent 49.7%, rgb(60 30 8 / .2) 50%, rgb(255 238 190 / .16) 50.3%, transparent 50.8%);
+  background-size: 240px 240px, 400px 400px, 700px 700px, 280px 280px, auto, auto, auto, auto, auto, auto, auto, auto, auto, auto, auto;
+  background-position: 0 0, 0 0, 0 0, 78% 22%, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+  background-repeat: repeat, repeat, repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  box-shadow: inset 0 0 110px rgb(80 35 5 / .65), inset 0 0 26px rgb(50 20 2 / .75), inset 0 0 4px rgb(40 15 0 / .8); }
+.bk-left { padding: 30px 30px 54px 34px; }
+.bk-pages { grid-template-columns: minmax(300px, 1fr) minmax(0, 1.75fr); }
+.bk-right { min-height: 760px; padding: 34px 38px 56px; }
+/* owner block */
+.bk-owner { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 4px 14px; align-items: center; width: 100%; text-align: left; }
+.bk-owner .bk-portrait { margin: 6px 0; padding: 6px 6px 16px; transform: rotate(-3deg); }
+.bk-owner .bk-portrait img { width: 84px; height: 106px; }
+.bk-owner .bk-portrait .token { width: 74px; height: 74px; font-size: 30px; margin: 5px; }
+.bk-owner .bk-portrait .tape { width: 44px; height: 14px; top: -7px; }
+.bk-owner-t { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.bk-owner .bk-kicker { font-family: "Shippori Mincho B1", serif; letter-spacing: .3em; font-size: 10.5px; }
+.bk-owner .bk-name { font-size: 22px; margin: 0; }
+.bk-owner .bk-sub { border: 0; padding: 0; margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+.bk-left .bk-bars { margin-top: 10px; }
+/* chapter + table of contents */
+.bk-chapter { width: 100%; margin-top: 22px; padding-top: 14px; text-align: center; border-top: 1px solid var(--line-strong); position: relative; }
+.bk-chapter::before { content: "❦"; position: absolute; top: -11px; left: 50%; translate: -50% 0; padding: 0 8px; background: transparent; color: var(--sky); font-size: 15px; }
+.bk-chapter h3 { margin: 2px 0 0; font-family: "Shippori Mincho B1", serif; font-weight: 800; font-size: 26px; color: #5a150a; letter-spacing: .12em; }
+.bk-tocs { list-style: none; margin: 14px 0 0; padding: 0; width: 100%; display: flex; flex-direction: column; gap: 2px; }
+.bk-toc { width: 100%; display: grid; grid-template-columns: 1.8em auto minmax(12px, 1fr) auto; gap: 6px; align-items: baseline; text-align: left; padding: 7px 6px; border: 0; background: transparent; cursor: pointer;
+  font-family: "Shippori Mincho B1", serif; font-size: 15.5px; color: var(--ink); border-radius: 3px; position: relative; transition: background .2s, transform .25s; }
+.bk-toc .bt-n { color: var(--sky); font-weight: 800; }
+.bk-toc .bt-l { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bk-toc .bt-d { border-bottom: 2px dotted var(--line-strong); height: .6em; align-self: center; }
+.bk-toc .bt-p { font-family: "Klee One", serif; color: var(--muted); font-size: 13px; }
+.bk-toc:hover { background: rgb(120 70 20 / .1); transform: translateX(3px); }
+.bk-toc.on { font-weight: 800; }
+.bk-toc.on::before { content: ""; position: absolute; left: -2px; top: 50%; width: 30px; height: 30px; translate: 0 -50%; border: 2px solid #8e1f12; border-radius: 48% 52% 45% 55% / 52% 46% 54% 48%; transform: rotate(-12deg); opacity: .8; }
+.bk-toc.on .bt-l { background: linear-gradient(transparent 62%, rgb(142 31 18 / .2) 62%, rgb(142 31 18 / .2) 88%, transparent 88%); }
+.bk-add { margin-top: 10px; width: 100%; border: 1.5px dashed var(--line-strong); background: transparent; padding: 9px; font-family: "Klee One", serif; font-size: 14.5px; color: #5a150a; cursor: pointer; border-radius: 3px; }
+.bk-add:hover { background: rgb(120 70 20 / .1); border-style: solid; }
+.bk-left > .bk-folio, .bk-right > .bk-folio { position: absolute; bottom: 20px; }
+/* right page */
+.bk-head { text-align: center; margin-bottom: 22px; }
+.bk-head h3 { color: #5a150a; font-size: 26px; }
+.bk-note { margin: 0 0 12px; font-family: "Klee One", serif; font-size: 13.5px; color: var(--muted); font-style: italic; }
+.bk-empty { margin: 80px 0; text-align: center; font-family: "Klee One", serif; color: var(--muted); font-size: 16px; line-height: 2; }
+.bk-entry-act { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
+.bk-manage { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.bk-body .fields { gap: 14px 22px; }
+.bk-body .scn-friends { margin-top: 18px; }
+.bk-body .radar-fig { max-width: 420px; margin: 0 auto; }
+.bk-body .derived { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.bk-pages .inp, .bk-pages .tbl .c-in, .bk-pages .dv .val input { color: #22120a; }
+.bk-pages .bk-head h3, .bk-pages .bk-chapter h3 { filter: url(#ink-wear); }
+.bk-pages .bk-toc, .bk-pages .bk-add, .bk-pages .bk-note, .bk-pages .bk-empty { filter: url(#ink-wear-soft); }
+.bk-ribbon { right: 22px; width: 14px; background: linear-gradient(90deg, rgb(0 0 0 / .3), transparent 30%, transparent 70%, rgb(0 0 0 / .35)), color-mix(in srgb, var(--sky) 60%, #0b0618); }
+.bk-flip .leaf { background-color: #cfae72; background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22240%22%3E%3Cfilter%20id%3D%22f%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.9%22%20numOctaves%3D%224%22%20stitchTiles%3D%22stitch%22%2F%3E%3CfeColorMatrix%20values%3D%220%200%200%200%20.32%20%200%200%200%200%20.2%20%200%200%200%200%20.07%20%200%200%200%20.6%20-.12%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23f%29%22%2F%3E%3C%2Fsvg%3E"), url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22700%22%20height%3D%22700%22%3E%3Cfilter%20id%3D%22f%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.008%22%20numOctaves%3D%224%22%20seed%3D%223%22%20stitchTiles%3D%22stitch%22%2F%3E%3CfeColorMatrix%20values%3D%220%200%200%200%20.45%20%200%200%200%200%20.27%20%200%200%200%200%20.08%20%200%200%200%201.6%20-.75%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23f%29%22%2F%3E%3C%2Fsvg%3E"), linear-gradient(to right, rgb(50 22 4 / .5), transparent 40px); background-size: 240px 240px, 700px 700px, auto; box-shadow: inset 0 0 70px rgb(70 30 5 / .6); }
+/* tabs sit on top of the cover, like sticky notes stuck to the page edge */
+.bk-tabs { top: -48px; left: 40px; right: 40px; }
+.bk-tab { font-size: 15px; background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%22240%22%3E%3Cfilter%20id%3D%22f%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.9%22%20numOctaves%3D%224%22%20stitchTiles%3D%22stitch%22%2F%3E%3CfeColorMatrix%20values%3D%220%200%200%200%20.32%20%200%200%200%200%20.2%20%200%200%200%200%20.07%20%200%200%200%20.6%20-.12%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23f%29%22%2F%3E%3C%2Fsvg%3E"), radial-gradient(circle at 74% 30%, rgb(100 60 20 / .3), transparent 26%), radial-gradient(circle at 20% 70%, rgb(100 60 20 / .22), transparent 20%), linear-gradient(to bottom, transparent 55%, rgb(60 30 10 / .22)); background-size: 240px 240px, auto, auto, auto; }
+@media (max-width: 900px) {
+  .book { padding-top: 6px; }
+  .bk-clasp { display: none; }
+  .bk-left { padding: 22px 18px 44px; }
+  .bk-right { padding: 24px 18px 48px; }
+  .bk-pages { grid-template-columns: minmax(0, 1fr); }
+  .bk-left { display: flex; flex-direction: column; align-items: stretch; text-align: left; }
+  .bk-owner { grid-template-columns: 92px minmax(0, 1fr); }
+  .bk-owner .bk-portrait, .bk-owner .bk-name, .bk-owner .bk-kana, .bk-owner .bk-sub, .bk-owner .bk-kicker { grid-column: auto; grid-row: auto; }
+  .bk-owner .bk-name { font-size: 22px; }
+  .bk-owner .bk-name, .bk-owner .bk-kana, .bk-owner .bk-sub { align-self: auto; }
+  .bk-owner .bk-kicker { text-align: left; }
+  .bk-chapter h3 { font-size: 22px; }
+  .bk-ribbon { display: none; }
+  .bk-tocs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 10px; }
+  .bk-toc { grid-template-columns: 1.6em minmax(0, 1fr); font-size: 14.5px; padding: 8px 6px; }
+  .bk-toc .bt-d, .bk-toc .bt-p { display: none; }
+  .bk-tabs { top: env(safe-area-inset-top, 0px); left: auto; right: auto; }
+}
+
 /* ===== phones ===== */
 .mbar, .touch-hint { display: none; }
 @media (pointer: coarse) {
@@ -1388,6 +1558,18 @@ label.btn { display: inline-block; }
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
+    <filter id="ink-wear" x="-5%" y="-10%" width="110%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.9 1.62" result="holes"/>
+      <feComposite in="SourceGraphic" in2="holes" operator="in" result="worn"/>
+      <feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="9" result="w"/>
+      <feDisplacementMap in="worn" in2="w" scale="1.6"/>
+    </filter>
+    <filter id="ink-wear-soft" x="-5%" y="-10%" width="110%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="2" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.5 1.45" result="holes"/>
+      <feComposite in="SourceGraphic" in2="holes" operator="in"/>
+    </filter>
     <linearGradient id="g-hp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--orange)"/><stop offset="1" style="stop-color:var(--hp)"/></linearGradient>
     <linearGradient id="g-mp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--cyan)"/><stop offset="1" style="stop-color:var(--mp)"/></linearGradient>
     <linearGradient id="g-san" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--pink)"/><stop offset="1" style="stop-color:var(--san)"/></linearGradient>
@@ -2207,40 +2389,127 @@ function sectionBody(key, c) {
 /* ================= 本のテーマ（付箋で項目を切り替える） ================= */
 const BOOK_LABEL = { profile: '人物', abilities: '能力値', skills: '技能', weapons: '武器', items: '所持品', money: '財産', tomes: '神話', scenarios: '冒険記録', story: '経歴' };
 const isBook = () => (presetOf().look || '').split(' ').includes('book');
+const KANJI = '一二三四五六七八九十';
+const kn = i => i < 10 ? KANJI[i] : '十' + (KANJI[i - 10] || '');
+function subsOf(key, c) {
+  const t = document.createElement('template');
+  t.innerHTML = sectionBody(key, c);
+  const q = sel => t.content.querySelector(sel);
+  const fieldOf = id => { const el = t.content.getElementById(id); return el ? el.closest('.field').outerHTML : ''; };
+  const fields = (...ids) => `<div class="fields">${ids.map(fieldOf).join('')}</div>`;
+  const o = x => x ? x.outerHTML : '';
+  const entry = (arr, kind, mk, emptyName) => arr.map((row, i) => ({ id: 'e' + i, label: row.name || emptyName, entry: i, html: mk(row, i) }));
+  const del = (k, i, word) => `<div class="bk-entry-act"><button class="btn small danger" type="button" data-del="${k}" data-i="${i}">この${word}を消す</button></div>`;
+  switch (key) {
+    case 'profile': return [
+      { id: 'basic', label: '基本の記録', html: fields('f-profile-name', 'f-profile-kana', 'f-profile-occupation', 'f-profile-age', 'f-profile-birthday', 'f-profile-sex', 'f-profile-origin', 'f-profile-player') },
+      { id: 'look', label: '容姿', html: fields('f-profile-height', 'f-profile-weight', 'f-profile-hair', 'f-profile-eyes', 'f-profile-skin', 'f-profile-tags') },
+      { id: 'image', label: '肖像と画像', html: `<div class="fields">${fieldOf('f-portrait-file')}${fieldOf('f-profile-iconUrl')}${fieldOf('f-profile-externalUrl')}${fieldOf('f-charbg-file')}${fieldOf('f-profile-color')}</div>` },
+      { id: 'bgm', label: '旋律（BGM）', html: `<div class="fields">${fieldOf('f-bgm-file')}</div>` },
+      { id: 'manage', label: 'この書の取り扱い', html: `<p class="bk-note">この探索者の記録を、フレンドに見せるか隠すか決めたり、写本（複製）を作ったり、破り捨てたり（削除）できます。</p><div class="bk-manage">${toolsHtml(c)}</div>` },
+    ];
+    case 'abilities': return [
+      { id: 'table', label: '能力値表', html: o(q('.sec-title')) + o(q('.ab-tbl')?.closest('.tbl-wrap')) },
+      { id: 'derived', label: '体力・正気・副能力値', html: o(q('.derived')) },
+      { id: 'chart', label: '能力値の図', html: o(q('.radar-fig')) },
+    ];
+    case 'skills': return [
+      { id: 'points', label: '技能点の配分', html: `<p class="bk-note">左の目次から技能の種類を開くと、ポイントを書き込めます。</p>${o(q('.points'))}${o(q('.sk-fig'))}` },
+      ...CATS.map(([cat, label]) => ({ id: 'cat-' + cat, label, html: `${o(q('.points'))}${o(q(`.skill-block[data-cat="${cat}"]`))}` })),
+    ];
+    case 'weapons': return entry(c.weapons, 'weapon', (w, i) => `<p class="bk-note">ダメージの「DB」はダメージ・ボーナスに置き換えて出力します。</p><div class="fields">
+        ${field('名称', `weapons.${i}.name`, w.name, { wrap: 'wide' })}${field('成功率', `weapons.${i}.rate`, w.rate)}${field('ダメージ', `weapons.${i}.damage`, w.damage)}
+        ${field('射程', `weapons.${i}.range`, w.range)}${field('攻撃回数', `weapons.${i}.attacks`, w.attacks)}${field('装弾数', `weapons.${i}.ammo`, w.ammo)}${field('耐久力', `weapons.${i}.durability`, w.durability)}
+        ${field('その他', `weapons.${i}.note`, w.note, { wrap: 'wide' })}</div>${del('weapons', i, '武器')}`, '名もなき武器');
+    case 'items': return entry(c.items, 'item', (it, i) => `<div class="fields">
+        ${field('名称', `items.${i}.name`, it.name, { wrap: 'wide' })}${field('個数', `items.${i}.count`, it.count)}${field('価格', `items.${i}.price`, it.price)}
+        ${field('効果・備考', `items.${i}.note`, it.note, { wrap: 'wide' })}</div>${del('items', i, '所持品')}`, '名もなき品');
+    case 'money': return [{ id: 'all', label: '財産の記録', html: o(q('.fields')) }];
+    case 'tomes': return [
+      { id: 'tomes', label: '魔導書・呪文・遺物', html: area('tomes', c.tomes, '魔導書・呪文・アーティファクト', 12) },
+      { id: 'entities', label: '遭遇した存在', html: area('entities', c.entities, '遭遇した超自然の存在', 12) },
+    ];
+    case 'scenarios': return [
+      { id: 'friends', label: '共に歩んだ仲間', html: o(q('.played-with')) + `<div class="bk-entry-act"><button class="btn small" type="button" data-act="open-friends">フレンドを管理</button></div>` },
+      ...entry(c.scenarios, 'scenario', (sc, i) => `<div class="fields">
+        ${field('シナリオ名', `scenarios.${i}.name`, sc.name, { wrap: 'wide' })}${field('日付', `scenarios.${i}.date`, sc.date, { ph: '例：2026/10/01' })}
+        ${field('メモ（生還・報酬・KPなど）', `scenarios.${i}.note`, sc.note, { wrap: 'wide' })}</div>
+        <div class="scn-friends"><span class="lbl">一緒に遊んだフレンド</span>${friendsOf().length ? friendsOf().map(f => fchip(f, `data-act="toggle-friend" data-i="${i}" data-fid="${f.id}" aria-pressed="${(sc.friends || []).includes(f.id)}"`, (sc.friends || []).includes(f.id))).join('') : '<span class="empty">フレンドがまだいません。</span>'}</div>
+        ${del('scenarios', i, '記録')}`, '無題の冒険'),
+    ];
+    case 'story': return [
+      { id: 'backstory', label: '経歴', html: area('backstory', c.backstory, '経歴', 14) },
+      { id: 'memo', label: '覚え書き（メモ）', html: `<p class="bk-note">ココフォリアのコマのメモ欄に入ります。</p>${area('memo', c.memo, 'メモ', 10)}` },
+      { id: 'extra', label: '追加の呪文（コマンド）', html: `<p class="bk-note">1行に1コマンド。チャットパレットの末尾に入ります。</p>${area('extra', c.extra, '追加コマンド', 8, 'inp mono')}` },
+    ];
+    default: return [{ id: 'all', label: '記録', html: sectionBody(key, c) }];
+  }
+}
+const ADD_FOR = { weapons: ['add-weapon', '新たな武器を書き加える'], items: ['add-item', '新たな品を書き加える'], scenarios: ['add-scenario', '新たな冒険を書き加える'] };
+const bookSubMap = () => (state.bookSub = state.bookSub || {});
 function bookHtml(c) {
   const p = c.profile;
   const key = SECTIONS.some(x => x.key === state.bookTab) ? state.bookTab : 'profile';
   const sec = SECTIONS.find(x => x.key === key), idx = SECTIONS.indexOf(sec);
+  const subs = subsOf(key, c);
+  let cur = subs.find(x => x.id === bookSubMap()[key]) || subs[0];
   const src = portraitSrc(c);
+  const add = ADD_FOR[key];
+  const toc = subs.map((x, i) => `<li><button class="bk-toc ${cur && x.id === cur.id ? 'on' : ''}" type="button" data-booksub="${x.id}" aria-current="${!!(cur && x.id === cur.id)}">
+      <span class="bt-n">${kn(i)}</span><span class="bt-l">${esc(x.label)}</span><span class="bt-d" aria-hidden="true"></span><span class="bt-p">${idx * 20 + i * 2 + 13}</span></button></li>`).join('');
+  const body = cur ? cur.html : `<p class="bk-empty">まだ何も記されていない頁だ。<br>左の「${add ? add[1] : ''}」から書き始めよう。</p>`;
+  const curNo = cur ? subs.indexOf(cur) : 0;
   return `<div class="book" id="book">
     <div class="bk-cover">
       <span class="bk-corners" aria-hidden="true"><svg class="bk-corner" viewBox="0 0 60 60" aria-hidden="true"><path d="M4 56V14C4 8 8 4 14 4h42"/><path d="M10 50V18c0-5 3-8 8-8h32"/><path d="M18 18c8 0 12 4 12 12M18 18c0 8 4 12 12 12"/><circle cx="18" cy="18" r="3"/><path d="M4 34c6 0 9 3 9 9M34 4c0 6 3 9 9 9"/></svg><svg class="bk-corner" viewBox="0 0 60 60" aria-hidden="true"><path d="M4 56V14C4 8 8 4 14 4h42"/><path d="M10 50V18c0-5 3-8 8-8h32"/><path d="M18 18c8 0 12 4 12 12M18 18c0 8 4 12 12 12"/><circle cx="18" cy="18" r="3"/><path d="M4 34c6 0 9 3 9 9M34 4c0 6 3 9 9 9"/></svg><svg class="bk-corner" viewBox="0 0 60 60" aria-hidden="true"><path d="M4 56V14C4 8 8 4 14 4h42"/><path d="M10 50V18c0-5 3-8 8-8h32"/><path d="M18 18c8 0 12 4 12 12M18 18c0 8 4 12 12 12"/><circle cx="18" cy="18" r="3"/><path d="M4 34c6 0 9 3 9 9M34 4c0 6 3 9 9 9"/></svg><svg class="bk-corner" viewBox="0 0 60 60" aria-hidden="true"><path d="M4 56V14C4 8 8 4 14 4h42"/><path d="M10 50V18c0-5 3-8 8-8h32"/><path d="M18 18c8 0 12 4 12 12M18 18c0 8 4 12 12 12"/><circle cx="18" cy="18" r="3"/><path d="M4 34c6 0 9 3 9 9M34 4c0 6 3 9 9 9"/></svg></span>
+      <span class="bk-clasp" aria-hidden="true"></span>
+      <nav class="bk-tabs" aria-label="章の付箋">${SECTIONS.map((x, i) => `<button class="bk-tab ${x.key === key ? 'on' : ''}" type="button" data-booktab="${x.key}" style="--bc:${x.color};--i:${i}" aria-current="${x.key === key}" aria-label="${x.jp}">${BOOK_LABEL[x.key]}</button>`).join('')}</nav>
       <div class="bk-pages">
         <div class="bk-page bk-left">
           <svg class="bk-circle" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="96"/><circle cx="100" cy="100" r="88" class="d"/><circle cx="100" cy="100" r="62"/><polygon points="100,12 176,144 24,144"/><polygon points="100,188 24,56 176,56"/><circle cx="100" cy="100" r="30" class="d"/><text x="100" y="9" text-anchor="middle">ᚠ</text><text x="191" y="104" text-anchor="middle">ᚱ</text><text x="100" y="199" text-anchor="middle">ᚲ</text><text x="9" y="104" text-anchor="middle">ᚷ</text></svg>
-          <p class="bk-kicker">GRIMOIRE OF THE INVESTIGATOR</p>
-          <button class="bk-portrait ${src ? 'has' : ''}" type="button" data-stage aria-label="立ち絵を表示">${src ? `<img src="${esc(imgSrc(src))}" alt="" onerror="this.remove()">` : tokenHtml(c)}<span class="tape" aria-hidden="true"></span></button>
-          <h2 class="bk-name" data-hub="name">${esc(p.name || '名無し')}</h2>
-          <p class="bk-kana" data-hub="kana">${esc(p.kana || '')}</p>
-          <p class="bk-sub" data-hub="sub"></p>
+          <span class="bk-stain l" aria-hidden="true"></span>
+          <div class="bk-owner">
+            <button class="bk-portrait ${src ? 'has' : ''}" type="button" data-stage aria-label="立ち絵を表示">${src ? `<img src="${esc(imgSrc(src))}" alt="" onerror="this.remove()">` : tokenHtml(c)}<span class="tape" aria-hidden="true"></span></button>
+            <div class="bk-owner-t">
+              <p class="bk-kicker">探索者の記録</p>
+              <h2 class="bk-name" data-hub="name">${esc(p.name || '名無し')}</h2>
+              <p class="bk-kana" data-hub="kana">${esc(p.kana || '')}</p>
+              <p class="bk-sub" data-hub="sub"></p>
+            </div>
+          </div>
           <div class="pbars bk-bars">${['hp', 'mp', 'san'].map(k => `<div class="pbar"><b>${k.toUpperCase()}</b><span class="tr"><i data-bar="${k}"></i></span><span data-out="${k}Cur"></span></div>`).join('')}</div>
-          <div class="bk-tools">${toolsHtml(c)}</div>
+          <div class="bk-chapter"><span class="bk-en">第${kn(idx)}章</span><h3>${sec.jp}</h3></div>
+          <ol class="bk-tocs">${toc}</ol>
+          ${add ? `<button class="bk-add" type="button" data-act="${add[0]}">＋ ${add[1]}</button>` : ''}
+          <p class="bk-folio">${idx * 20 + 12}</p>
         </div>
-        <nav class="bk-tabs" aria-label="項目の付箋">${SECTIONS.map((x, i) => `<button class="bk-tab ${x.key === key ? 'on' : ''}" type="button" data-booktab="${x.key}" style="--bc:${x.color};--i:${i}" aria-current="${x.key === key}" aria-label="${x.jp}">${BOOK_LABEL[x.key]}</button>`).join('')}</nav>
+        <span class="bk-ribbon" aria-hidden="true"></span>
         <div class="bk-page bk-right" id="bk-right">
-          <div class="bk-head"><span class="bk-en">第${'一二三四五六七八九十'[idx]}章 ・ ${sec.en}</span><h3>${sec.jp}</h3></div>
-          <div class="bk-body">${sectionBody(key, c)}</div>
-          <p class="bk-folio">${idx * 2 + 13}</p>
+          <span class="bk-stain" aria-hidden="true"></span>
+          <div class="bk-head"><span class="bk-en">第${kn(idx)}章 ・ ${kn(curNo)}</span><h3>${cur ? esc(cur.label) : sec.jp}</h3></div>
+          <div class="bk-body">${body}</div>
+          <p class="bk-folio">${idx * 20 + curNo * 2 + 13}</p>
         </div>
       </div>
-
     </div>
   </div>`;
 }
-function flipLeaves(fromIdx, toIdx) {
+function setBookSub(id) {
+  const key = state.bookTab || 'profile';
+  const subs = subsOf(key, active());
+  const prev = subs.findIndex(x => x.id === bookSubMap()[key]);
+  const next = subs.findIndex(x => x.id === id);
+  if (next < 0) return;
+  const changed = (prev < 0 ? 0 : prev) !== next;
+  bookSubMap()[key] = id; save();
+  renderSheet();
+  if (changed && !reduceMotion.matches) flipLeaves(prev < 0 ? 0 : prev, next, 1);
+  if (innerWidth < 900) { const r = $('bk-right'); if (r) scrollTo({ top: r.getBoundingClientRect().top + scrollY - 70, behavior: reduceMotion.matches ? 'auto' : 'smooth' }); }
+}
+function flipLeaves(fromIdx, toIdx, count) {
   const pg = $('bk-right'), pages = pg && pg.parentElement;
   if (!pg || !pages) return;
-  const forward = toIdx > fromIdx, n = Math.min(6, Math.abs(toIdx - fromIdx) + 2);
+  const forward = toIdx > fromIdx, n = count || Math.min(6, Math.abs(toIdx - fromIdx) + 2);
   const narrow = innerWidth < 900;
   const vw = innerHeight, r = pg.getBoundingClientRect();
   const top = Math.max(0, -r.top), h = Math.min(r.height - top, vw + 40);
@@ -2541,6 +2810,8 @@ function arm(b, label) {
 onBoth('click', e => {
   const bt = e.target.closest('[data-booktab]');
   if (bt) { setBookTab(bt.dataset.booktab); return; }
+  const bs = e.target.closest('[data-booksub]');
+  if (bs) { setBookSub(bs.dataset.booksub); return; }
   const stg = e.target.closest('[data-stage]');
   if (stg) { openStage(stg); return; }
   const op = e.target.closest('[data-open]');
@@ -2637,6 +2908,10 @@ onBoth('click', e => {
       save(); renderAll(); return;
     }
     default: return;
+  }
+  if (isBook()) {
+    const listKey = { 'add-weapon': 'weapons', 'add-item': 'items', 'add-scenario': 'scenarios' }[b.dataset.act];
+    if (listKey) { bookSubMap()[listKey] = 'e' + (c[listKey].length - 1); state.bookTab = listKey; }
   }
   touch(); renderSheet();
   if (focus) $(focus)?.focus();
