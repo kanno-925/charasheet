@@ -985,6 +985,82 @@ label.btn { display: inline-block; }
 .dc-row small { font-family: var(--f-mono); color: var(--muted); font-size: 10px; }
 @media (max-width: 760px) { .dice-tray { right: 12px; left: 12px; width: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 92px); } .dcard { padding: 10px 12px; } .dc-total.big { font-size: 32px; } .dc-body { margin-top: 4px; } }
 
+/* ===== book theme ===== */
+.sheet.is-book, .has-bg .sheet.is-book { background: transparent; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.book { padding: 6px 50px 18px 4px; }
+.bk-cover { position: relative; padding: 13px 13px 15px; border-radius: 8px 18px 18px 8px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--sky) 85%, #000), color-mix(in srgb, var(--sky) 55%, #000));
+  box-shadow: 0 34px 60px -30px rgb(40 24 10 / .75), inset 0 0 0 1px rgb(0 0 0 / .3); }
+.bk-cover::before { content: ""; position: absolute; inset: 5px; border: 1px solid color-mix(in srgb, var(--amber) 60%, transparent); border-radius: 6px 14px 14px 6px; pointer-events: none; }
+.bk-pages { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(230px, .8fr) minmax(0, 2fr); border-radius: 4px 10px 10px 4px;
+  box-shadow: 3px 3px 0 -1px var(--solid), 3px 3px 0 0 color-mix(in srgb, var(--ink) 22%, transparent), 6px 6px 0 -1px var(--solid), 6px 6px 0 0 color-mix(in srgb, var(--ink) 16%, transparent); }
+.bk-page { position: relative; min-width: 0; padding: 30px 32px 46px; background-color: var(--solid); }
+.bk-left { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; border-radius: 4px 0 0 4px;
+  background-image: linear-gradient(to left, color-mix(in srgb, var(--ink) 17%, transparent), transparent 48px), radial-gradient(circle at 25% 12%, rgb(255 255 255 / .45), transparent 45%); }
+.bk-right { border-radius: 0 10px 10px 0; transform-origin: left center; min-height: 820px;
+  background-image: linear-gradient(to right, color-mix(in srgb, var(--ink) 20%, transparent), transparent 60px), radial-gradient(circle at 85% 92%, color-mix(in srgb, var(--cyan) 12%, transparent), transparent 45%); }
+.bk-kicker { margin: 0; font-family: "Cinzel", "Times New Roman", serif; font-size: 10px; letter-spacing: .3em; color: var(--muted); }
+.bk-portrait { position: relative; border: 0; padding: 10px 10px 28px; margin: 12px 0 6px; background: #fffdf6; cursor: pointer; transform: rotate(-2.5deg);
+  box-shadow: 0 10px 20px -10px rgb(40 24 10 / .55); transition: transform .45s cubic-bezier(.3, 1.6, .5, 1); }
+.bk-portrait:hover, .bk-portrait:focus-visible { transform: rotate(0deg) scale(1.03); }
+.bk-portrait img { display: block; width: 170px; height: 214px; object-fit: cover; object-position: 50% 12%; }
+.bk-portrait .token { width: 150px; height: 150px; font-size: 62px; margin: 8px; }
+.bk-portrait .tape { position: absolute; top: -11px; left: 50%; width: 74px; height: 22px; translate: -50% 0; rotate: 4deg; background: color-mix(in srgb, var(--amber) 38%, rgb(255 255 255 / .55)); opacity: .9; }
+.bk-name { margin: 6px 0 0; font-family: var(--f-display); font-weight: 800; font-size: 27px; line-height: 1.25; overflow-wrap: anywhere; }
+.bk-kana { margin: 0; font-size: 12px; color: var(--muted); letter-spacing: .12em; min-height: 1.2em; }
+.bk-sub { margin: 6px 0; width: 100%; padding: 7px 0; font-size: 12.5px; border-top: 1px solid color-mix(in srgb, var(--ink) 22%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--ink) 22%, transparent); }
+.bk-bars { width: 100%; text-align: left; }
+.bk-bars [data-bar] { transition: width .6s cubic-bezier(.2, .8, .2, 1); }
+.bk-bars [data-bar="hp"] { background: linear-gradient(90deg, var(--hp), var(--orange)); }
+.bk-bars [data-bar="mp"] { background: linear-gradient(90deg, var(--mp), color-mix(in srgb, var(--mp) 55%, #fff)); }
+.bk-bars [data-bar="san"] { background: linear-gradient(90deg, var(--san), var(--pink)); }
+.bk-tools { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: auto; padding-top: 14px; }
+.bk-head { text-align: center; margin-bottom: 16px; }
+.bk-en { font-family: "Cinzel", "Times New Roman", serif; font-size: 10px; letter-spacing: .34em; color: var(--muted); }
+.bk-head h3 { margin: 2px 0 0; font-family: var(--f-display); font-weight: 800; font-size: 25px; display: flex; align-items: center; justify-content: center; gap: 14px; }
+.bk-head h3::before, .bk-head h3::after { content: ""; height: 1px; width: min(90px, 16%); background: linear-gradient(90deg, transparent, var(--sky)); }
+.bk-head h3::after { transform: scaleX(-1); }
+.bk-body > .sec { padding: 0; border: 0; }
+.bk-folio { position: absolute; left: 0; right: 0; bottom: 16px; margin: 0; text-align: center; font-family: var(--f-display); font-size: 12px; color: var(--muted); letter-spacing: .2em; }
+.bk-tabs { position: absolute; top: 28px; right: -55px; z-index: 2; display: flex; flex-direction: column; gap: 6px; }
+.bk-tab { --bc: var(--sky); width: 54px; height: 84px; padding: 8px 4px 8px 14px; border: 0; border-radius: 0 9px 9px 0; cursor: pointer;
+  writing-mode: vertical-rl; font-family: var(--f-display); font-weight: 700; font-size: 13.5px; letter-spacing: .14em; display: flex; align-items: center; justify-content: center;
+  color: color-mix(in srgb, var(--bc) 45%, #1d140c);
+  background: linear-gradient(90deg, rgb(0 0 0 / .07) 0 12px, transparent 12px), color-mix(in srgb, var(--bc) 26%, #fbf3dc);
+  box-shadow: 2px 3px 6px -2px rgb(40 24 10 / .45);
+  transform: translateX(-14px) rotate(calc((var(--i) - 4) * .4deg)); transition: transform .35s cubic-bezier(.3, 1.6, .5, 1), background .2s; }
+.bk-tab:hover, .bk-tab:focus-visible { transform: translateX(-6px) rotate(0deg); }
+.bk-tab.on { transform: translateX(0) rotate(0deg); background: linear-gradient(90deg, rgb(0 0 0 / .07) 0 12px, transparent 12px), color-mix(in srgb, var(--bc) 52%, #fbf3dc); color: color-mix(in srgb, var(--bc) 25%, #120b05); box-shadow: 3px 4px 10px -3px rgb(40 24 10 / .55); }
+@media (max-width: 900px) {
+  .book { padding: 40px 0 12px; }
+  .bk-pages { grid-template-columns: minmax(0, 1fr); border-radius: 4px; }
+  .bk-page { padding: 22px 18px 40px; }
+  .bk-left { border-radius: 4px 4px 0 0; background-image: linear-gradient(to top, color-mix(in srgb, var(--ink) 14%, transparent), transparent 30px); }
+  .bk-right { border-radius: 0 0 8px 8px; min-height: 0; transform-origin: top center; background-image: linear-gradient(to bottom, color-mix(in srgb, var(--ink) 16%, transparent), transparent 34px); }
+  .bk-portrait img { width: 120px; height: 150px; }
+  .bk-portrait .token { width: 104px; height: 104px; font-size: 42px; }
+  .bk-name { font-size: 23px; }
+  .book { padding-top: 6px; }
+  .bk-left { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 2px 14px; text-align: left; align-items: center; padding-bottom: 18px; }
+  .bk-kicker { grid-column: 1 / -1; text-align: center; }
+  .bk-portrait { grid-column: 1; grid-row: 2 / span 3; margin: 10px 0 6px; padding: 6px 6px 18px; }
+  .bk-portrait img { width: 96px; height: 120px; }
+  .bk-portrait .token { width: 84px; height: 84px; font-size: 34px; margin: 4px; }
+  .bk-portrait .tape { width: 48px; height: 16px; top: -8px; }
+  .bk-name { grid-column: 2; margin: 0; font-size: 21px; align-self: end; }
+  .bk-kana { grid-column: 2; align-self: start; }
+  .bk-sub { grid-column: 2; margin: 0; padding: 4px 0; font-size: 12px; border: 0; color: var(--muted); align-self: start; }
+  .bk-bars, .bk-tools { grid-column: 1 / -1; }
+  .bk-tools { padding-top: 8px; }
+  .bk-tabs { position: sticky; top: env(safe-area-inset-top, 0px); right: auto; z-index: 3; flex-direction: row; gap: 4px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; padding: 8px 8px 0; margin: 0 -1px;
+    background: linear-gradient(to bottom, var(--bg), color-mix(in srgb, var(--bg) 85%, transparent)); }
+  .bk-tabs::-webkit-scrollbar { display: none; }
+  .bk-tab { writing-mode: horizontal-tb; flex: none; width: auto; height: 44px; padding: 6px 13px 16px; border-radius: 9px 9px 0 0; font-size: 13px; letter-spacing: .06em;
+    background: linear-gradient(0deg, rgb(0 0 0 / .07) 0 10px, transparent 10px), color-mix(in srgb, var(--bc) 26%, #fbf3dc); transform: translateY(12px); }
+  .bk-tab:hover, .bk-tab:focus-visible { transform: translateY(6px); }
+  .bk-tab.on { transform: translateY(0); background: linear-gradient(0deg, rgb(0 0 0 / .07) 0 10px, transparent 10px), color-mix(in srgb, var(--bc) 52%, #fbf3dc); }
+}
+
 /* ===== phones ===== */
 .mbar, .touch-hint { display: none; }
 @media (pointer: coarse) {
@@ -1818,6 +1894,14 @@ function sumText(c, d, key) {
   }
 }
 
+function toolsHtml(c) {
+  const S = SYS[c.system];
+  return `${c.sample ? '<span class="sample-tag">サンプル</span>' : ''}
+      <span class="sys-badge">${esc(S.label)}</span>
+      <button class="btn small lock-btn ${c.locked ? 'on' : ''}" type="button" data-act="lock" aria-pressed="${!!c.locked}" title="${c.locked ? 'フレンドから見えません（押すと公開）' : 'フレンドに公開中（押すと非公開）'}">${c.locked ? '<svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg>非公開' : '<svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 5.8-1"/></svg>フレンドに公開'}</button>
+      <button class="btn small" type="button" data-act="dup">複製</button>
+      <button class="btn small danger" type="button" data-act="del">削除</button>`;
+}
 function hubHtml(c) {
   const S = SYS[c.system], n = SECTIONS.length;
   const pos = SECTIONS.map((s, i) => {
@@ -1826,11 +1910,7 @@ function hubHtml(c) {
   });
   return `
     <div class="hub-top">
-      ${c.sample ? '<span class="sample-tag">サンプル</span>' : ''}
-      <span class="sys-badge">${esc(S.label)}</span>
-      <button class="btn small lock-btn ${c.locked ? 'on' : ''}" type="button" data-act="lock" aria-pressed="${!!c.locked}" title="${c.locked ? 'フレンドから見えません（押すと公開）' : 'フレンドに公開中（押すと非公開）'}">${c.locked ? '<svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg>非公開' : '<svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 5.8-1"/></svg>フレンドに公開'}</button>
-      <button class="btn small" type="button" data-act="dup">複製</button>
-      <button class="btn small danger" type="button" data-act="del">削除</button>
+      ${toolsHtml(c)}
     </div>
     <div class="hub" id="hub">
       <svg class="hub-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
@@ -2034,9 +2114,63 @@ function sectionBody(key, c) {
   }
 }
 
+
+/* ================= 本のテーマ（付箋で項目を切り替える） ================= */
+const BOOK_LABEL = { profile: '人物', abilities: '能力値', skills: '技能', weapons: '武器', items: '所持品', money: '財産', tomes: '神話', scenarios: '冒険記録', story: '経歴' };
+const isBook = () => (presetOf().look || '').split(' ').includes('book');
+function bookHtml(c) {
+  const p = c.profile;
+  const key = SECTIONS.some(x => x.key === state.bookTab) ? state.bookTab : 'profile';
+  const sec = SECTIONS.find(x => x.key === key), idx = SECTIONS.indexOf(sec);
+  const src = portraitSrc(c);
+  return `<div class="book" id="book">
+    <div class="bk-cover">
+      <div class="bk-pages">
+        <div class="bk-page bk-left">
+          <p class="bk-kicker">INVESTIGATOR'S RECORD</p>
+          <button class="bk-portrait ${src ? 'has' : ''}" type="button" data-stage aria-label="立ち絵を表示">${src ? `<img src="${esc(imgSrc(src))}" alt="" onerror="this.remove()">` : tokenHtml(c)}<span class="tape" aria-hidden="true"></span></button>
+          <h2 class="bk-name" data-hub="name">${esc(p.name || '名無し')}</h2>
+          <p class="bk-kana" data-hub="kana">${esc(p.kana || '')}</p>
+          <p class="bk-sub" data-hub="sub"></p>
+          <div class="pbars bk-bars">${['hp', 'mp', 'san'].map(k => `<div class="pbar"><b>${k.toUpperCase()}</b><span class="tr"><i data-bar="${k}"></i></span><span data-out="${k}Cur"></span></div>`).join('')}</div>
+          <div class="bk-tools">${toolsHtml(c)}</div>
+        </div>
+        <nav class="bk-tabs" aria-label="項目の付箋">${SECTIONS.map((x, i) => `<button class="bk-tab ${x.key === key ? 'on' : ''}" type="button" data-booktab="${x.key}" style="--bc:${x.color};--i:${i}" aria-current="${x.key === key}" aria-label="${x.jp}">${BOOK_LABEL[x.key]}</button>`).join('')}</nav>
+        <div class="bk-page bk-right" id="bk-right">
+          <div class="bk-head"><span class="bk-en">${sec.en}</span><h3>${sec.jp}</h3></div>
+          <div class="bk-body">${sectionBody(key, c)}</div>
+          <p class="bk-folio">— ${idx + 1} —</p>
+        </div>
+      </div>
+
+    </div>
+  </div>`;
+}
+function setBookTab(key) {
+  if (!SECTIONS.some(x => x.key === key)) key = 'profile';
+  const changed = state.bookTab !== key;
+  state.bookTab = key; save();
+  renderSheet();
+  const pg = $('bk-right');
+  if (changed && pg && !reduceMotion.matches) {
+    const narrow = innerWidth < 900;
+    pg.animate(narrow
+      ? [{ transform: 'perspective(1400px) rotateX(-55deg)', opacity: .25, filter: 'brightness(.85)' }, { transform: 'none', opacity: 1, filter: 'none' }]
+      : [{ transform: 'perspective(1800px) rotateY(-75deg)', opacity: .2, filter: 'brightness(.8)' }, { transform: 'none', opacity: 1, filter: 'none' }],
+      { duration: 640, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+  }
+  if (changed && innerWidth < 900) {
+    const nav = document.querySelector('.bk-tabs'), top = $('bk-right');
+    if (top && nav) scrollTo({ top: top.getBoundingClientRect().top + scrollY - nav.offsetHeight - 4, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    document.querySelector('.bk-tab.on')?.scrollIntoView({ inline: 'center', block: 'nearest' });
+  }
+}
+
 function renderSheet() {
   const c = active();
-  $('sheet').innerHTML = hubHtml(c);
+  const book = isBook();
+  $('sheet').classList.toggle('is-book', book);
+  $('sheet').innerHTML = book ? bookHtml(c) : hubHtml(c);
   if (panelKey && !$('panel-ov').hidden) {
     const body = $('panel-body'), st = body.scrollTop;
     body.innerHTML = sectionBody(panelKey, c);
@@ -2092,6 +2226,7 @@ function stagger(delay = 0) {
     { duration: 340, delay: delay + i * 16, easing: 'cubic-bezier(.2, .8, .2, 1)', fill: 'backwards' }));
 }
 function openPanel(key, fromEl) {
+  if (isBook()) { setBookTab(key); return; }
   const ov = $('panel-ov');
   fillPanel(key);
   ov.hidden = false;
@@ -2184,6 +2319,9 @@ function updateComputed() {
   const hn = document.querySelector('[data-hub="name"]'); if (hn) hn.textContent = c.profile.name || '名無し';
   const hk = document.querySelector('[data-hub="kana"]'); if (hk) hk.textContent = c.profile.kana;
   updateCharts(c, a);
+  document.querySelectorAll('[data-bar]').forEach(el => { const k = el.dataset.bar, v = d[k], m = d[k + 'Max']; el.style.width = (m > 0 ? Math.max(0, Math.min(100, v / m * 100)) : 0) + '%'; });
+  const hs = document.querySelector('[data-hub="sub"]');
+  if (hs) hs.textContent = [c.profile.occupation, c.profile.age && c.profile.age + '歳', c.profile.birthday && '誕生日 ' + c.profile.birthday, c.profile.sex].filter(Boolean).join(' / ') || 'プロフィール未記入';
 }
 
 const RING_C = 2 * Math.PI * 34;
@@ -2260,7 +2398,7 @@ function renderAll() { applyBg(); if (!$('select').hidden) renderSelect(); $('co
 function touch() {
   const c = active(); c.updatedAt = Date.now(); delete c.sample;
   save(); renderShelf(); renderOutput(); updateComputed();
-  const tk = document.querySelector('.hub-core .token');
+  const tk = document.querySelector('.hub-core .token, .bk-portrait .token');
   if (tk) tk.outerHTML = tokenHtml(c);
 }
 
@@ -2288,6 +2426,8 @@ function arm(b, label) {
 }
 
 onBoth('click', e => {
+  const bt = e.target.closest('[data-booktab]');
+  if (bt) { setBookTab(bt.dataset.booktab); return; }
   const stg = e.target.closest('[data-stage]');
   if (stg) { openStage(stg); return; }
   const op = e.target.closest('[data-open]');
@@ -2551,6 +2691,7 @@ const THEME_PRESETS = {
   tome:   { name: '古書', sub: 'セピアの羊皮紙', look: 'mincho', vals: { bg: '#e6dac1', solid: '#f6efdd', ink: '#3a2817', sky: '#8a4a26', cyan: '#b07a3a', amber: '#c0562a' } },
   sakura: { name: '和風', sub: '桜と墨', look: 'mincho', vals: { bg: '#efe3e4', solid: '#fcf7f6', ink: '#2a1c22', sky: '#b23f68', cyan: '#d98aa6', amber: '#c08a2a' } },
   neon:   { name: 'ネオン', sub: '夜のサイバー', look: 'dark', vals: { bg: '#0b0918', solid: '#16122b', ink: '#ece8ff', sky: '#a159f5', cyan: '#22c8e8', amber: '#f2569e' } },
+  book:   { name: '本', sub: '付箋つきの探索記録', look: 'mincho book', vals: { bg: '#cbbd9f', solid: '#f3e9d2', ink: '#2c2015', sky: '#7b3a20', cyan: '#a4733b', amber: '#b5832a' } },
   forest: { name: '森', sub: '深緑とランタン', look: '', vals: { bg: '#dfe7dc', solid: '#f5f8f1', ink: '#1c2a1f', sky: '#2f7d4f', cyan: '#5aa78a', amber: '#d98a1f' } },
 };
 const presetOf = () => THEME_PRESETS[state.themePreset] || THEME_PRESETS.sky;
@@ -2650,7 +2791,7 @@ $('bg-slots').addEventListener('click', e => { const b = e.target.closest('[data
 $('theme-presets').addEventListener('click', e => {
   const b = e.target.closest('[data-preset-theme]'); if (!b) return;
   state.themePreset = b.dataset.presetTheme; state.theme = {};
-  applyTheme(); save(); renderPresets(); renderThemeRows();
+  applyTheme(); save(); renderPresets(); renderThemeRows(); renderSheet();
   fxAt(b, true);
 });
 $('bg-veil').addEventListener('input', e => { state.bgVeil = +e.target.value; applyTheme(); renderBgControls(); save(); });
