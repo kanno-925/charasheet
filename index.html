@@ -608,6 +608,53 @@ label.btn { display: inline-block; }
   background: radial-gradient(circle, #ffffff 0%, #f4f8fd 45%, rgb(160 220 235 / .9) 62%, rgb(63 182 194 / 0) 72%); }
 @media (prefers-reduced-motion: reduce) { .intro * { animation: none !important; } }
 
+/* ===== investigator select (after the intro) ===== */
+.select { position: fixed; inset: 0; z-index: 8; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+  background: radial-gradient(1100px 620px at 90% -10%, var(--glow-1), transparent 62%), radial-gradient(800px 520px at -8% 30%, var(--glow-2), transparent 60%), linear-gradient(180deg, var(--bg-2), var(--bg) 560px);
+  background-color: var(--bg); }
+.has-bg .select { background: color-mix(in srgb, var(--bg) 25%, transparent); }
+.select-in { min-height: 100%; display: flex; flex-direction: column; align-items: center; padding: 22px 16px calc(env(safe-area-inset-bottom, 0px) + 28px); gap: 6px; }
+.sel-head { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.sel-head .eyebrow { justify-content: center; }
+.sel-head h2 { margin: 0; font-family: var(--f-display); font-weight: 800; font-size: clamp(24px, 4vw, 34px); background: linear-gradient(100deg, var(--sky), var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sel-head p { margin: 0; color: var(--muted); font-size: 13px; }
+.has-bg .sel-head { background: color-mix(in srgb, var(--solid) 75%, transparent); padding: 10px 22px; border-radius: 22px; }
+.sel-stage { position: relative; width: min(1100px, 100%); flex: none; }
+.sel-rings { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.sel-rings circle, .sel-rings ellipse { fill: none; stroke: var(--line-strong); stroke-width: 1.2; stroke-dasharray: 3 8; animation: dash-flow 50s linear infinite; }
+.sel-rings :nth-child(even) { animation-direction: reverse; }
+.has-bg .sel-rings circle, .has-bg .sel-rings ellipse { stroke: color-mix(in srgb, #ffffff 75%, transparent); }
+.sel-new { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 168px; height: 168px; border-radius: 50%; border: 0; cursor: pointer; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #fff;
+  background: radial-gradient(circle at 34% 28%, color-mix(in srgb, var(--cyan) 70%, #fff), var(--sky) 72%);
+  box-shadow: 0 20px 50px -16px var(--sky), 0 0 0 10px color-mix(in srgb, var(--sky) 14%, transparent), inset 0 -10px 24px -10px color-mix(in srgb, var(--ink) 40%, transparent);
+  transition: scale .4s cubic-bezier(.3, 1.6, .5, 1), box-shadow .3s; }
+.sel-new::before { content: ""; position: absolute; inset: -30px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--cyan) 35%, transparent), transparent 68%); animation: breathe 4.5s ease-in-out infinite; pointer-events: none; z-index: -1; }
+.sel-new:hover, .sel-new:focus-visible { scale: 1.06; box-shadow: 0 24px 60px -16px var(--sky), 0 0 0 14px color-mix(in srgb, var(--sky) 18%, transparent); }
+.sel-new:active { scale: .96; }
+.sel-new .plus { font-size: 56px; line-height: .9; font-weight: 300; font-family: var(--f-latin); }
+.sel-new b { font-family: var(--f-display); font-weight: 800; font-size: 15px; letter-spacing: .04em; }
+.sel-new small { font-family: var(--f-latin); font-size: 9px; letter-spacing: .24em; opacity: .85; }
+.sel-char { --B: 100px; position: absolute; translate: -50% -50%; z-index: 3; border: 0; background: none; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; width: calc(var(--B) + 44px); color: var(--ink);
+  animation: bob 6s ease-in-out infinite; animation-delay: calc(var(--i) * -.83s); -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.sel-char .token { width: var(--B); height: var(--B); font-size: calc(var(--B) * .4); border-width: 4px; box-shadow: 0 16px 34px -14px color-mix(in srgb, var(--ink) 55%, transparent); transition: scale .4s cubic-bezier(.3, 1.6, .5, 1), box-shadow .3s; }
+.sel-char:hover .token, .sel-char:focus-visible .token { scale: 1.1; box-shadow: 0 20px 40px -12px var(--sky), 0 0 0 6px color-mix(in srgb, var(--sky) 18%, transparent); }
+.sel-char:focus-visible { outline: none; }
+.sel-name { max-width: 100%; padding: 3px 12px; border-radius: 999px; background: var(--solid); border: 1px solid var(--line); box-shadow: var(--shadow); font-weight: 800; font-family: var(--f-display); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sel-sys { font-size: 10.5px; color: var(--muted); white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; margin-top: -4px; }
+.has-bg .sel-sys { background: color-mix(in srgb, var(--solid) 75%, transparent); padding: 0 8px; border-radius: 999px; }
+.sel-stage.grid { display: flex; flex-direction: column; align-items: center; gap: 22px; padding-block: 16px; }
+.sel-stage.grid .sel-new { position: relative; left: auto; top: auto; translate: none; width: 140px; height: 140px; }
+.sel-stage.grid .sel-rings { display: none; }
+.sel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 18px 8px; width: 100%; justify-items: center; }
+.sel-stage.grid .sel-char { position: static; translate: none; --B: 76px; width: 110px; }
+.sel-foot { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+.sel-empty { position: absolute; left: 50%; top: calc(50% + 120px); translate: -50% 0; color: var(--muted); font-size: 13px; white-space: nowrap; }
+.sel-rest { width: min(1100px, 100%); margin-top: 6px; }
+.sel-rest .sel-char { position: static; translate: none; --B: 70px !important; width: 110px; }
+@media (max-width: 560px) { .sel-new { width: 116px !important; height: 116px !important; } .sel-new .plus { font-size: 40px !important; } .sel-new b { font-size: 12px !important; } .sel-new small { display: none; } .sel-empty { top: calc(50% + 84px) !important; } }
+@media (max-width: 760px) { .sel-new { width: 138px; height: 138px; } .sel-new .plus { font-size: 46px; } .sel-new b { font-size: 13px; } .sel-empty { top: calc(50% + 100px); } }
+
 /* ===== phones ===== */
 .mbar, .touch-hint { display: none; }
 @media (pointer: coarse) {
@@ -723,6 +770,21 @@ label.btn { display: inline-block; }
   </div>
 </div>
 
+<div class="select" id="select" aria-label="探索者をえらぶ">
+  <div class="select-in">
+    <div class="sel-head">
+      <p class="eyebrow">SELECT YOUR INVESTIGATOR</p>
+      <h2>探索者をえらぶ</h2>
+      <p>キャラを押すとシートが開きます。真ん中から新しい探索者をつくれます。</p>
+    </div>
+    <div class="sel-stage" id="sel-stage"></div>
+    <div class="sel-foot">
+      <button class="btn" type="button" id="sel-import">読み込み（いあきゃら など）</button>
+      <button class="btn" type="button" id="sel-theme">カラー設定</button>
+    </div>
+  </div>
+</div>
+
 <div class="bg-layer" id="bg-layer" aria-hidden="true"></div>
 <div class="peek" id="peek" hidden aria-hidden="true"></div>
 
@@ -739,6 +801,7 @@ label.btn { display: inline-block; }
       <div class="brand-text"><small>CHARASHEET STUDIO</small><h1>キャラシ工房</h1></div>
     </div>
     <div class="bar-actions">
+      <button class="btn" id="btn-select" type="button">探索者一覧</button>
       <button class="btn primary" id="btn-new" type="button">＋ 新しい探索者</button>
       <button class="btn" id="btn-import" type="button">読み込み</button>
       <button class="btn" id="btn-export" type="button">バックアップ</button>
@@ -1765,7 +1828,7 @@ function fxAt(el, burst) { const r = el.getBoundingClientRect(); fx(r.left + r.w
 function enter(el) { if (!el || reduceMotion.matches) return; el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter'); }
 document.addEventListener('pointerdown', e => { if (e.button === 0) fx(e.clientX, e.clientY); });
 
-function renderAll() { $('copy-status').textContent = ''; renderShelf(); renderSheet(); renderOutput(); enter($('sheet')); enter(document.querySelector('.koma')); }
+function renderAll() { if (!$('select').hidden) renderSelect(); $('copy-status').textContent = ''; renderShelf(); renderSheet(); renderOutput(); enter($('sheet')); enter(document.querySelector('.koma')); }
 function touch() {
   const c = active(); c.updatedAt = Date.now(); delete c.sample;
   save(); renderShelf(); renderOutput(); updateComputed();
@@ -1931,7 +1994,9 @@ $('preset-list').innerHTML = Object.entries(SYS).map(([k, v]) =>
 $('preset-list').addEventListener('click', e => {
   const b = e.target.closest('[data-sys]'); if (!b) return;
   const c = blank(b.dataset.sys);
-  state.chars.unshift(c); state.activeId = c.id; save(); closeModals(); renderAll();
+  state.chars.unshift(c); state.activeId = c.id; save(); closeModals();
+  if (!$('select').hidden) leaveSelect(null, true);
+  renderAll();
   openPanel('profile', document.querySelector('#sheet .hub-core'));
   $('f-profile-name')?.focus({ preventScroll: true });
 });
@@ -2208,6 +2273,113 @@ $('shelf').addEventListener('focusin', e => { const it = e.target.closest('.char
 $('shelf').addEventListener('focusout', hidePeek);
 addEventListener('scroll', hidePeek, { passive: true });
 
+/* ================= 探索者をえらぶ画面 ================= */
+let selPress = null, selLong = false, selResizeT = null;
+function renderSelect() {
+  const stage = $('sel-stage');
+  $('sel-rest')?.remove();
+  const W = stage.clientWidth || Math.min(1100, innerWidth - 32);
+  const small = W < 560;
+  const B = small ? 70 : 100;
+  const chars = state.chars;
+  const pos = [], radii = [];
+  let r = small ? Math.min(150, W / 2 - (B + 44) / 2 - 4) : 210, ring = 0, idx = 0, grid = false;
+  const ky = small ? 1.45 : 1;
+  if (r < 100) grid = true;
+  while (!grid && idx < chars.length) {
+    if (r + (B + 44) / 2 > W / 2) break;
+    const cap = Math.max(5, Math.floor(2 * Math.PI * r / (B + 54)));
+    const n = Math.min(cap, chars.length - idx);
+    for (let j = 0; j < n; j++) {
+      const ang = -Math.PI / 2 + (j + (ring % 2) * .5) / n * 2 * Math.PI;
+      pos.push([r * Math.cos(ang), r * ky * Math.sin(ang)]);
+    }
+    radii.push(r); idx += n; r += B + 62; ring++;
+  }
+  const newBtn = `<button class="sel-new" type="button" id="sel-new"><span class="plus">＋</span><b>新しい探索者</b><small>NEW INVESTIGATOR</small></button>`;
+  const charBtn = (c, i, xy) => `<button class="sel-char" type="button" data-id="${c.id}" style="--i:${i};--B:${B}px${xy ? `;left:calc(50% + ${xy[0].toFixed(1)}px);top:calc(50% + ${xy[1].toFixed(1)}px)` : ''}" aria-label="${esc(c.profile.name || '名無し')}のシートを開く">
+      ${tokenHtml(c)}<span class="sel-name">${esc(c.profile.name || '名無し')}</span><span class="sel-sys">${esc(SYS[c.system].short)}${c.profile.occupation ? ' ・ ' + esc(c.profile.occupation) : ''}</span>
+    </button>`;
+  stage.classList.toggle('grid', grid);
+  if (grid) idx = chars.length;
+  if (grid) {
+    stage.style.height = '';
+    stage.innerHTML = `${newBtn}<div class="sel-grid">${chars.map((c, i) => charBtn(c, i)).join('')}</div>`;
+  } else {
+    const maxR = radii.length ? radii[radii.length - 1] : r;
+    const H = Math.max(small ? 360 : 480, 2 * (maxR * ky + B / 2 + 46));
+    const rest = chars.slice(idx);
+    stage.style.height = H + 'px';
+    const ringR = radii.length ? radii : [maxR];
+    stage.innerHTML = `<svg class="sel-rings" aria-hidden="true">${ringR.map(rr => `<ellipse cx="50%" cy="50%" rx="${rr}" ry="${(rr * ky).toFixed(1)}"/>`).join('')}<circle cx="50%" cy="50%" r="${small ? 80 : 112}"/></svg>
+      ${newBtn}${chars.slice(0, idx).map((c, i) => charBtn(c, i, pos[i])).join('')}
+      ${chars.length ? '' : '<p class="sel-empty">まだ探索者がいません。真ん中を押して作りましょう。</p>'}`;
+    if (rest.length) stage.insertAdjacentHTML('afterend', `<div class="sel-grid sel-rest" id="sel-rest">${rest.map((c, i) => charBtn(c, idx + i)).join('')}</div>`);
+  }
+}
+function popSelect() {
+  if (reduceMotion.matches) return;
+  const stage = $('sel-stage');
+  stage.querySelectorAll('.sel-char').forEach((el, i) => el.animate(
+    [{ opacity: 0, transform: 'scale(.3)', filter: 'blur(6px)' }, { opacity: 1, transform: 'scale(1)', filter: 'blur(0)' }],
+    { duration: 700, delay: 120 + i * 70, easing: 'cubic-bezier(.2, .9, .3, 1.25)', fill: 'backwards' }));
+  $('sel-new')?.animate([{ opacity: 0, scale: .6 }, { opacity: 1, scale: 1 }], { duration: 700, easing: 'cubic-bezier(.2, .9, .3, 1.2)' });
+  document.querySelector('.sel-head')?.animate([{ opacity: 0, transform: 'translateY(-12px)' }, { opacity: 1, transform: 'none' }], { duration: 600, easing: 'ease-out' });
+}
+function showSelect() {
+  hidePeek();
+  const sel = $('select'); sel.hidden = false; sel.scrollTop = 0;
+  document.documentElement.style.overflow = 'hidden';
+  renderSelect();
+  if (!reduceMotion.matches) sel.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: 'ease-out' });
+  popSelect();
+}
+function leaveSelect(fromEl, quick) {
+  hidePeek();
+  const sel = $('select');
+  const done = () => { sel.hidden = true; document.documentElement.style.overflow = ''; scrollTo(0, 0); };
+  if (reduceMotion.matches || quick) { done(); return; }
+  if (fromEl) {
+    fxAt(fromEl, true);
+    fromEl.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.5)', opacity: 0 }], { duration: 520, easing: 'cubic-bezier(.5, 0, .3, 1)', fill: 'forwards' });
+  }
+  const a = sel.animate([{ opacity: 1, transform: 'none', filter: 'blur(0)' }, { opacity: 0, transform: 'scale(1.06)', filter: 'blur(10px)' }], { duration: 560, delay: 140, easing: 'cubic-bezier(.5, 0, .3, 1)', fill: 'forwards' });
+  a.finished.then(() => {
+    done(); a.cancel();
+    document.querySelector('.app').animate([{ opacity: .2, transform: 'scale(1.03)', filter: 'blur(10px)' }, { opacity: 1, transform: 'none', filter: 'none' }], { duration: 800, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+  });
+}
+$('select').addEventListener('click', e => {
+  if (e.target.closest('#sel-new')) { openModal('modal-new'); return; }
+  if (e.target.closest('#sel-import')) { $('btn-import').click(); return; }
+  if (e.target.closest('#sel-theme')) { $('btn-theme').click(); return; }
+  const ch = e.target.closest('.sel-char'); if (!ch) return;
+  if (selLong) { selLong = false; return; }
+  state.activeId = ch.dataset.id; save();
+  renderShelf(); renderSheet(); renderOutput();
+  leaveSelect(ch);
+});
+$('select').addEventListener('pointerover', e => {
+  if (!canHover.matches) return;
+  const ch = e.target.closest('.sel-char');
+  if (ch && ch.dataset.id !== peekId) showPeek(ch);
+  if (!ch && peekId) hidePeek();
+});
+$('select').addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') hidePeek(); });
+$('select').addEventListener('scroll', hidePeek, { passive: true });
+$('select').addEventListener('pointerdown', e => {
+  if (e.pointerType === 'mouse') return;
+  const ch = e.target.closest('.sel-char'); if (!ch) return;
+  selLong = false; clearTimeout(selPress);
+  selPress = setTimeout(() => { selLong = true; showPeek(ch); if (navigator.vibrate) navigator.vibrate(10); }, 450);
+});
+['pointerup', 'pointercancel'].forEach(ev => $('select').addEventListener(ev, () => clearTimeout(selPress)));
+$('select').addEventListener('contextmenu', e => { if (e.target.closest('.sel-char')) e.preventDefault(); });
+$('btn-select').addEventListener('click', showSelect);
+document.querySelector('.brand').addEventListener('click', showSelect);
+document.querySelector('.brand').style.cursor = 'pointer';
+addEventListener('resize', () => { clearTimeout(selResizeT); selResizeT = setTimeout(() => { if (!$('select').hidden) renderSelect(); }, 150); });
+
 /* ================= オープニング ================= */
 (function intro() {
   const el = $('intro'); if (!el) return;
@@ -2243,7 +2415,7 @@ addEventListener('scroll', hidePeek, { passive: true });
   let entered = false;
   const finish = () => {
     cancelAnimationFrame(raf); removeEventListener('resize', resize); document.removeEventListener('keydown', onKey, true);
-    el.remove(); document.documentElement.style.overflow = '';
+    el.remove(); document.documentElement.style.overflow = $('select').hidden ? '' : 'hidden';
   };
   function enter() {
     if (entered) return; entered = true;
@@ -2261,8 +2433,9 @@ addEventListener('scroll', hidePeek, { passive: true });
     flash.animate([{ transform: 'scale(0)', opacity: .95 }, { transform: 'scale(1.4)', opacity: 1, offset: .12 }, { transform: `scale(${reach})`, opacity: 1 }], { duration: 1100, easing: ease, fill: 'forwards' })
       .finished.then(() => {
         el.style.background = 'transparent';
+        el.style.pointerEvents = 'none';
         el.querySelectorAll('canvas, .intro-fog, svg, .intro-body').forEach(n => { n.style.display = 'none'; });
-        app.animate([{ opacity: .2, transform: 'scale(1.03)', filter: 'blur(10px)' }, { opacity: 1, transform: 'none', filter: 'none' }], { duration: 900, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+        popSelect();
         return flash.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 900, easing: 'ease-out', fill: 'forwards' }).finished;
       })
       .then(finish);
@@ -2276,6 +2449,8 @@ addEventListener('scroll', hidePeek, { passive: true });
 load();
 applyTheme();
 renderAll();
+renderSelect();
+if (!$('intro')) document.documentElement.style.overflow = 'hidden';
 })();
 </script>
 
