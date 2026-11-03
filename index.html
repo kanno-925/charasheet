@@ -855,6 +855,22 @@ label.btn { display: inline-block; }
 .sv-text { margin: 0; white-space: pre-wrap; font-size: 13px; line-height: 1.7; }
 @media (max-width: 700px) { .sv-top, .sv-grid { grid-template-columns: minmax(0, 1fr); } .sv-art { min-height: 200px; } }
 
+/* ===== friend list on the select screen ===== */
+.sel-tabs { display: inline-grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-top: 10px; border-radius: 999px; background: var(--solid); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.sel-tabs button { border: 0; background: transparent; border-radius: 999px; padding: 8px 20px; font-weight: 800; font-family: var(--f-display); cursor: pointer; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; gap: 4px; white-space: nowrap; transition: background .25s, color .25s; }
+.sel-tabs button.on { background: linear-gradient(100deg, var(--sky), var(--cyan)); color: #fff; box-shadow: 0 6px 16px -8px var(--sky); }
+.sel-tabs .req-badge { margin-left: 2px; }
+.sel-friend .token { font-family: var(--f-display); }
+.sel-friend.out { opacity: .7; }
+.sel-friend.out .token { filter: saturate(.4); }
+.sel-friend.in .token { box-shadow: 0 0 0 0 color-mix(in srgb, var(--orange) 60%, transparent); animation: req-pulse 2s ease-out infinite; }
+@keyframes req-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--orange) 55%, transparent); } 100% { box-shadow: 0 0 0 16px transparent; } }
+.sel-reqmark { position: absolute; top: -2px; right: 6px; padding: 1px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--orange), var(--pink)); box-shadow: 0 4px 10px -4px var(--orange); }
+.sel-minis { display: flex; justify-content: center; margin-top: 2px; }
+.sel-minis i { --tc: var(--sky); width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 10px; font-weight: 800; color: #fff; background: var(--tc); border: 2px solid var(--solid); margin-left: -6px; }
+.sel-minis i:first-child { margin-left: 0; }
+.sel-minis i.more { background: var(--muted); font-size: 9px; }
+
 /* ===== phones ===== */
 .mbar, .touch-hint { display: none; }
 @media (pointer: coarse) {
@@ -973,14 +989,18 @@ label.btn { display: inline-block; }
 <div class="select" id="select" aria-label="探索者をえらぶ">
   <div class="select-in">
     <div class="sel-head">
-      <p class="eyebrow">SELECT YOUR INVESTIGATOR</p>
-      <h2>探索者をえらぶ</h2>
-      <p>キャラを押すとシートが開きます。真ん中から新しい探索者をつくれます。</p>
+      <p class="eyebrow" id="sel-eyebrow">SELECT YOUR INVESTIGATOR</p>
+      <h2 id="sel-title">探索者をえらぶ</h2>
+      <p id="sel-desc">キャラを押すとシートが開きます。真ん中から新しい探索者をつくれます。</p>
+      <div class="sel-tabs" role="tablist" aria-label="表示の切り替え">
+        <button type="button" role="tab" data-seltab="mine" class="on" aria-selected="true">自分の探索者</button>
+        <button type="button" role="tab" data-seltab="friends" aria-selected="false">フレンド<span id="sel-req"></span></button>
+      </div>
     </div>
     <div class="sel-stage" id="sel-stage"></div>
     <div class="sel-foot">
       <button class="btn" type="button" id="sel-import">読み込み（いあきゃら など）</button>
-      <button class="btn" type="button" id="sel-friends">フレンド</button>
+      <button class="btn" type="button" id="sel-friends">フレンド管理</button>
       <button class="btn" type="button" id="sel-theme">カラー設定</button>
       <button class="btn acct-btn" type="button" id="sel-account">ログイン</button>
     </div>
@@ -2929,7 +2949,7 @@ $('friend-list').addEventListener('click', e => {
   state.chars.forEach(c => (c.scenarios || []).forEach(sc => { if (sc.friends) sc.friends = sc.friends.filter(x => x !== id); }));
   save(); renderFriends(); renderSheet();
 });
-$('btn-friends').addEventListener('click', openFriends);
+$('btn-friends').addEventListener('click', () => { selTab = 'friends'; showSelect(); });
 $('sel-friends').addEventListener('click', openFriends);
 
 
@@ -3011,7 +3031,7 @@ async function loadFriendships() {
   let profs = [];
   if (ids.length) { const r = await sb.from('profiles').select('id,username').in('id', ids); if (r.error) throw r.error; profs = r.data || []; }
   const nm = id => (profs.find(p => p.id === id) || {}).username || '（退会したユーザー）';
-  online = { friends: [], incoming: [], outgoing: [] };
+  online = { friends: [], incoming: [], outgoing: [], chars: (online && online.chars) || {} };
   (data || []).forEach(r => {
     const other = r.requester === me.id ? r.addressee : r.requester;
     const u = { id: other, username: nm(other) };
@@ -3029,11 +3049,12 @@ async function loadFriendships() {
   if (added) { save(); renderSheet(); }
   renderAccountBtn();
   if (!$('modal-friends').hidden) { renderOnline(); renderFriends(); }
+  if (!$('select').hidden && selTab === 'friends') renderSelect();
 }
 async function handleSession(session) {
   const uid = session && session.user ? session.user.id : null;
   if ((me ? me.id : null) === uid) return;
-  if (!uid) { me = null; online = null; lastSynced.clear(); setSync('off'); renderAccount(); renderOnline(); return; }
+  if (!uid) { me = null; online = null; lastSynced.clear(); setSync('off'); renderAccount(); renderOnline(); if (!$('select').hidden && selTab === 'friends') renderSelect(); return; }
   me = { id: uid, email: session.user.email, username: (session.user.user_metadata || {}).username || '' };
   renderAccountBtn(); renderAccount();
   try {
@@ -3042,6 +3063,8 @@ async function handleSession(session) {
     renderAccountBtn(); renderAccount();
     await pullAndMerge();
     await loadFriendships();
+    await loadFriendChars();
+    if (!$('select').hidden && selTab === 'friends') renderSelect();
   } catch (e) { setSync('error', jaErr(e)); }
 }
 async function initCloud() {
@@ -3075,7 +3098,9 @@ function renderAccountBtn() {
   const dot = me ? `<i class="sync-dot ${syncState}" title="${syncState === 'ok' ? '同期済み' : syncState === 'pending' ? '同期中' : syncState === 'error' ? '同期エラー' : ''}"></i>` : '';
   const req = me && online && online.incoming.length ? `<b class="req-badge">${online.incoming.length}</b>` : '';
   ['btn-account', 'sel-account'].forEach(id => { const b = $(id); if (b) b.innerHTML = `${dot}${esc(label)}${req}`; });
-  ['btn-friends', 'sel-friends'].forEach(id => { const b = $(id); if (b) b.innerHTML = `フレンド${req}`; });
+  $('btn-friends').innerHTML = `フレンド${req}`;
+  $('sel-friends').innerHTML = `フレンド管理${req}`;
+  $('sel-req').innerHTML = req;
 }
 function renderAccount() {
   const el = $('acct-body'); if (!el) return;
@@ -3316,11 +3341,89 @@ $('fview-body').addEventListener('click', e => {
 });
 $('fview-title').addEventListener('click', e => { if (e.target.closest('[data-fvback]')) { fviewCur = null; renderFviewList(); } });
 
+
+/* ---- フレンド一覧（探索者をえらぶ画面の「フレンド」タブ） ---- */
+let selTab = 'mine';
+function ringLayout(n, W, B) {
+  const small = W < 560, pos = [], radii = [];
+  let r = small ? Math.min(150, W / 2 - (B + 44) / 2 - 4) : 210, ring = 0, idx = 0;
+  const ky = small ? 1.45 : 1;
+  while (idx < n && r >= 100) {
+    if (r + (B + 44) / 2 > W / 2) break;
+    const cap = Math.max(5, Math.floor(2 * Math.PI * r / (B + 54)));
+    const k = Math.min(cap, n - idx);
+    for (let j = 0; j < k; j++) { const ang = -Math.PI / 2 + (j + (ring % 2) * .5) / k * 2 * Math.PI; pos.push([r * Math.cos(ang), r * ky * Math.sin(ang)]); }
+    radii.push(r); idx += k; r += B + 62; ring++;
+  }
+  return { pos, radii: radii.length ? radii : [small ? Math.min(150, W / 2 - (B + 44) / 2 - 4) : 210], idx, ky, small };
+}
+function renderFriendSelect(stage) {
+  const W = stage.clientWidth || Math.min(1100, innerWidth - 32);
+  const B = W < 560 ? 70 : 96;
+  const L = ringLayout(0, W, B);
+  const rings = rr => `<svg class="sel-rings" aria-hidden="true">${rr.map(r => `<ellipse cx="50%" cy="50%" rx="${r}" ry="${(r * L.ky).toFixed(1)}"/>`).join('')}<circle cx="50%" cy="50%" r="${L.small ? 80 : 112}"/></svg>`;
+  stage.classList.remove('grid');
+  if (!cloudReady() || !me) {
+    stage.style.height = (L.small ? 380 : 460) + 'px';
+    stage.innerHTML = `${rings(L.radii)}<button class="sel-new" type="button" id="sel-login"><span class="plus">⟶</span><b>ログイン</b><small>SIGN IN</small></button>
+      <p class="sel-empty">${!cloudReady() ? 'アカウント機能の準備中です。' : 'ログインすると、フレンドとキャラシを見せ合えます。'}</p>`;
+    return;
+  }
+  const o = online || { friends: [], incoming: [], outgoing: [], chars: {} };
+  const items = [...o.incoming.map(u => ({ u, kind: 'in' })), ...o.friends.map(u => ({ u, kind: 'fr' })), ...o.outgoing.map(u => ({ u, kind: 'out' }))];
+  const lay = ringLayout(items.length, W, B);
+  const H = Math.max(L.small ? 380 : 480, 2 * (lay.radii[lay.radii.length - 1] * lay.ky + B / 2 + 60));
+  const colorOf = u => (friendsOf().find(f => f.uid === u.id) || {}).color || '#1f6fe0';
+  const bubble = ({ u, kind }, i, xy) => {
+    const chars = (o.chars || {})[u.id] || [];
+    const sub = kind === 'fr' ? (o.chars && o.chars[u.id] !== undefined ? `公開キャラ ${chars.length}人` : '公開キャラ …') : kind === 'in' ? '申請が届いています' : '承認待ち';
+    const minis = kind === 'fr' && chars.length ? `<span class="sel-minis">${chars.slice(0, 4).map(ch => `<i style="--tc:${esc(ch.color)}">${esc((ch.name || '？').charAt(0))}</i>`).join('')}${chars.length > 4 ? `<i class="more">+${chars.length - 4}</i>` : ''}</span>` : '';
+    return `<button class="sel-char sel-friend ${kind}" type="button" data-fuid="${u.id}" data-fname="${esc(u.username)}" data-kind="${kind}" style="--i:${i};--B:${B}px${xy ? `;left:calc(50% + ${xy[0].toFixed(1)}px);top:calc(50% + ${xy[1].toFixed(1)}px)` : ''}" aria-label="${esc(u.username)}${kind === 'fr' ? 'さんのキャラシを見る' : kind === 'in' ? 'さんからの申請を確認する' : 'さん（承認待ち）'}">
+      <span class="token" style="--tc:${esc(colorOf(u))}">${esc((u.username || '？').charAt(0))}</span>${kind === 'in' ? '<span class="sel-reqmark">申請</span>' : ''}
+      <span class="sel-name">${esc(u.username)}</span><span class="sel-sys">${sub}</span>${minis}
+    </button>`;
+  };
+  stage.style.height = H + 'px';
+  stage.innerHTML = `${rings(lay.radii)}<button class="sel-new" type="button" id="sel-addfriend"><span class="plus">＋</span><b>フレンドを追加</b><small>ADD FRIEND</small></button>
+    ${items.slice(0, lay.idx).map((it, i) => bubble(it, i, lay.pos[i])).join('')}
+    ${items.length ? '' : '<p class="sel-empty">まだフレンドがいません。真ん中から、友達のユーザー名で申請しましょう。</p>'}`;
+  const rest = items.slice(lay.idx);
+  if (rest.length) stage.insertAdjacentHTML('afterend', `<div class="sel-grid sel-rest" id="sel-rest">${rest.map((it, i) => bubble(it, lay.idx + i)).join('')}</div>`);
+}
+async function loadFriendChars() {
+  if (!sb || !me || !online) return;
+  const ids = online.friends.map(u => u.id);
+  const map = {};
+  ids.forEach(id => { map[id] = []; });
+  if (ids.length) {
+    const { data, error } = await sb.from('characters').select('id,owner,name,color:data->profile->>color').in('owner', ids);
+    if (error) throw error;
+    (data || []).forEach(r => { (map[r.owner] = map[r.owner] || []).push({ name: r.name || (r.data && r.data.profile && r.data.profile.name) || '', color: r.color || (r.data && r.data.profile && r.data.profile.color) || '#1f6fe0' }); });
+  }
+  online.chars = map;
+}
+async function refreshFriendView() {
+  if (!sb || !me) return;
+  try { await loadFriendships(); await loadFriendChars(); } catch (e) { toast(jaErr(e)); }
+  if (!$('select').hidden && selTab === 'friends') renderSelect();
+}
+function setSelTab(t) {
+  if (selTab === t) return;
+  selTab = t; hidePeek();
+  renderSelect(); popSelect();
+  if (t === 'friends') refreshFriendView();
+}
+
 /* ================= 探索者をえらぶ画面 ================= */
 let selPress = null, selLong = false, selResizeT = null;
 function renderSelect() {
   const stage = $('sel-stage');
   $('sel-rest')?.remove();
+  document.querySelectorAll('[data-seltab]').forEach(b => { const on = b.dataset.seltab === selTab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+  $('sel-eyebrow').textContent = selTab === 'friends' ? 'FRIENDS' : 'SELECT YOUR INVESTIGATOR';
+  $('sel-title').textContent = selTab === 'friends' ? 'フレンド一覧' : '探索者をえらぶ';
+  $('sel-desc').textContent = selTab === 'friends' ? 'フレンドを押すと、その人の公開キャラシが見られます。真ん中からフレンドを追加できます。' : 'キャラを押すとシートが開きます。真ん中から新しい探索者をつくれます。';
+  if (selTab === 'friends') { renderFriendSelect(stage); return; }
   const W = stage.clientWidth || Math.min(1100, innerWidth - 32);
   const small = W < 560;
   const B = small ? 70 : 100;
@@ -3371,6 +3474,7 @@ function popSelect() {
 }
 function showSelect() {
   hidePeek();
+  if (selTab === 'friends') setTimeout(refreshFriendView, 0);
   stopBgm(); $('bgm').hidden = true;
   const sel = $('select'); sel.hidden = false; sel.scrollTop = 0;
   document.documentElement.style.overflow = 'hidden';
@@ -3394,6 +3498,12 @@ function leaveSelect(fromEl, quick) {
   });
 }
 $('select').addEventListener('click', e => {
+  const tb = e.target.closest('[data-seltab]');
+  if (tb) { setSelTab(tb.dataset.seltab); return; }
+  if (e.target.closest('#sel-addfriend')) { openFriends(); setTimeout(() => $('ol-name')?.focus(), 60); return; }
+  if (e.target.closest('#sel-login')) { acctTab = 'login'; openAccount(); return; }
+  const fb = e.target.closest('.sel-friend');
+  if (fb) { if (selLong) { selLong = false; return; } if (fb.dataset.kind === 'fr') viewFriend(fb.dataset.fuid, fb.dataset.fname); else openFriends(); return; }
   if (e.target.closest('#sel-new')) { openModal('modal-new'); return; }
   if (e.target.closest('#sel-import')) { $('btn-import').click(); return; }
   if (e.target.closest('#sel-theme')) { $('btn-theme').click(); return; }
@@ -3420,8 +3530,8 @@ $('select').addEventListener('pointerdown', e => {
 });
 ['pointerup', 'pointercancel'].forEach(ev => $('select').addEventListener(ev, () => clearTimeout(selPress)));
 $('select').addEventListener('contextmenu', e => { if (e.target.closest('.sel-char')) e.preventDefault(); });
-$('btn-select').addEventListener('click', showSelect);
-document.querySelector('.brand').addEventListener('click', showSelect);
+$('btn-select').addEventListener('click', () => { selTab = 'mine'; showSelect(); });
+document.querySelector('.brand').addEventListener('click', () => { selTab = 'mine'; showSelect(); });
 document.querySelector('.brand').style.cursor = 'pointer';
 addEventListener('resize', () => { clearTimeout(selResizeT); selResizeT = setTimeout(() => { if (!$('select').hidden) renderSelect(); }, 150); });
 
