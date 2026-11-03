@@ -940,6 +940,51 @@ label.btn { display: inline-block; }
   .sr-flags { grid-column: 3; grid-row: 1; justify-self: end; align-self: start; }
 }
 
+/* ===== dice ===== */
+.die-btn { width: 26px; height: 26px; flex: none; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--solid); color: var(--sky); display: inline-grid; place-items: center; cursor: pointer; margin-left: 6px; padding: 0; transition: transform .3s cubic-bezier(.3, 1.6, .5, 1), background .2s, color .2s; }
+.die-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.die-btn svg circle { fill: currentColor; stroke: none; }
+.die-btn:hover { background: var(--sky); color: #fff; transform: rotate(-14deg) scale(1.08); }
+.die-btn:active { transform: rotate(40deg) scale(.9); }
+.die-btn.sk { margin-left: auto; }
+.skill-name { width: 100%; }
+.ab-n { display: inline-flex; align-items: center; }
+.die-all { display: inline-flex; align-items: center; gap: 6px; }
+.die-all svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.die-all svg circle { fill: currentColor; stroke: none; }
+.dice-tray { position: fixed; right: 16px; bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); z-index: 115; display: flex; flex-direction: column; gap: 8px; width: min(360px, calc(100vw - 32px)); pointer-events: none; }
+.dcard { pointer-events: auto; position: relative; padding: 12px 14px; border-radius: 18px; background: var(--solid); border: 1px solid var(--line-strong); box-shadow: 0 18px 44px -18px color-mix(in srgb, var(--ink) 55%, transparent); animation: fuwa-pop .45s cubic-bezier(.3, 1.4, .5, 1); transition: opacity .4s, transform .4s; }
+.dcard.out { opacity: 0; transform: translateY(10px); }
+.dc-x { position: absolute; top: 6px; right: 8px; border: 0; background: none; color: var(--muted); font-size: 16px; cursor: pointer; }
+.dc-head { display: flex; align-items: baseline; gap: 8px; padding-right: 20px; }
+.dc-head b { font-family: var(--f-display); font-size: 15px; }
+.dc-head small { font-family: var(--f-mono); font-size: 11px; color: var(--muted); font-variant-ligatures: none; }
+.dc-body { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+.dc-faces { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.die { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font-style: normal; font-family: var(--f-mono); font-weight: 700; color: var(--ink); background: linear-gradient(145deg, var(--solid), color-mix(in srgb, var(--sky) 12%, var(--solid))); border: 1px solid var(--line-strong); box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--sky) 18%, transparent); }
+.dc-faces.sm .die { width: 22px; height: 22px; font-size: 11px; border-radius: 6px; }
+.die.land, .dc-total.land { animation: die-land .35s cubic-bezier(.3, 1.8, .5, 1); }
+@keyframes die-land { 0% { transform: scale(1.35) rotate(-12deg); } 100% { transform: none; } }
+.dplus { color: var(--muted); font-size: 11px; }
+.dc-eq { color: var(--muted); }
+.dc-total { font-family: var(--f-mono); font-size: 28px; font-weight: 800; color: var(--sky); font-variant-numeric: tabular-nums; display: inline-block; }
+.dc-total.sm { font-size: 17px; text-align: right; }
+.dc-total.big { font-size: 40px; line-height: 1; }
+.dc-vs { font-family: var(--f-mono); color: var(--muted); font-size: 15px; }
+.dc-verdict { margin-left: auto; padding: 4px 12px; border-radius: 999px; font-weight: 800; font-size: 13px; color: #fff; background: var(--muted); animation: fuwa-pop .4s cubic-bezier(.3, 1.6, .5, 1); }
+.res-ok .dc-verdict { background: linear-gradient(100deg, var(--sky), var(--cyan)); }
+.res-crit .dc-verdict { background: linear-gradient(100deg, var(--amber), var(--orange)); }
+.res-crit { border-color: var(--amber); box-shadow: 0 0 0 4px color-mix(in srgb, var(--amber) 22%, transparent), 0 18px 44px -18px var(--amber); }
+.res-fumble .dc-verdict { background: var(--danger); }
+.res-fumble { border-color: var(--danger); }
+.res-fail .dc-total { color: var(--muted); }
+.res-fumble .dc-total { color: var(--danger); }
+.dc-grid { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+.dc-row { display: grid; grid-template-columns: 3.4em minmax(0, 1fr) auto 2.4em; gap: 8px; align-items: center; font-size: 12px; }
+.dc-row > b { font-family: var(--f-latin); }
+.dc-row small { font-family: var(--f-mono); color: var(--muted); font-size: 10px; }
+@media (max-width: 760px) { .dice-tray { right: 12px; left: 12px; width: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 92px); } .dcard { padding: 10px 12px; } .dc-total.big { font-size: 32px; } .dc-body { margin-top: 4px; } }
+
 /* ===== phones ===== */
 .mbar, .touch-hint { display: none; }
 @media (pointer: coarse) {
@@ -1405,9 +1450,16 @@ const calc = (expr, vars = {}) => {
   if (!/^[\d+\-*/(). ]+$/.test(s)) return 0;
   try { return Math.floor(Function('"use strict";return (' + s + ')')()); } catch (e) { return 0; }
 };
-const rollExpr = expr => calc(expr.replace(/(\d+)d(\d+)/gi, (_, n, s) => {
-  let t = 0; for (let i = 0; i < +n; i++) t += 1 + Math.floor(Math.random() * +s); return t;
-}));
+const rollExpr = expr => rollDetail(expr).total;
+function rollDetail(expr) {
+  const groups = [];
+  const replaced = String(expr).replace(/(\d+)d(\d+)/gi, (_, n, sd) => {
+    const faces = Array.from({ length: +n }, () => 1 + Math.floor(Math.random() * +sd));
+    groups.push({ n: +n, s: +sd, faces });
+    return faces.reduce((a, b) => a + b, 0);
+  });
+  return { total: calc(replaced), groups, expr: String(expr).toUpperCase().replace(/\*/g, '×') };
+}
 
 /* ================= データ ================= */
 let state = { chars: [], activeId: null, paletteAll: false };
@@ -1811,7 +1863,7 @@ function skillTableHtml(c, cat) {
       : s.hasSub ? `<button class="icon-btn" type="button" data-act="dup-skill" data-i="${i}" title="同じ技能をもう1つ追加" aria-label="${esc(s.name)}をもう1つ追加">＋</button>` : '';
     return `<tr data-row="${i}">
       <td><input type="checkbox" class="chk" id="${pid(`skills.${i}.isJob`)}" data-p="skills.${i}.isJob" ${s.isJob ? 'checked' : ''} aria-label="${lbl} を職業技能にする"></td>
-      <td><span class="skill-name">${nameCell}</span></td>
+      <td><span class="skill-name">${nameCell}<button class="die-btn sk" type="button" data-act="check" data-i="${i}" title="${lbl}で判定（1D100）" aria-label="${lbl}で判定する"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="3.5"/><circle cx="7" cy="7" r="1.2"/><circle cx="13" cy="13" r="1.2"/><circle cx="10" cy="10" r="1.2"/></svg></button></span></td>
       <td class="out-num init" data-l="初期値">${s.custom ? inp(`skills.${i}.init`, s.init, { cls: 'c-in num', num: true, label: '初期値' }) : `<span data-out="sk-i-${i}"></span>`}</td>
       <td data-l="職業P">${inp(`skills.${i}.job`, s.job, { cls: 'c-in num', num: true, label: `${lbl} 職業P` })}</td>
       <td data-l="興味P">${inp(`skills.${i}.hobby`, s.hobby, { cls: 'c-in num', num: true, label: `${lbl} 興味P` })}</td>
@@ -1890,7 +1942,7 @@ function sectionBody(key, c) {
       const rows = S.abil.map(([k, dice, , jp]) => {
         const v = c.abilities[k], nm = jp || k;
         return `<tr>
-          <td class="ab-name">${nm}</td><td class="dice">${dice}</td>
+          <td class="ab-name"><span class="ab-n">${nm}<button class="die-btn" type="button" data-act="roll-one" data-k="${k}" title="${nm}だけ振る（${dice}）" aria-label="${nm}をダイスで振る"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="3.5"/><circle cx="7" cy="7" r="1.2"/><circle cx="13" cy="13" r="1.2"/><circle cx="10" cy="10" r="1.2"/></svg></button></span></td><td class="dice">${dice}</td>
           <td data-l="初期値">${inp(`abilities.${k}.base`, v.base, { cls: 'c-in num', num: true, label: `${nm} 初期値` })}</td>
           <td data-l="増減">${inp(`abilities.${k}.adj`, v.adj, { cls: 'c-in num', num: true, label: `${nm} 増減` })}</td>
           <td data-l="一時的増減">${inp(`abilities.${k}.tmp`, v.tmp, { cls: 'c-in num', num: true, label: `${nm} 一時的増減` })}</td>
@@ -1899,7 +1951,7 @@ function sectionBody(key, c) {
         </tr>`;
       }).join('');
       return `<section class="sec">
-        ${bar('現在値 ＝ 初期値 ＋ 増減 ＋ 一時的増減', '<button class="btn small" type="button" data-act="roll">ダイスで決める</button>')}
+        ${bar('現在値 ＝ 初期値 ＋ 増減 ＋ 一時的増減。各行のサイコロで1つずつ振れます', '<button class="btn small die-all" type="button" data-act="roll"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="3.5"/><circle cx="7" cy="7" r="1.2"/><circle cx="13" cy="13" r="1.2"/><circle cx="10" cy="10" r="1.2"/></svg>全部まとめて振る</button>')}
         <div class="ab-viz">
           <figure class="chart-fig radar-fig"><figcaption>能力値チャート <span>現在値</span></figcaption><div class="radar" id="ab-radar"></div></figure>
           <div class="derived">
@@ -2291,11 +2343,29 @@ onBoth('click', e => {
     case 'add-scenario': c.scenarios.push({ name: '', date: '', note: '', friends: [] }); focus = pid(`scenarios.${c.scenarios.length - 1}.name`); break;
     case 'roll': {
       const filled = Object.values(c.abilities).some(v => v.base !== '');
-      if (filled && !arm(b, 'もう一度押すと振り直し')) return;
-      SYS[c.system].abil.forEach(([k, , expr]) => { c.abilities[k].base = String(rollExpr(expr)); });
+      if (filled && !arm(b, 'もう一度押すと全部振り直し')) return;
+      const res = SYS[c.system].abil.map(([k, dice, expr, jp]) => { const r = rollDetail(expr); c.abilities[k].base = String(r.total); return { k: jp || k, ...r }; });
       c.hp = ''; c.mp = ''; c.san = '';
       fxAt(b, true);
+      diceCardAll(res);
       break;
+    }
+    case 'roll-one': {
+      const def = SYS[c.system].abil.find(([k]) => k === b.dataset.k); if (!def) return;
+      const r = rollDetail(def[2]);
+      c.abilities[def[0]].base = String(r.total);
+      if (['CON', 'SIZ'].includes(def[0])) c.hp = '';
+      if (def[0] === 'POW') { c.mp = ''; c.san = ''; }
+      fxAt(b, false);
+      diceCardOne(def[3] || def[0], r);
+      break;
+    }
+    case 'check': {
+      const sk = c.skills[+b.dataset.i]; if (!sk) return;
+      const a = abilities(c), target = skillTotal(sk, a);
+      fxAt(b, false);
+      diceCardCheck(skillLabel(sk) || '技能', target, c.system);
+      return;
     }
     case 'dup': {
       const copy = JSON.parse(JSON.stringify(c));
@@ -3538,6 +3608,76 @@ $('fview-body').addEventListener('click', e => {
 $('fview-title').addEventListener('click', e => { if (e.target.closest('[data-fvback]')) { fviewCur = null; renderFviewList(); } });
 
 
+
+
+/* ================= ダイスの結果表示 ================= */
+const diceTray = (() => { const t = document.createElement('div'); t.className = 'dice-tray'; t.setAttribute('aria-live', 'polite'); document.body.appendChild(t); return t; })();
+function judge(v, target, sys) {
+  if (sys === 'coc7') {
+    if (v === 1) return ['crit', 'クリティカル'];
+    if (v === 100 || (target < 50 && v >= 96)) return ['fumble', 'ファンブル'];
+    if (v <= Math.floor(target / 5)) return ['crit', 'イクストリーム成功'];
+    if (v <= Math.floor(target / 2)) return ['ok', 'ハード成功'];
+    if (v <= target) return ['ok', 'レギュラー成功'];
+    return ['fail', '失敗'];
+  }
+  if (v <= 5 && v <= target) return ['crit', '決定的成功（クリティカル）'];
+  if (v >= 96 && v > target) return ['fumble', '致命的失敗（ファンブル）'];
+  if (v <= target) return ['ok', '成功'];
+  return ['fail', '失敗'];
+}
+function pushCard(html, cls) {
+  const card = document.createElement('div');
+  card.className = 'dcard ' + (cls || '');
+  card.innerHTML = html + '<button class="dc-x" type="button" aria-label="閉じる">×</button>';
+  diceTray.prepend(card);
+  [...diceTray.children].slice(innerWidth < 760 ? 1 : 3).forEach(el => el.remove());
+  card.querySelector('.dc-x').addEventListener('click', () => card.remove());
+  clearTimeout(card._t);
+  card._t = setTimeout(() => { card.classList.add('out'); setTimeout(() => card.remove(), 400); }, 9000);
+  return card;
+}
+function tumble(card, done) {
+  const faces = card.querySelectorAll('[data-face]');
+  const nums = card.querySelectorAll('[data-final]');
+  if (reduceMotion.matches) { faces.forEach(f => { f.textContent = f.dataset.face; }); nums.forEach(n => { n.textContent = n.dataset.final; }); done && done(); return; }
+  const t0 = performance.now(), dur = 650;
+  const step = t => {
+    const k = (t - t0) / dur;
+    if (k < 1) {
+      faces.forEach(f => { f.textContent = 1 + Math.floor(Math.random() * (+f.dataset.sides || 6)); });
+      nums.forEach(n => { n.textContent = Math.floor(Math.random() * (+n.dataset.max || 99)) + 1; });
+      requestAnimationFrame(step);
+    } else {
+      faces.forEach(f => { f.textContent = f.dataset.face; f.classList.add('land'); });
+      nums.forEach(n => { n.textContent = n.dataset.final; n.classList.add('land'); });
+      done && done();
+    }
+  };
+  requestAnimationFrame(step);
+}
+const facesHtml = r => r.groups.map(g => g.faces.map(f => `<i class="die" data-face="${f}" data-sides="${g.s}">?</i>`).join('')).join('<span class="dplus">＋</span>');
+function diceCardOne(name, r) {
+  const card = pushCard(`<div class="dc-head"><b>${esc(name)}</b><small>${esc(r.expr)}</small></div>
+    <div class="dc-body"><span class="dc-faces">${facesHtml(r)}</span><span class="dc-eq">＝</span><b class="dc-total" data-final="${r.total}" data-max="${Math.max(18, r.total)}">?</b></div>`, 'one');
+  tumble(card);
+}
+function diceCardAll(list) {
+  const card = pushCard(`<div class="dc-head"><b>能力値をまとめて振りました</b></div>
+    <div class="dc-grid">${list.map(r => `<div class="dc-row"><b>${esc(r.k)}</b><span class="dc-faces sm">${facesHtml(r)}</span><small>${esc(r.expr)}</small><b class="dc-total sm" data-final="${r.total}" data-max="${Math.max(18, r.total)}">?</b></div>`).join('')}</div>`, 'all');
+  tumble(card);
+}
+function diceCardCheck(name, target, sys) {
+  const v = 1 + Math.floor(Math.random() * 100);
+  const [cls, label] = judge(v, target, sys);
+  const card = pushCard(`<div class="dc-head"><b>${esc(name)}</b><small>${sys === 'coc7' ? 'CC' : 'CCB'}&lt;=${target}</small></div>
+    <div class="dc-body"><b class="dc-total big" data-final="${v}" data-max="100">?</b><span class="dc-vs">/ ${target}</span><span class="dc-verdict" hidden>${label}</span></div>`, 'check');
+  tumble(card, () => {
+    const vd = card.querySelector('.dc-verdict');
+    vd.hidden = false; card.classList.add('res-' + cls);
+    if (cls === 'crit' && !reduceMotion.matches) fxAt(vd, true);
+  });
+}
 
 /* ================= 並べ替え ================= */
 const SORT_LABEL = { created: ['新しい順', '古い順'], name: ['あ→ん', 'ん→あ'], age: ['若い順', '年上順'], birthday: ['1月→12月', '12月→1月'], updated: ['最近順', '昔順'], system: ['6版→7版', '7版→6版'] };
