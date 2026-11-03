@@ -565,6 +565,87 @@ label.btn { display: inline-block; }
 @keyframes fx-ring-big { from { transform: scale(.5); opacity: 1; } to { transform: scale(14); opacity: 0; } }
 @keyframes fx-spark { from { transform: translate(0, 0) scale(1); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(.2); opacity: 0; } }
 
+/* ===== phones ===== */
+.mbar, .touch-hint { display: none; }
+@media (pointer: coarse) {
+  input, select, textarea { font-size: 16px !important; }
+  .icon-btn { min-width: 36px; min-height: 36px; }
+  .char-item { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+  .touch-hint { display: inline; font-size: 10px; color: var(--muted); letter-spacing: .04em; margin-left: 6px; }
+}
+@media (max-width: 760px) {
+  .app { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); }
+  .bar { padding-block: 12px 4px; }
+  .bar-actions { width: 100%; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .bar-actions::-webkit-scrollbar { display: none; }
+  .bar-actions .btn { flex: none; padding: 6px 13px; font-size: 13px; }
+  .hero { padding-block: 6px 12px; }
+  .hero-title { font-size: 28px; }
+  .hero-lead, .hero-tags { display: none; }
+  .eyebrow { font-size: 10px; margin-bottom: 4px; }
+  .hub-top { justify-content: center; padding-top: 12px; }
+  .hub-top .sys-badge { display: none; }
+  .peek { grid-template-columns: 118px minmax(0, 1fr); gap: 12px; padding: 12px; }
+  .peek::before { display: none; }
+  .peek-art { min-height: 200px; }
+  .toast { bottom: calc(env(safe-area-inset-bottom, 0px) + 92px); }
+
+  /* bottom action bar */
+  .mbar { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 7; gap: 10px; align-items: center;
+    padding: 10px 12px calc(env(safe-area-inset-bottom, 0px) + 10px);
+    background: color-mix(in srgb, var(--solid) 90%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    border-top: 1px solid var(--line); box-shadow: 0 -10px 30px -18px color-mix(in srgb, var(--ink) 50%, transparent); }
+  .mbar-stats { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; }
+  .mbar-stats .token { width: 38px; height: 38px; font-size: 15px; border-width: 2px; }
+  .mbar-nums { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+  .mbar-nums b { font-size: 13px; font-family: var(--f-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mbar-nums span { font-family: var(--f-mono); font-size: 10.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -.02em; }
+  .mbar-nums i { font-style: normal; font-family: var(--f-latin); font-weight: 700; margin-right: 1px; color: var(--sky); }
+  .btn.mbar-copy { flex: none; border: 0; color: #fff; padding: 12px 15px; font-size: 14px; background: linear-gradient(100deg, var(--orange), var(--pink)); box-shadow: 0 8px 20px -10px var(--orange); }
+
+  /* tables become stacked cards */
+  .sk-tbl thead, .ab-tbl thead, .list-tbl thead { display: none; }
+  .sk-tbl tbody, .ab-tbl tbody, .list-tbl tbody { display: block; }
+  .sk-tbl tr, .ab-tbl tr, .list-tbl tr { display: grid; gap: 4px 6px; padding: 8px 10px; border-bottom: 1px solid var(--line); position: relative; }
+  .sk-tbl tr:last-child, .ab-tbl tr:last-child, .list-tbl tr:last-child { border-bottom: 0; }
+  .sk-tbl td, .ab-tbl td, .list-tbl td { display: block; padding: 0 !important; border: 0 !important; min-width: 0; }
+  .tbl td[data-l]::before { content: attr(data-l); display: block; font-size: 10px; color: var(--muted); letter-spacing: .04em; font-family: var(--f-body); font-weight: 500; text-align: left; margin-bottom: 1px; }
+  .tbl .c-in, .tbl .c-in.num { width: 100%; border-color: var(--line); background: var(--solid); padding: 5px 6px; }
+  .tbl td.out-num { text-align: left; }
+
+  /* skills: [chk] name ... total [x] / init job hobby grow other */
+  .sk-tbl tr { grid-template-columns: 26px repeat(5, minmax(0, 1fr)); }
+  .sk-tbl td:nth-child(1) { grid-column: 1; grid-row: 1 / 3; align-self: center; }
+  .sk-tbl td:nth-child(2) { grid-column: 2 / 5; grid-row: 1; align-self: center; font-weight: 700; }
+  .sk-tbl td:nth-child(8) { grid-column: 5; grid-row: 1; align-self: center; text-align: right; font-size: 18px; }
+  .sk-tbl td:nth-child(9) { grid-column: 6; grid-row: 1; align-self: center; justify-self: end; }
+  .sk-tbl td:nth-child(3) { grid-column: 2; grid-row: 2; align-self: end; padding-bottom: 6px !important; }
+  .sk-tbl td:nth-child(4) { grid-column: 3; grid-row: 2; }
+  .sk-tbl td:nth-child(5) { grid-column: 4; grid-row: 2; }
+  .sk-tbl td:nth-child(6) { grid-column: 5; grid-row: 2; }
+  .sk-tbl td:nth-child(7) { grid-column: 6; grid-row: 2; }
+  .sk-tbl .skill-name { white-space: normal; flex-wrap: wrap; }
+  .sk-tbl .skill-name .c-in { width: 8em; }
+  .sk-tbl td.total small { display: block; margin: 0; }
+
+  /* abilities: name dice | current | ½ ⅕ (×5) / base adj tmp */
+  .ab-tbl tr { grid-template-columns: repeat(6, minmax(0, 1fr)); align-items: end; }
+  .ab-tbl td:nth-child(1) { grid-column: 1 / 3; grid-row: 1; font-size: 16px; align-self: center; }
+  .ab-tbl td:nth-child(2) { grid-column: 3; grid-row: 1; align-self: center; }
+  .ab-tbl td:nth-child(6) { grid-column: 4; grid-row: 1; font-size: 18px; }
+  .ab-tbl td:nth-child(7) { grid-column: 5; grid-row: 1; }
+  .ab-tbl td:nth-child(8) { grid-column: 6; grid-row: 1; }
+  .ab-tbl td:nth-child(3) { grid-column: 1 / 3; grid-row: 2; }
+  .ab-tbl td:nth-child(4) { grid-column: 3 / 5; grid-row: 2; }
+  .ab-tbl td:nth-child(5) { grid-column: 5 / 7; grid-row: 2; }
+
+  /* weapons / items / scenarios: first field full width, rest in 2 columns, delete at top-right */
+  .list-tbl tr { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-right: 46px; }
+  .list-tbl td:first-child { grid-column: 1 / -1; }
+  .list-tbl td:last-child { position: absolute; right: 6px; top: 8px; }
+  .list-tbl th, .list-tbl td { min-width: 0 !important; }
+}
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -627,7 +708,7 @@ label.btn { display: inline-block; }
 
   <div class="layout">
     <nav class="shelf" aria-label="探索者一覧">
-      <p class="panel-label">INVESTIGATORS <span>探索者</span></p>
+      <p class="panel-label">INVESTIGATORS <span>探索者</span><span class="touch-hint">長押しで詳細</span></p>
       <div class="shelf-list" id="shelf"></div>
     </nav>
 
@@ -721,6 +802,11 @@ label.btn { display: inline-block; }
 </div>
 
 <div class="toast" id="toast" role="status" hidden></div>
+
+<div class="mbar" id="mbar">
+  <div class="mbar-stats" id="mbar-stats"></div>
+  <button class="btn mbar-copy" id="mbar-copy" type="button">コマをコピー</button>
+</div>
 
 <div class="overlay" id="modal-new" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="new-title">
@@ -1110,25 +1196,25 @@ function skillTableHtml(c, cat) {
     return `<tr data-row="${i}">
       <td><input type="checkbox" class="chk" id="${pid(`skills.${i}.isJob`)}" data-p="skills.${i}.isJob" ${s.isJob ? 'checked' : ''} aria-label="${lbl} を職業技能にする"></td>
       <td><span class="skill-name">${nameCell}</span></td>
-      <td class="out-num init">${s.custom ? inp(`skills.${i}.init`, s.init, { cls: 'c-in num', num: true, label: '初期値' }) : `<span data-out="sk-i-${i}"></span>`}</td>
-      <td>${inp(`skills.${i}.job`, s.job, { cls: 'c-in num', num: true, label: `${lbl} 職業P` })}</td>
-      <td>${inp(`skills.${i}.hobby`, s.hobby, { cls: 'c-in num', num: true, label: `${lbl} 興味P` })}</td>
-      <td>${inp(`skills.${i}.grow`, s.grow, { cls: 'c-in num', num: true, label: `${lbl} 成長` })}</td>
-      <td>${inp(`skills.${i}.other`, s.other, { cls: 'c-in num', num: true, label: `${lbl} その他` })}</td>
+      <td class="out-num init" data-l="初期値">${s.custom ? inp(`skills.${i}.init`, s.init, { cls: 'c-in num', num: true, label: '初期値' }) : `<span data-out="sk-i-${i}"></span>`}</td>
+      <td data-l="職業P">${inp(`skills.${i}.job`, s.job, { cls: 'c-in num', num: true, label: `${lbl} 職業P` })}</td>
+      <td data-l="興味P">${inp(`skills.${i}.hobby`, s.hobby, { cls: 'c-in num', num: true, label: `${lbl} 興味P` })}</td>
+      <td data-l="成長">${inp(`skills.${i}.grow`, s.grow, { cls: 'c-in num', num: true, label: `${lbl} 成長` })}</td>
+      <td data-l="その他">${inp(`skills.${i}.other`, s.other, { cls: 'c-in num', num: true, label: `${lbl} その他` })}</td>
       <td class="out-num total" data-out="sk-t-${i}"></td>
       <td>${tail}</td>
     </tr>`;
   }).join('');
-  return `<div class="tbl-wrap"><table class="tbl">
+  return `<div class="tbl-wrap"><table class="tbl sk-tbl">
     <thead><tr><th title="職業技能">職業</th><th style="text-align:left">技能名</th><th>初期値</th><th>職業P</th><th>興味P</th><th>成長</th><th>その他</th><th>合計</th><th></th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
 }
 
 function listTableHtml(c, key, cols, labels, emptyText) {
   if (!c[key].length) return `<p class="empty">${emptyText}</p>`;
-  return `<div class="tbl-wrap"><table class="tbl">
+  return `<div class="tbl-wrap"><table class="tbl list-tbl">
     <thead><tr>${labels.map(([l, w]) => `<th style="min-width:${w}">${l}</th>`).join('')}<th></th></tr></thead>
-    <tbody>${c[key].map((row, i) => `<tr>${cols.map((col, j) => `<td>${inp(`${key}.${i}.${col}`, row[col], { cls: 'c-in', label: labels[j][0] })}</td>`).join('')}
+    <tbody>${c[key].map((row, i) => `<tr>${cols.map((col, j) => `<td data-l="${labels[j][0]}">${inp(`${key}.${i}.${col}`, row[col], { cls: 'c-in', label: labels[j][0] })}</td>`).join('')}
       <td><button class="icon-btn" type="button" data-del="${key}" data-i="${i}" aria-label="行を削除">×</button></td></tr>`).join('')}</tbody>
   </table></div>`;
 }
@@ -1172,16 +1258,16 @@ function sectionBody(key, c) {
         const v = c.abilities[k], nm = jp || k;
         return `<tr>
           <td class="ab-name">${nm}</td><td class="dice">${dice}</td>
-          <td>${inp(`abilities.${k}.base`, v.base, { cls: 'c-in num', num: true, label: `${nm} 初期値` })}</td>
-          <td>${inp(`abilities.${k}.adj`, v.adj, { cls: 'c-in num', num: true, label: `${nm} 増減` })}</td>
-          <td>${inp(`abilities.${k}.tmp`, v.tmp, { cls: 'c-in num', num: true, label: `${nm} 一時的増減` })}</td>
-          <td class="out-num total" data-out="ab-${k}"></td>
-          ${is7 ? `<td class="out-num init" data-out="ab-${k}-h"></td><td class="out-num init" data-out="ab-${k}-f"></td>` : `<td class="out-num init" data-out="ab-${k}-x5"></td>`}
+          <td data-l="初期値">${inp(`abilities.${k}.base`, v.base, { cls: 'c-in num', num: true, label: `${nm} 初期値` })}</td>
+          <td data-l="増減">${inp(`abilities.${k}.adj`, v.adj, { cls: 'c-in num', num: true, label: `${nm} 増減` })}</td>
+          <td data-l="一時的増減">${inp(`abilities.${k}.tmp`, v.tmp, { cls: 'c-in num', num: true, label: `${nm} 一時的増減` })}</td>
+          <td class="out-num total" data-l="現在値" data-out="ab-${k}"></td>
+          ${is7 ? `<td class="out-num init" data-l="½" data-out="ab-${k}-h"></td><td class="out-num init" data-l="⅕" data-out="ab-${k}-f"></td>` : `<td class="out-num init" data-l="×5" data-out="ab-${k}-x5"></td>`}
         </tr>`;
       }).join('');
       return `<section class="sec">
         ${bar('現在値 ＝ 初期値 ＋ 増減 ＋ 一時的増減', '<button class="btn small" type="button" data-act="roll">ダイスで決める</button>')}
-        <div class="tbl-wrap"><table class="tbl">
+        <div class="tbl-wrap"><table class="tbl ab-tbl">
           <thead><tr><th style="text-align:left">能力値</th><th>ダイス</th><th>初期値</th><th>増減</th><th>一時的増減</th><th>現在値</th>${is7 ? '<th>ハード（½）</th><th>イクストリーム（⅕）</th>' : '<th>×5</th>'}</tr></thead>
           <tbody>${rows}</tbody>
         </table></div>
@@ -1453,6 +1539,9 @@ function renderOutput() {
   $('json-out').textContent = JSON.stringify(json, null, 2);
   $('opt-all').checked = !!state.paletteAll;
   $('orbit-core').textContent = initial(c);
+  const st = d.status.map(x => `<i>${esc(x.label)}</i>${x.value}/${x.max}`).join(' ');
+  const mh = `${tokenHtml(c)}<div class="mbar-nums"><b>${esc(d.name)}</b><span>${st}</span></div>`;
+  if ($('mbar-stats').dataset.h !== mh) { $('mbar-stats').innerHTML = mh; $('mbar-stats').dataset.h = mh; }
 }
 
 /* ================= ふわっとエフェクト ================= */
@@ -1562,10 +1651,25 @@ onBoth('click', e => {
   if (focus) $(focus)?.focus();
 });
 
+let pressTimer = null, longPressed = false;
 $('shelf').addEventListener('click', e => {
   const b = e.target.closest('[data-id]'); if (!b) return;
+  if (longPressed) { longPressed = false; e.preventDefault(); return; }
   state.activeId = b.dataset.id; save(); renderAll();
 });
+$('shelf').addEventListener('pointerdown', e => {
+  if (e.pointerType === 'mouse') return;
+  const it = e.target.closest('.char-item'); if (!it) return;
+  longPressed = false;
+  clearTimeout(pressTimer);
+  pressTimer = setTimeout(() => { longPressed = true; showPeek(it); if (navigator.vibrate) navigator.vibrate(10); }, 450);
+});
+['pointerup', 'pointercancel', 'pointermove'].forEach(ev => $('shelf').addEventListener(ev, e => {
+  if (ev === 'pointermove' && Math.abs(e.movementX) + Math.abs(e.movementY) < 4) return;
+  clearTimeout(pressTimer);
+}));
+$('shelf').addEventListener('contextmenu', e => { if (e.target.closest('.char-item')) e.preventDefault(); });
+document.addEventListener('pointerdown', e => { if (!$('peek').hidden && e.pointerType !== 'mouse' && !e.target.closest('.char-item')) hidePeek(); });
 $('opt-all').addEventListener('change', e => { state.paletteAll = e.target.checked; save(); renderOutput(); });
 
 /* ================= コピー ================= */
@@ -1596,6 +1700,13 @@ async function copyText(text, statusEl, fallbackEl, okMsg = 'コピーしまし�
 $('btn-copy').addEventListener('click', e => {
   const btn = e.currentTarget;
   copyText(JSON.stringify(toCcfolia(active())), $('copy-status'), $('json-out')).then(ok => { if (ok) { fxAt(btn, true); enter(document.querySelector('.koma')); } });
+});
+$('mbar-copy').addEventListener('click', e => {
+  const btn = e.currentTarget;
+  copyText(JSON.stringify(toCcfolia(active())), $('copy-status'), $('json-out')).then(ok => {
+    if (ok) { fxAt(btn, true); toast('コピーしました。ココフォリアの盤面に貼り付けてください。'); }
+    else { toast('自動でコピーできませんでした。下の「出力の中身を確認」のJSONを長押ししてコピーしてください。'); $('json-out').scrollIntoView({ block: 'center' }); }
+  });
 });
 
 /* ================= モーダル ================= */
@@ -1869,7 +1980,8 @@ function showPeek(item) {
   const r = item.getBoundingClientRect(), pw = pk.offsetWidth, ph = pk.offsetHeight;
   let left = r.right + 16;
   if (left + pw > innerWidth - 12) left = Math.max(12, innerWidth - pw - 12);
-  const top = Math.min(Math.max(12, r.top + r.height / 2 - ph / 2), Math.max(12, innerHeight - ph - 12));
+  let top = Math.min(Math.max(12, r.top + r.height / 2 - ph / 2), Math.max(12, innerHeight - ph - 12));
+  if (innerWidth < 760) { left = Math.max(12, (innerWidth - pw) / 2); top = Math.max(12, (innerHeight - ph) / 2 - 30); }
   pk.style.left = left + 'px'; pk.style.top = top + 'px';
   pk.style.setProperty('--ay', Math.min(ph - 20, Math.max(20, r.top + r.height / 2 - top)) + 'px');
   if (!reduceMotion.matches) {
@@ -1884,7 +1996,7 @@ $('shelf').addEventListener('pointerover', e => {
   const it = e.target.closest('.char-item');
   if (it && it.dataset.id !== peekId) showPeek(it);
 });
-$('shelf').addEventListener('pointerleave', hidePeek);
+$('shelf').addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') hidePeek(); });
 $('shelf').addEventListener('focusin', e => { const it = e.target.closest('.char-item'); if (it) showPeek(it); });
 $('shelf').addEventListener('focusout', hidePeek);
 addEventListener('scroll', hidePeek, { passive: true });
