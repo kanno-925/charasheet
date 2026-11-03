@@ -477,7 +477,19 @@ label.btn { display: inline-block; }
 .bg-slider output { font-family: var(--f-mono); font-size: 12px; text-align: right; color: var(--ink); }
 @media (max-width: 560px) { .bgset { grid-template-columns: minmax(0, 1fr); } .bg-thumb { width: 100%; } .bg-slider { grid-template-columns: 7em minmax(0, 1fr) 3em; } }
 
-.has-bg .hero-copy { justify-self: start; padding: 14px 18px; border-radius: 22px; background: var(--paper); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.has-bg { --glass: color-mix(in srgb, var(--solid) var(--glass-a, 25%), transparent); --glass-line: color-mix(in srgb, #ffffff 50%, transparent); }
+.has-bg body::before { display: none; }
+.has-bg .hero-copy { justify-self: start; padding: 14px 18px; border-radius: 22px; background: var(--glass); border: 1px solid var(--glass-line); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.has-bg .sheet, .has-bg .koma, .has-bg details.out { background: var(--glass); border-color: var(--glass-line); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.has-bg details.out pre.code, .has-bg .out-sub { background: color-mix(in srgb, var(--solid) 70%, transparent); }
+.has-bg .hub-lines .orb, .has-bg .hub-lines .spoke { stroke: color-mix(in srgb, #ffffff 70%, transparent); }
+.has-bg .hub-name, .has-bg .hub-stats { background: var(--paper); padding: 2px 14px; border-radius: 999px; }
+.has-bg .koma-top > div, .has-bg .steps li, .has-bg .opt, .has-bg .copy-status:not(:empty) { background: color-mix(in srgb, var(--solid) 72%, transparent); border-radius: 10px; padding-block: 2px; padding-right: 8px; }
+.has-bg .opt { padding-left: 6px; }
+.has-bg .hero-lead, .has-bg .brand-text, .has-bg .eyebrow, .has-bg .sample-tag { background: color-mix(in srgb, var(--solid) 72%, transparent); border-radius: 10px; padding: 3px 10px; }
+.has-bg .eyebrow { display: inline-flex; border-radius: 999px; }
+.has-bg .sample-tag { border-radius: 999px; }
+.has-bg .koma-top > div { padding: 4px 10px; }
 .has-bg .panel-label { display: inline-flex; padding: 2px 10px; border-radius: 999px; background: var(--paper); }
 .has-bg .char-item { background: var(--paper); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
 .has-bg .char-item.active { background: var(--solid); }
@@ -697,6 +709,7 @@ label.btn { display: inline-block; }
         <div class="row"><label class="btn small" for="bg-file">画像を選ぶ</label><input type="file" id="bg-file" accept="image/*" hidden><button class="btn small danger" type="button" id="bg-remove">画像を外す</button></div>
         <label class="bg-slider" for="bg-veil">色を重ねる濃さ<input type="range" id="bg-veil" min="0" max="90"><output id="bg-veil-v"></output></label>
         <label class="bg-slider" for="bg-blur">ぼかし<input type="range" id="bg-blur" min="0" max="20"><output id="bg-blur-v"></output></label>
+        <label class="bg-slider" for="bg-glass">パネルの透け具合<input type="range" id="bg-glass" min="0" max="100"><output id="bg-glass-v"></output></label>
       </div>
     </div>
     <div class="theme-rows" id="theme-rows"></div>
@@ -1673,15 +1686,17 @@ function applyTheme() {
   L.classList.toggle('on', !!state.bgImage);
   document.documentElement.classList.toggle('has-bg', !!state.bgImage);
   L.style.backgroundImage = state.bgImage ? `url("${imgSrc(state.bgImage)}")` : '';
-  L.style.setProperty('--veil', (state.bgVeil ?? 35) / 100);
+  L.style.setProperty('--veil', (state.bgVeil ?? 15) / 100);
   L.style.setProperty('--bgblur', (state.bgBlur ?? 0) + 'px');
+  document.documentElement.style.setProperty('--glass-a', (100 - (state.bgGlass ?? 75)) + '%');
 }
 function renderBgControls() {
   $('bg-thumb').style.backgroundImage = state.bgImage ? `url("${imgSrc(state.bgImage)}")` : '';
   $('bg-thumb').textContent = state.bgImage ? '' : '未設定';
   $('bg-remove').hidden = !state.bgImage;
-  $('bg-veil').value = state.bgVeil ?? 35; $('bg-veil-v').textContent = (state.bgVeil ?? 35) + '%';
+  $('bg-veil').value = state.bgVeil ?? 15; $('bg-veil-v').textContent = (state.bgVeil ?? 15) + '%';
   $('bg-blur').value = state.bgBlur ?? 0; $('bg-blur-v').textContent = (state.bgBlur ?? 0) + 'px';
+  $('bg-glass').value = state.bgGlass ?? 75; $('bg-glass-v').textContent = (state.bgGlass ?? 75) + '%';
 }
 function renderThemeRows() {
   const t = themeVals();
@@ -1724,6 +1739,7 @@ $('bg-file').addEventListener('change', async e => {
 $('bg-remove').addEventListener('click', () => { state.bgImage = ''; applyTheme(); renderBgControls(); save(); });
 $('bg-veil').addEventListener('input', e => { state.bgVeil = +e.target.value; applyTheme(); renderBgControls(); save(); });
 $('bg-blur').addEventListener('input', e => { state.bgBlur = +e.target.value; applyTheme(); renderBgControls(); save(); });
+$('bg-glass').addEventListener('input', e => { state.bgGlass = +e.target.value; applyTheme(); renderBgControls(); save(); });
 $('theme-reset').addEventListener('click', e => {
   if (!arm(e.currentTarget, 'もう一度押すと戻します')) return;
   state.theme = {}; applyTheme(); save(); renderThemeRows();
