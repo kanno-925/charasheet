@@ -795,6 +795,9 @@ label.btn { display: inline-block; }
 .acct-mode b { font-family: var(--f-display); font-size: 17px; }
 .acct-mode span { font-size: 12px; color: var(--muted); }
 .acct-mode.signup { background: color-mix(in srgb, var(--amber) 14%, var(--solid)); border-color: var(--amber); }
+.acct-rename { display: flex; flex-direction: column; gap: 4px; }
+.acct-rename label { font-size: 12px; color: var(--muted); font-weight: 500; }
+.acct-rename .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
 .acct-switch { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); padding-top: 10px; border-top: 1px solid var(--line); }
 .acct-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 999px; background: var(--code-bg); border: 1px solid var(--line); }
 .acct-tabs button { border: 0; background: transparent; border-radius: 999px; padding: 8px; font-weight: 700; cursor: pointer; color: var(--muted); }
@@ -2975,6 +2978,7 @@ const jaErr = e => {
   if (/Invalid login credentials/i.test(m)) return 'ログインできませんでした。このメールアドレスのアカウントがないか、パスワードが違います。アカウントがない場合は、下の「新規アカウント作成へ」から作ってください。';
   if (/Email not confirmed/i.test(m)) return 'メールアドレスの確認がまだです。届いたメールのリンクを押してからログインしてください。';
   if (/already registered|already been registered/i.test(m)) return 'このメールアドレスはすでに登録されています。ログインしてください。';
+  if (/duplicate key|profiles_username_lower|23505/i.test(m)) return 'そのユーザー名はすでに使われています。別のユーザー名にしてください。';
   if (/Database error saving new user/i.test(m)) return 'そのユーザー名はすでに使われています。別のユーザー名にしてください。';
   if (/rate limit|too many/i.test(m)) return '短い時間に何度も送信されました。しばらく待ってからもう一度試してください。';
   if (/Password should be/i.test(m)) return 'パスワードが短すぎます。8文字以上にしてください。';
@@ -3119,6 +3123,11 @@ function renderAccount() {
         <span class="fav" style="--fc:var(--sky)">${esc((me.username || '？').charAt(0))}</span>
         <div><b class="acct-name">${esc(me.username)}</b><span class="acct-mail">${esc(me.email || '')}</span></div>
       </div>
+      <form class="acct-rename" data-form="rename">
+        <label for="ac-newname">ユーザー名（フレンドに見える名前・2〜20文字）</label>
+        <div class="row"><input class="inp" id="ac-newname" maxlength="20" autocomplete="username" value="${esc(me.username)}"><button class="btn" type="submit">変更する</button></div>
+        <p class="err" id="ac-err" role="alert"></p><p class="ok-msg" id="ac-ok" role="status"></p>
+      </form>
       <div class="acct-sync ${syncState}"><i class="sync-dot ${syncState}"></i>${st}${syncMsg ? `<small>${esc(syncMsg)}</small>` : ''}</div>
       <p>キャラシは自動でサーバーに保存され、ほかの端末でログインしても同じキャラが使えます。フレンドには、<b>非公開（ロック）にしていないキャラシ</b>だけが見えます。ロックはシート上部の「フレンドに公開／非公開」ボタンで切り替えます。</p>
       <div class="acct-actions"><button class="btn" type="button" data-acct="sync">今すぐ同期</button><button class="btn" type="button" data-acct="friends">フレンド</button><button class="btn danger" type="button" data-acct="logout">ログアウト</button></div>`;
@@ -3174,6 +3183,32 @@ $('acct-body').addEventListener('submit', async e => {
   if (!sbClient()) return;
   const form = e.target, kind = form.dataset.form, err = $('ac-err'), ok = $('ac-ok');
   const btn = form.querySelector('button[type=submit]');
+  if (kind === 'rename') {
+    err.textContent = ''; ok.textContent = '';
+    const name = ($('ac-newname').value || '').trim();
+    if (!me) return;
+    if (!/^[^\s]{2,20}$/.test(name)) { err.textContent = 'ユーザー名は空白なしの2〜20文字にしてください。'; return; }
+    if (name === me.username) { err.textContent = '今のユーザー名と同じです。'; return; }
+    btn.disabled = true;
+    try {
+      if (name.toLowerCase() !== (me.username || '').toLowerCase()) {
+        const av = await sb.rpc('username_available', { name });
+        if (av.error) throw av.error;
+        if (av.data === false) { err.textContent = 'そのユーザー名はすでに使われています。別のユーザー名にしてください。'; return; }
+      }
+      const { error } = await sb.from('profiles').update({ username: name }).eq('id', me.id);
+      if (error) throw error;
+      sb.auth.updateUser({ data: { username: name } }).catch(() => {});
+      const old = me.username;
+      me.username = name;
+      renderAccountBtn(); renderAccount();
+      if (!$('modal-friends').hidden) renderOnline();
+      $('ac-ok').textContent = `ユーザー名を「${old}」から「${name}」に変更しました。フレンドにも新しい名前で表示されます。`;
+      fxAt($('ac-newname'), true);
+    } catch (er) { err.textContent = jaErr(er); }
+    finally { btn.disabled = false; }
+    return;
+  }
   err.textContent = ''; ok.textContent = '';
   const email = ($('ac-email')?.value || '').trim(), pass = $('ac-pass')?.value || '';
   btn.disabled = true;
