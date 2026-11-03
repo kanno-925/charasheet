@@ -612,7 +612,9 @@ label.btn { display: inline-block; }
 .select { position: fixed; inset: 0; z-index: 8; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
   background: radial-gradient(1100px 620px at 90% -10%, var(--glow-1), transparent 62%), radial-gradient(800px 520px at -8% 30%, var(--glow-2), transparent 60%), linear-gradient(180deg, var(--bg-2), var(--bg) 560px);
   background-color: var(--bg); }
-.has-bg .select { background: color-mix(in srgb, var(--bg) 25%, transparent); }
+.has-bg .select { background: var(--bg); isolation: isolate; }
+.has-bg .select::before { content: ""; position: fixed; inset: -30px; z-index: -2; background: var(--sel-img) center / cover no-repeat; filter: blur(var(--bgblur, 0px)); }
+.has-bg .select::after { content: ""; position: fixed; inset: 0; z-index: -1; background: var(--bg); opacity: var(--veil, .15); }
 .select-in { min-height: 100%; display: flex; flex-direction: column; align-items: center; padding: 22px 16px calc(env(safe-area-inset-bottom, 0px) + 28px); gap: 6px; }
 .sel-head { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
 .sel-head .eyebrow { justify-content: center; }
@@ -654,6 +656,76 @@ label.btn { display: inline-block; }
 .sel-rest .sel-char { position: static; translate: none; --B: 70px !important; width: 110px; }
 @media (max-width: 560px) { .sel-new { width: 116px !important; height: 116px !important; } .sel-new .plus { font-size: 40px !important; } .sel-new b { font-size: 12px !important; } .sel-new small { display: none; } .sel-empty { top: calc(50% + 84px) !important; } }
 @media (max-width: 760px) { .sel-new { width: 138px; height: 138px; } .sel-new .plus { font-size: 46px; } .sel-new b { font-size: 13px; } .sel-empty { top: calc(50% + 100px); } }
+
+/* ===== charts ===== */
+.chart-fig { margin: 0; border: 1px solid var(--line); border-radius: 16px; background: var(--solid); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.chart-fig figcaption { font-size: 12px; font-weight: 700; color: var(--ink); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.chart-fig figcaption > span { font-weight: 400; color: var(--muted); font-size: 11px; }
+.ab-viz { display: grid; grid-template-columns: minmax(240px, 320px) minmax(0, 1fr); gap: 14px; align-items: start; }
+.ab-viz .derived { align-content: start; }
+@media (max-width: 900px) { .ab-viz { grid-template-columns: minmax(0, 1fr); } .radar-fig { max-width: 360px; width: 100%; justify-self: center; } }
+.radar-svg { width: 100%; height: auto; display: block; overflow: visible; }
+.radar-svg .rg { fill: none; stroke: var(--line); stroke-width: 1; }
+.radar-svg .rg:last-of-type { stroke: var(--line-strong); }
+.radar-svg .ra { stroke: var(--line); stroke-width: 1; }
+.radar-svg .rarea { fill: color-mix(in srgb, var(--sky) 22%, transparent); stroke: var(--sky); stroke-width: 2; stroke-linejoin: round; }
+.radar-svg .rd { fill: var(--sky); stroke: var(--solid); stroke-width: 2; }
+.radar-svg .rh { fill: transparent; cursor: default; }
+.radar-svg .rh:hover + .rd, .radar-svg .rd:has(+ .rh:hover) { r: 6; }
+.radar-svg .rl-k { font-family: var(--f-latin); font-size: 10px; font-weight: 700; fill: var(--muted); letter-spacing: .06em; }
+.radar-svg .rl-v { font-family: var(--f-mono); font-size: 12px; font-weight: 700; fill: var(--ink); }
+.radar-svg .rshape { transform-box: view-box; transform-origin: var(--cx) var(--cy); }
+.radar-svg.grow .rshape { animation: radar-in .9s cubic-bezier(.2, .9, .3, 1.15) both; }
+@keyframes radar-in { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.peek-radar { margin: -4px auto -6px; width: 100%; max-width: 230px; }
+.legend { display: inline-flex; gap: 6px; align-items: center; }
+.legend .sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-left: 6px; }
+.sw-init, .seg-i { background: color-mix(in srgb, var(--sky) 30%, var(--solid)); }
+.sw-add, .seg-a { background: var(--sky); }
+.sk-bars { display: flex; flex-direction: column; gap: 5px; }
+.sk-row { display: grid; grid-template-columns: minmax(6em, 11em) minmax(0, 1fr) 2.6em; gap: 10px; align-items: center; font-size: 12px; border-radius: 6px; }
+.sk-row:hover { background: var(--code-bg); }
+.sk-n { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sk-tr { display: flex; gap: 2px; height: 12px; align-items: stretch; background-image: linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 25% 100%; }
+.sk-tr i { display: block; height: 100%; min-width: 0; }
+.sk-tr .seg-i { border-radius: 0; }
+.sk-tr .seg-a { border-radius: 0 4px 4px 0; }
+.sk-tr .seg-i:only-child, .sk-tr .seg-a[style^="width:0"] { border-radius: 0 4px 4px 0; }
+.sk-v { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.sk-axis { position: relative; height: 14px; font-family: var(--f-mono); font-size: 9.5px; color: var(--muted); }
+.sk-axisrow:hover { background: none; }
+.sk-axis span { position: absolute; translate: -50% 0; }
+.sk-bars.grow .sk-tr { animation: bars-in .7s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--k) * 30ms); transform-origin: left center; }
+@keyframes bars-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.chart-tip { position: fixed; z-index: 130; pointer-events: none; background: var(--ink); color: var(--solid); font-size: 12px; padding: 5px 10px; border-radius: 8px; box-shadow: var(--shadow); white-space: nowrap; font-family: var(--f-body); }
+@media (max-width: 560px) { .sk-row { grid-template-columns: minmax(5em, 7.5em) minmax(0, 1fr) 2.2em; gap: 6px; } }
+
+/* ===== BGM ===== */
+.bgm-set { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--code-bg); }
+.bgm-set .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.bgm-set .row .inp { flex: 1 1 220px; }
+.bgm-set p { margin: 0; font-size: 11.5px; color: var(--muted); }
+.bgm-now { display: flex; gap: 8px; align-items: center; font-weight: 700; color: var(--muted); }
+.bgm-now.on { color: var(--ink); }
+.bgm-now svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.bgm-now.on svg { color: var(--sky); }
+.bgm { position: fixed; left: 16px; bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); z-index: 7; display: flex; align-items: center; gap: 10px; padding: 8px 14px 8px 8px; border-radius: 999px;
+  background: color-mix(in srgb, var(--solid) 92%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid var(--line); box-shadow: var(--shadow); max-width: min(360px, calc(100vw - 32px)); animation: fuwa-pop .45s cubic-bezier(.3, 1.4, .5, 1); }
+.bgm-play { width: 40px; height: 40px; border-radius: 50%; border: 0; cursor: pointer; display: grid; place-items: center; color: #fff; flex: none; background: linear-gradient(135deg, var(--sky), var(--cyan)); box-shadow: 0 6px 14px -6px var(--sky); }
+.bgm-play svg { width: 18px; height: 18px; fill: currentColor; }
+.bgm.playing .bgm-play { animation: bgm-glow 2.4s ease-in-out infinite; }
+@keyframes bgm-glow { 50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--sky) 18%, transparent), 0 6px 14px -6px var(--sky); } }
+.bgm-info { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.bgm-info small { font-family: var(--f-latin); font-size: 9px; letter-spacing: .2em; color: var(--sky); font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.bgm-info b { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+.eq { display: inline-flex; gap: 2px; align-items: flex-end; height: 9px; }
+.eq i { width: 2px; height: 3px; background: var(--sky); border-radius: 1px; }
+.bgm.playing .eq i { animation: eq .9s ease-in-out infinite; }
+.bgm.playing .eq i:nth-child(2) { animation-delay: -.3s; } .bgm.playing .eq i:nth-child(3) { animation-delay: -.6s; } .bgm.playing .eq i:nth-child(4) { animation-delay: -.15s; }
+@keyframes eq { 0%, 100% { height: 3px; } 50% { height: 9px; } }
+#bgm-vol { width: 80px; accent-color: var(--sky); }
+.sel-bgm { position: absolute; top: 0; right: 16px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; color: #fff; background: linear-gradient(135deg, var(--sky), var(--cyan)); box-shadow: 0 4px 10px -4px var(--sky); }
+@media (max-width: 760px) { .bgm { left: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 84px); padding-right: 12px; } #bgm-vol { width: 64px; } .bgm-info b { max-width: 110px; } }
 
 /* ===== phones ===== */
 .mbar, .touch-hint { display: none; }
@@ -937,6 +1009,12 @@ label.btn { display: inline-block; }
 </div>
 
 <div class="toast" id="toast" role="status" hidden></div>
+
+<div class="bgm" id="bgm" hidden>
+  <button class="bgm-play" id="bgm-play" type="button" aria-label="再生"></button>
+  <div class="bgm-info"><small>BGM <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></small><b id="bgm-title"></b></div>
+  <input type="range" id="bgm-vol" min="0" max="100" aria-label="BGMの音量">
+</div>
 
 <div class="mbar" id="mbar">
   <div class="mbar-stats" id="mbar-stats"></div>
@@ -1508,6 +1586,14 @@ function sectionBody(key, c) {
           </div>
         </div>
       </div>
+      <div class="field wide"><span class="lbl">BGM（このキャラを開いたときに流れる曲）</span>
+        <div class="bgm-set">
+          <div class="bgm-now ${c.bgm ? 'on' : ''}"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 15.5V5.2l8-1.7v10"/><circle cx="5.8" cy="15.5" r="2.3"/><circle cx="13.8" cy="13.5" r="2.3"/></svg><span>${c.bgm ? esc(c.bgm.name || 'BGM') : '未設定'}</span></div>
+          <div class="row"><label class="btn small" for="f-bgm-file">音楽ファイルを選ぶ</label><input type="file" id="f-bgm-file" accept="audio/*,.mp3,.m4a,.ogg,.wav" hidden>${c.bgm ? '<button class="btn small" type="button" data-act="bgm-play">再生</button><button class="btn small danger" type="button" data-act="bgm-remove">BGMを外す</button>' : ''}</div>
+          <div class="row"><input class="inp" id="f-bgm-url" placeholder="または音楽ファイルのURL（https://…/song.mp3）" value="${c.bgm?.src === 'url' ? esc(c.bgm.url) : ''}"><button class="btn small" type="button" data-act="bgm-url">URLで設定</button></div>
+          <p>mp3・m4a・oggなど。選んだファイルはこのブラウザ内に保存されます（バックアップには含まれません）。YouTubeなどの動画URLは使えません。</p>
+        </div>
+      </div>
       ${field('画像URL（ココフォリアのコマ画像）', 'profile.iconUrl', p.iconUrl, { wrap: 'wide', ph: 'https://…（空欄ならココフォリアで後から設定）' })}
       ${field('参照URL', 'profile.externalUrl', p.externalUrl, { wrap: 'wide', ph: 'https://…' })}
     </div></section>`;
@@ -1526,11 +1612,9 @@ function sectionBody(key, c) {
       }).join('');
       return `<section class="sec">
         ${bar('現在値 ＝ 初期値 ＋ 増減 ＋ 一時的増減', '<button class="btn small" type="button" data-act="roll">ダイスで決める</button>')}
-        <div class="tbl-wrap"><table class="tbl ab-tbl">
-          <thead><tr><th style="text-align:left">能力値</th><th>ダイス</th><th>初期値</th><th>増減</th><th>一時的増減</th><th>現在値</th>${is7 ? '<th>ハード（½）</th><th>イクストリーム（⅕）</th>' : '<th>×5</th>'}</tr></thead>
-          <tbody>${rows}</tbody>
-        </table></div>
-        <div class="derived">
+        <div class="ab-viz">
+          <figure class="chart-fig radar-fig"><figcaption>能力値チャート <span>現在値</span></figcaption><div class="radar" id="ab-radar"></div></figure>
+          <div class="derived">
           <div class="dv hp"><span class="lbl">HP（耐久力）</span><span class="val"><input id="f-hp" data-p="hp" value="${esc(c.hp)}" class="num" inputmode="numeric" aria-label="現在HP" data-ph="hpMax"><small>/ ${out('hpMax')}</small></span></div>
           <div class="dv mp"><span class="lbl">MP</span><span class="val"><input id="f-mp" data-p="mp" value="${esc(c.mp)}" class="num" inputmode="numeric" aria-label="現在MP" data-ph="mpMax"><small>/ ${out('mpMax')}</small></span></div>
           <div class="dv san"><span class="lbl">SAN（正気度）</span><span class="val"><input id="f-san" data-p="san" value="${esc(c.san)}" class="num" inputmode="numeric" aria-label="現在SAN" data-ph="sanStart"><small>/ ${out('sanMax')}</small></span></div>
@@ -1542,6 +1626,11 @@ function sectionBody(key, c) {
           <div class="dv"><span class="lbl">ダメージ・ボーナス</span><span class="val">${out('db')}</span></div>
           ${is7 ? `<div class="dv"><span class="lbl">ビルド</span><span class="val">${out('build')}</span></div><div class="dv"><span class="lbl">MOV</span><span class="val">${out('mov')}</span></div>` : ''}
         </div>
+        </div>
+        <div class="tbl-wrap"><table class="tbl ab-tbl">
+          <thead><tr><th style="text-align:left">能力値</th><th>ダイス</th><th>初期値</th><th>増減</th><th>一時的増減</th><th>現在値</th>${is7 ? '<th>ハード（½）</th><th>イクストリーム（⅕）</th>' : '<th>×5</th>'}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
       </section>`;
     }
 
@@ -1551,6 +1640,7 @@ function sectionBody(key, c) {
         : 'EDU×20';
       return `<section class="sec">
         ${bar('左のチェックを入れた技能が職業技能です')}
+        <figure class="chart-fig sk-fig"><figcaption>技能グラフ <span class="legend"><i class="sw sw-init"></i>初期値<i class="sw sw-add"></i>振ったポイント</span></figcaption><div id="sk-chart"></div></figure>
         <div class="points">
           <span class="pt" data-pt="job">職業P（${jobFormula}） 残り <b data-out="jobLeft"></b> / <span data-out="jobPt"></span></span>
           <span class="pt" data-pt="hobby">興味P（INT×${is7 ? 2 : 10}） 残り <b data-out="hobbyLeft"></b> / <span data-out="hobbyPt"></span></span>
@@ -1756,6 +1846,7 @@ function updateComputed() {
   document.querySelectorAll('[data-sum]').forEach(el => { el.textContent = sumText(c, d, el.dataset.sum); });
   const hn = document.querySelector('[data-hub="name"]'); if (hn) hn.textContent = c.profile.name || '名無し';
   const hk = document.querySelector('[data-hub="kana"]'); if (hk) hk.textContent = c.profile.kana;
+  updateCharts(c, a);
 }
 
 const RING_C = 2 * Math.PI * 34;
@@ -1880,6 +1971,16 @@ onBoth('click', e => {
       focus = pid(`skills.${i + 1}.sub`); break;
     }
     case 'portrait-remove': c.portrait = ''; break;
+    case 'bgm-play': playCharBgm(c, true); return;
+    case 'bgm-remove': if (c.bgm?.src === 'idb') AudioDB.del(c.id).catch(() => {}); delete c.bgm; if (bgmFor === c.id) stopBgm(); break;
+    case 'bgm-url': {
+      const u = ($('f-bgm-url').value || '').trim();
+      if (!/^https?:\/\/\S+$/.test(u)) { toast('https:// で始まる音楽ファイルのURLを入れてください。'); return; }
+      if (/youtube\.com|youtu\.be|nicovideo|soundcloud\.com|spotify\.com/i.test(u)) { toast('動画・配信サイトのURLは使えません。mp3などの音楽ファイルを直接開けるURLを入れてください。'); return; }
+      if (c.bgm?.src === 'idb') AudioDB.del(c.id).catch(() => {});
+      c.bgm = { src: 'url', url: u, name: decodeURIComponent(u.split('/').pop().split('?')[0]).replace(/\.[^.]+$/, '') || 'BGM', volume: c.bgm?.volume ?? 60 };
+      touch(); renderSheet(); playCharBgm(c, true); return;
+    }
     case 'add-weapon': c.weapons.push({ name: '', rate: '', damage: '', range: '', attacks: '1', ammo: '', durability: '', note: '' }); focus = pid(`weapons.${c.weapons.length - 1}.name`); break;
     case 'add-item': c.items.push({ name: '', count: '', price: '', note: '' }); focus = pid(`items.${c.items.length - 1}.name`); break;
     case 'add-scenario': c.scenarios.push({ name: '', date: '', note: '' }); focus = pid(`scenarios.${c.scenarios.length - 1}.name`); break;
@@ -1894,11 +1995,14 @@ onBoth('click', e => {
     case 'dup': {
       const copy = JSON.parse(JSON.stringify(c));
       copy.id = uid(); copy.profile.name = (c.profile.name || '名無し') + '（コピー）'; delete copy.sample;
+      if (c.bgm?.src === 'idb') AudioDB.get(c.id).then(bl => bl && AudioDB.put(copy.id, bl)).catch(() => {});
       state.chars.splice(state.chars.indexOf(c) + 1, 0, copy); state.activeId = copy.id;
       save(); renderAll(); return;
     }
     case 'del': {
       if (!arm(b, '本当に削除する')) return;
+      if (c.bgm?.src === 'idb') AudioDB.del(c.id).catch(() => {});
+      if (bgmFor === c.id) stopBgm();
       state.chars = state.chars.filter(x => x.id !== c.id);
       if (!state.chars.length) state.chars.push(blank('coc6'));
       state.activeId = state.chars[0].id;
@@ -1915,6 +2019,7 @@ $('shelf').addEventListener('click', e => {
   const b = e.target.closest('[data-id]'); if (!b) return;
   if (longPressed) { longPressed = false; e.preventDefault(); return; }
   state.activeId = b.dataset.id; save(); renderAll();
+  playCharBgm(active());
 });
 $('shelf').addEventListener('pointerdown', e => {
   if (e.pointerType === 'mouse') return;
@@ -1994,7 +2099,7 @@ $('preset-list').innerHTML = Object.entries(SYS).map(([k, v]) =>
 $('preset-list').addEventListener('click', e => {
   const b = e.target.closest('[data-sys]'); if (!b) return;
   const c = blank(b.dataset.sys);
-  state.chars.unshift(c); state.activeId = c.id; save(); closeModals();
+  state.chars.unshift(c); state.activeId = c.id; save(); closeModals(); stopBgm();
   if (!$('select').hidden) leaveSelect(null, true);
   renderAll();
   openPanel('profile', document.querySelector('#sheet .hub-core'));
@@ -2070,6 +2175,9 @@ function applyTheme() {
   document.documentElement.classList.toggle('has-bg', !!state.bgImage);
   L.style.backgroundImage = state.bgImage ? `url("${imgSrc(state.bgImage)}")` : '';
   L.style.setProperty('--veil', (state.bgVeil ?? 15) / 100);
+  const R = document.documentElement.style;
+  R.setProperty('--veil', (state.bgVeil ?? 15) / 100); R.setProperty('--bgblur', (state.bgBlur ?? 0) + 'px');
+  R.setProperty('--sel-img', state.bgImage ? `url("${imgSrc(state.bgImage)}")` : 'none');
   L.style.setProperty('--bgblur', (state.bgBlur ?? 0) + 'px');
   document.documentElement.style.setProperty('--glass-a', (100 - (state.bgGlass ?? 75)) + '%');
 }
@@ -2240,7 +2348,7 @@ function peekHtml(c) {
         <span class="peek-sub">${esc([p.occupation, p.age && p.age + '歳', p.sex].filter(Boolean).join(' / ') || 'プロフィール未入力')}</span>
       </div>
       <div class="pbars">${bars.map(([l, v, m, g]) => `<div class="pbar"><b>${l}</b><span class="tr"><i style="width:${m > 0 ? Math.max(0, Math.min(100, v / m * 100)) : 0}%;background:linear-gradient(90deg, ${g})"></i></span><span>${v}/${m}</span></div>`).join('')}</div>
-      <div class="peek-abil">${S.abil.filter(([k]) => k !== 'LUCK').map(([k]) => `<div><small>${k}</small><b>${a[k]}</b></div>`).join('')}</div>
+      <div class="peek-radar">${radarSvg(c, a, 230, false)}</div>
       <div class="peek-der"><span>アイデア <b>${d.idea}</b></span><span>幸運 <b>${d.luck}</b></span><span>知識 <b>${d.know}</b></span><span>DB <b>${esc(d.db)}</b></span>${c.system === 'coc7' ? `<span>MOV <b>${d.mov}</b></span>` : ''}</div>
       <div class="peek-skills">${skills.length ? skills.map(([n, v]) => `<span>${esc(n)}<b>${v}</b></span>`).join('') : '<span class="none">ポイントを振った技能はまだありません</span>'}</div>
     </div>`;
@@ -2273,6 +2381,164 @@ $('shelf').addEventListener('focusin', e => { const it = e.target.closest('.char
 $('shelf').addEventListener('focusout', hidePeek);
 addEventListener('scroll', hidePeek, { passive: true });
 
+
+/* ================= グラフ ================= */
+function radarSvg(c, a, size, animate) {
+  const keys = SYS[c.system].abil.filter(([k]) => k !== 'LUCK').map(([k]) => k);
+  const is7 = c.system === 'coc7';
+  const maxV = Math.max(is7 ? 90 : 18, ...keys.map(k => a[k] || 0));
+  const pad = 38, cx = size / 2, cy = size / 2, R = size / 2 - pad, n = keys.length;
+  const P = (i, r) => { const t = -Math.PI / 2 + i * 2 * Math.PI / n; return [cx + r * Math.cos(t), cy + r * Math.sin(t)]; };
+  const poly = r => keys.map((_, i) => P(i, r).map(v => v.toFixed(1)).join(',')).join(' ');
+  const pts = keys.map((k, i) => P(i, R * Math.max(0, Math.min(1, (a[k] || 0) / maxV))));
+  const grid = [.25, .5, .75, 1].map(f => `<polygon class="rg" points="${poly(R * f)}"/>`).join('');
+  const axes = keys.map((_, i) => { const [x, y] = P(i, R); return `<line class="ra" x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`; }).join('');
+  const labels = keys.map((k, i) => {
+    const [x, y] = P(i, R + 18), anchor = Math.abs(x - cx) < 4 ? 'middle' : x < cx ? 'end' : 'start';
+    return `<text class="rl-k" x="${x.toFixed(1)}" y="${(y - 6).toFixed(1)}" text-anchor="${anchor}">${k}</text><text class="rl-v" x="${x.toFixed(1)}" y="${(y + 8).toFixed(1)}" text-anchor="${anchor}">${a[k] || 0}</text>`;
+  }).join('');
+  const dots = pts.map(([x, y], i) => `<circle class="rd" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5"/><circle class="rh" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="14" data-tip="${keys[i]} ${a[keys[i]] || 0}"/>`).join('');
+  return `<svg class="radar-svg${animate ? ' grow' : ''}" viewBox="0 0 ${size} ${size}" role="img" aria-label="能力値チャート：${keys.map(k => `${k} ${a[k] || 0}`).join('、')}" style="--cx:${cx}px;--cy:${cy}px">
+    ${grid}${axes}<g class="rshape"><polygon class="rarea" points="${pts.map(p => p.map(v => v.toFixed(1)).join(',')).join(' ')}"/>${dots}</g>${labels}</svg>`;
+}
+function skillBarsHtml(c, a, animate) {
+  const list = c.skills.filter(s => s.name && skillTotal(s, a) !== skillInit(s, a))
+    .map(s => ({ n: skillLabel(s), t: skillTotal(s, a), i: Math.min(skillInit(s, a), skillTotal(s, a)) }))
+    .sort((x, y) => y.t - x.t).slice(0, 16);
+  if (!list.length) return '<p class="empty">ポイントを振ると、ここに技能のグラフが出ます。</p>';
+  const max = Math.max(100, ...list.map(x => x.t));
+  return `<div class="sk-bars${animate ? ' grow' : ''}">${list.map((x, k) => `
+    <div class="sk-row" style="--k:${k}" data-tip="${esc(x.n)}　初期値 ${x.i} ＋ 振ったポイント ${x.t - x.i} ＝ ${x.t}">
+      <span class="sk-n">${esc(x.n)}</span>
+      <span class="sk-tr"><i class="seg-i" style="width:${(x.i / max * 100).toFixed(2)}%"></i><i class="seg-a" style="width:${((x.t - x.i) / max * 100).toFixed(2)}%"></i></span>
+      <b class="sk-v">${x.t}</b>
+    </div>`).join('')}
+    <div class="sk-row sk-axisrow" aria-hidden="true"><span></span><span class="sk-axis">${[0, 25, 50, 75, 100].filter(v => v <= max).map(v => `<span style="left:${(v / max * 100).toFixed(2)}%">${v}</span>`).join('')}</span><span></span></div>
+  </div>`;
+}
+function updateCharts(c, a) {
+  const r = $('ab-radar');
+  if (r) { r.innerHTML = radarSvg(c, a, 300, !r.dataset.drawn); r.dataset.drawn = '1'; }
+  const k = $('sk-chart');
+  if (k) { k.innerHTML = skillBarsHtml(c, a, !k.dataset.drawn); k.dataset.drawn = '1'; }
+}
+/* グラフのツールチップ */
+(() => {
+  const tip = document.createElement('div');
+  tip.className = 'chart-tip'; tip.hidden = true; tip.setAttribute('role', 'status');
+  document.body.appendChild(tip);
+  document.addEventListener('pointerover', e => {
+    const t = e.target.closest('[data-tip]');
+    if (!t) { tip.hidden = true; return; }
+    tip.textContent = t.dataset.tip; tip.hidden = false;
+    const r = t.getBoundingClientRect();
+    tip.style.left = Math.min(innerWidth - tip.offsetWidth - 8, Math.max(8, r.left + r.width / 2 - tip.offsetWidth / 2)) + 'px';
+    tip.style.top = Math.max(8, r.top - tip.offsetHeight - 8) + 'px';
+  });
+  addEventListener('scroll', () => { tip.hidden = true; }, { passive: true, capture: true });
+})();
+
+/* ================= キャラごとのBGM ================= */
+const AudioDB = {
+  db: null,
+  open() {
+    if (this.db) return Promise.resolve(this.db);
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('charasheet-kobo', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('bgm');
+      r.onsuccess = () => { this.db = r.result; res(this.db); };
+      r.onerror = () => rej(r.error);
+    });
+  },
+  async tx(mode, fn) {
+    const db = await this.open();
+    return new Promise((res, rej) => { const t = db.transaction('bgm', mode); const out = fn(t.objectStore('bgm')); t.oncomplete = () => res(out && out.result); t.onerror = () => rej(t.error); });
+  },
+  put(id, blob) { return this.tx('readwrite', st => st.put(blob, id)); },
+  get(id) { return this.tx('readonly', st => st.get(id)); },
+  del(id) { return this.tx('readwrite', st => st.delete(id)); },
+};
+const bgmAudio = new Audio();
+bgmAudio.preload = 'auto';
+let bgmFor = null, bgmUrl = null, bgmFade = 0;
+const bgmVol = c => Math.max(0, Math.min(1, (c?.bgm?.volume ?? 60) / 100));
+function fadeTo(target, ms) {
+  const my = ++bgmFade;
+  return new Promise(res => {
+    const start = bgmAudio.volume, t0 = performance.now();
+    const step = t => {
+      if (my !== bgmFade) return res();
+      const k = Math.min(1, (t - t0) / ms);
+      bgmAudio.volume = Math.max(0, Math.min(1, start + (target - start) * k));
+      k < 1 ? requestAnimationFrame(step) : res();
+    };
+    requestAnimationFrame(step);
+  });
+}
+async function bgmSource(c) {
+  if (!c?.bgm) return null;
+  if (c.bgm.src === 'url') return c.bgm.url || null;
+  try { const blob = await AudioDB.get(c.id); return blob ? URL.createObjectURL(blob) : null; } catch (e) { return null; }
+}
+async function playCharBgm(c, force) {
+  if (!c || !c.bgm) { stopBgm(); return; }
+  if (!force && bgmFor === c.id && !bgmAudio.paused) { renderPlayer(); return; }
+  const url = await bgmSource(c);
+  if (!url) { stopBgm(); toast('BGMの音楽ファイルが見つかりませんでした。もう一度設定してください。'); return; }
+  if (!bgmAudio.paused) await fadeTo(0, 300);
+  if (bgmUrl && bgmUrl.startsWith('blob:')) URL.revokeObjectURL(bgmUrl);
+  bgmUrl = url; bgmFor = c.id;
+  bgmAudio.src = url; bgmAudio.loop = true; bgmAudio.volume = 0;
+  try { await bgmAudio.play(); fadeTo(bgmVol(c), 900); }
+  catch (e) { if (e && e.name === 'NotSupportedError') toast('このBGMは再生できませんでした。mp3などの音楽ファイルか、音楽ファイルの直接URLを設定してください。'); }
+  renderPlayer();
+}
+function stopBgm() {
+  if (bgmAudio.paused) { renderPlayer(); return; }
+  fadeTo(0, 500).then(() => { bgmAudio.pause(); renderPlayer(); });
+}
+function renderPlayer() {
+  const c = active(), el = $('bgm');
+  const show = !!(c && c.bgm) && $('select').hidden;
+  el.hidden = !show;
+  if (!show) return;
+  const playing = !bgmAudio.paused && bgmFor === c.id;
+  el.classList.toggle('playing', playing);
+  $('bgm-title').textContent = c.bgm.name || 'BGM';
+  $('bgm-play').setAttribute('aria-label', playing ? '一時停止' : '再生');
+  $('bgm-play').innerHTML = playing
+    ? '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="4" width="3.4" height="12" rx="1"/><rect x="11.6" y="4" width="3.4" height="12" rx="1"/></svg>'
+    : '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4.2v11.6c0 .6.7 1 1.2.6l9-5.8c.5-.3.5-1 0-1.3l-9-5.8C6.7 3.2 6 3.6 6 4.2z"/></svg>';
+  $('bgm-vol').value = c.bgm.volume ?? 60;
+}
+$('bgm-play').addEventListener('click', () => {
+  const c = active(); if (!c?.bgm) return;
+  if (!bgmAudio.paused && bgmFor === c.id) { stopBgm(); }
+  else if (bgmFor === c.id && bgmAudio.src) { bgmAudio.volume = 0; bgmAudio.play().then(() => { fadeTo(bgmVol(c), 600); renderPlayer(); }).catch(() => playCharBgm(c, true)); }
+  else playCharBgm(c, true);
+});
+$('bgm-vol').addEventListener('input', e => {
+  const c = active(); if (!c?.bgm) return;
+  c.bgm.volume = +e.target.value; save();
+  if (bgmFor === c.id) { bgmFade++; bgmAudio.volume = bgmVol(c); }
+});
+bgmAudio.addEventListener('play', renderPlayer);
+bgmAudio.addEventListener('pause', renderPlayer);
+document.addEventListener('change', async e => {
+  if (e.target.id !== 'f-bgm-file') return;
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  if (!/^audio\//.test(f.type) && !/\.(mp3|m4a|aac|ogg|oga|wav|flac|opus|webm)$/i.test(f.name)) { toast('音楽ファイル（mp3・m4a・ogg・wav など）を選んでください。'); return; }
+  if (f.size > 40 * 1024 * 1024) { toast('ファイルが大きすぎます。40MBまでの音楽ファイルを選んでください。'); return; }
+  const c = active();
+  try { await AudioDB.put(c.id, f); }
+  catch (err) { toast('BGMを保存できませんでした。ブラウザの保存容量がいっぱいかもしれません。'); return; }
+  c.bgm = { src: 'idb', name: f.name.replace(/\.[^.]+$/, ''), volume: c.bgm?.volume ?? 60 };
+  touch(); renderSheet();
+  toast(`BGM「${c.bgm.name}」を設定しました。`);
+  playCharBgm(c, true);
+});
+
 /* ================= 探索者をえらぶ画面 ================= */
 let selPress = null, selLong = false, selResizeT = null;
 function renderSelect() {
@@ -2298,7 +2564,7 @@ function renderSelect() {
   }
   const newBtn = `<button class="sel-new" type="button" id="sel-new"><span class="plus">＋</span><b>新しい探索者</b><small>NEW INVESTIGATOR</small></button>`;
   const charBtn = (c, i, xy) => `<button class="sel-char" type="button" data-id="${c.id}" style="--i:${i};--B:${B}px${xy ? `;left:calc(50% + ${xy[0].toFixed(1)}px);top:calc(50% + ${xy[1].toFixed(1)}px)` : ''}" aria-label="${esc(c.profile.name || '名無し')}のシートを開く">
-      ${tokenHtml(c)}<span class="sel-name">${esc(c.profile.name || '名無し')}</span><span class="sel-sys">${esc(SYS[c.system].short)}${c.profile.occupation ? ' ・ ' + esc(c.profile.occupation) : ''}</span>
+      ${tokenHtml(c)}${c.bgm ? '<span class="sel-bgm" title="BGMあり">♪</span>' : ''}<span class="sel-name">${esc(c.profile.name || '名無し')}</span><span class="sel-sys">${esc(SYS[c.system].short)}${c.profile.occupation ? ' ・ ' + esc(c.profile.occupation) : ''}</span>
     </button>`;
   stage.classList.toggle('grid', grid);
   if (grid) idx = chars.length;
@@ -2328,6 +2594,7 @@ function popSelect() {
 }
 function showSelect() {
   hidePeek();
+  stopBgm(); $('bgm').hidden = true;
   const sel = $('select'); sel.hidden = false; sel.scrollTop = 0;
   document.documentElement.style.overflow = 'hidden';
   renderSelect();
@@ -2337,7 +2604,7 @@ function showSelect() {
 function leaveSelect(fromEl, quick) {
   hidePeek();
   const sel = $('select');
-  const done = () => { sel.hidden = true; document.documentElement.style.overflow = ''; scrollTo(0, 0); };
+  const done = () => { sel.hidden = true; document.documentElement.style.overflow = ''; scrollTo(0, 0); renderPlayer(); };
   if (reduceMotion.matches || quick) { done(); return; }
   if (fromEl) {
     fxAt(fromEl, true);
@@ -2358,6 +2625,7 @@ $('select').addEventListener('click', e => {
   state.activeId = ch.dataset.id; save();
   renderShelf(); renderSheet(); renderOutput();
   leaveSelect(ch);
+  playCharBgm(active());
 });
 $('select').addEventListener('pointerover', e => {
   if (!canHover.matches) return;
