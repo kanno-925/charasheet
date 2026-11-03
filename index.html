@@ -791,6 +791,11 @@ label.btn { display: inline-block; }
 .sync-dot.pending { background: var(--amber); animation: breathe 1.2s ease-in-out infinite; }
 .sync-dot.error { background: var(--danger); }
 .req-badge { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 11px; margin-left: 4px; }
+.acct-mode { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; border-radius: 14px; background: color-mix(in srgb, var(--sky) 10%, var(--solid)); border: 1px solid var(--line-strong); }
+.acct-mode b { font-family: var(--f-display); font-size: 17px; }
+.acct-mode span { font-size: 12px; color: var(--muted); }
+.acct-mode.signup { background: color-mix(in srgb, var(--amber) 14%, var(--solid)); border-color: var(--amber); }
+.acct-switch { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); padding-top: 10px; border-top: 1px solid var(--line); }
 .acct-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 999px; background: var(--code-bg); border: 1px solid var(--line); }
 .acct-tabs button { border: 0; background: transparent; border-radius: 999px; padding: 8px; font-weight: 700; cursor: pointer; color: var(--muted); }
 .acct-tabs button.on { background: var(--solid); color: var(--ink); box-shadow: var(--shadow); }
@@ -2967,7 +2972,7 @@ function sbClient() {
 }
 const jaErr = e => {
   const m = String((e && (e.message || e.error_description)) || e || '');
-  if (/Invalid login credentials/i.test(m)) return 'メールアドレスかパスワードが違います。';
+  if (/Invalid login credentials/i.test(m)) return 'ログインできませんでした。このメールアドレスのアカウントがないか、パスワードが違います。アカウントがない場合は、下の「新規アカウント作成へ」から作ってください。';
   if (/Email not confirmed/i.test(m)) return 'メールアドレスの確認がまだです。届いたメールのリンクを押してからログインしてください。';
   if (/already registered|already been registered/i.test(m)) return 'このメールアドレスはすでに登録されています。ログインしてください。';
   if (/Database error saving new user/i.test(m)) return 'そのユーザー名はすでに使われています。別のユーザー名にしてください。';
@@ -3119,24 +3124,28 @@ function renderAccount() {
       <div class="acct-actions"><button class="btn" type="button" data-acct="sync">今すぐ同期</button><button class="btn" type="button" data-acct="friends">フレンド</button><button class="btn danger" type="button" data-acct="logout">ログアウト</button></div>`;
     return;
   }
-  const tabs = `<div class="acct-tabs" role="tablist">
-      <button type="button" role="tab" class="${acctTab === 'login' ? 'on' : ''}" aria-selected="${acctTab === 'login'}" data-tab="login">ログイン</button>
-      <button type="button" role="tab" class="${acctTab === 'signup' ? 'on' : ''}" aria-selected="${acctTab === 'signup'}" data-tab="signup">新規登録</button>
-    </div>`;
+
   const f = {
-    login: `<form class="acct-form" data-form="login">
+    login: `<div class="acct-mode"><b>ログイン</b><span>登録済みのアカウントで入ります</span></div>
+      <form class="acct-form" data-form="login">
         <label>ログインID（メールアドレス）<input class="inp" type="email" id="ac-email" autocomplete="email" required></label>
         <label>パスワード<input class="inp" type="password" id="ac-pass" autocomplete="current-password" required></label>
         <button class="btn primary" type="submit">ログイン</button>
+        <p class="err" id="ac-err" role="alert"></p>
         <button class="linkish" type="button" data-tab="reset">パスワードを忘れたとき</button>
-      </form>`,
-    signup: `<form class="acct-form" data-form="signup">
+      </form>
+      <div class="acct-switch">アカウントをお持ちでない方は<button class="btn small" type="button" data-tab="signup">新規アカウント作成へ</button></div>`,
+    signup: `<div class="acct-mode signup"><b>新規アカウント作成</b><span>はじめての方はこちら。ログインではありません</span></div>
+      <form class="acct-form" data-form="signup">
         <label>ユーザー名（フレンドに見える名前・2〜20文字）<input class="inp" id="ac-user" autocomplete="username" maxlength="20" required></label>
         <label>ログインID（メールアドレス）<input class="inp" type="email" id="ac-email" autocomplete="email" required></label>
         <label>パスワード（8文字以上）<input class="inp" type="password" id="ac-pass" autocomplete="new-password" minlength="8" required></label>
-        <button class="btn primary" type="submit">登録する</button>
+        <label>パスワード（確認のため、もう一度）<input class="inp" type="password" id="ac-pass2" autocomplete="new-password" minlength="8" required></label>
+        <button class="btn primary" type="submit">この内容でアカウントを作る</button>
+        <p class="err" id="ac-err" role="alert"></p>
         <p class="empty">登録すると、このブラウザにあるキャラシもアカウントに保存されます。</p>
-      </form>`,
+      </form>
+      <div class="acct-switch">すでにアカウントをお持ちの方は<button class="btn small" type="button" data-tab="login">ログインへ戻る</button></div>`,
     reset: `<form class="acct-form" data-form="reset">
         <p>登録したメールアドレスに、パスワードを変えるためのリンクを送ります。</p>
         <label>ログインID（メールアドレス）<input class="inp" type="email" id="ac-email" autocomplete="email" required></label>
@@ -3149,9 +3158,9 @@ function renderAccount() {
         <button class="btn primary" type="submit">パスワードを変える</button>
       </form>`,
   };
-  el.innerHTML = (acctTab === 'login' || acctTab === 'signup' ? tabs : '') + f[acctTab] + '<p class="err" id="ac-err" role="alert"></p><p class="ok-msg" id="ac-ok" role="status"></p>';
+  el.innerHTML = f[acctTab] + (/id="ac-err"/.test(f[acctTab]) ? '' : '<p class="err" id="ac-err" role="alert"></p>') + '<p class="ok-msg" id="ac-ok" role="status"></p>';
 }
-function openAccount() { renderAccount(); openModal('modal-account'); }
+function openAccount() { if (acctTab !== 'recover') acctTab = 'login'; renderAccount(); openModal('modal-account'); }
 $('acct-body').addEventListener('click', async e => {
   const t = e.target.closest('[data-tab]');
   if (t) { acctTab = t.dataset.tab; renderAccount(); $('ac-email')?.focus(); return; }
@@ -3177,11 +3186,24 @@ $('acct-body').addEventListener('submit', async e => {
       const username = ($('ac-user').value || '').trim();
       if (!/^[^\s]{2,20}$/.test(username)) { err.textContent = 'ユーザー名は空白なしの2〜20文字にしてください。'; return; }
       if (pass.length < 8) { err.textContent = 'パスワードは8文字以上にしてください。'; return; }
+      if (pass !== ($('ac-pass2').value || '')) { err.textContent = '確認用のパスワードが一致しません。同じパスワードを2回入れてください。'; return; }
       const av = await sb.rpc('username_available', { name: username });
       if (av.error) throw av.error;
       if (av.data === false) { err.textContent = 'そのユーザー名はすでに使われています。別のユーザー名にしてください。'; return; }
       const { data, error } = await sb.auth.signUp({ email, password: pass, options: { data: { username }, emailRedirectTo: location.origin + location.pathname } });
-      if (error) throw error;
+      if (error) {
+        if (/already registered|already been registered|already exists/i.test(error.message || '')) {
+          acctTab = 'login'; renderAccount(); $('ac-email').value = email;
+          $('ac-err').textContent = 'このメールアドレスはすでに登録されています。新しいアカウントは作らずに、ログインしてください。';
+          return;
+        }
+        throw error;
+      }
+      if (data && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+        acctTab = 'login'; renderAccount(); $('ac-email').value = email;
+        $('ac-err').textContent = 'このメールアドレスはすでに登録されています。新しいアカウントは作らずに、ログインしてください。';
+        return;
+      }
       if (data && data.session) { acctTab = 'login'; closeModals(); toast(`ようこそ、${username}さん。登録できました。`); }
       else { acctTab = 'login'; renderAccount(); $('ac-ok').textContent = '確認メールを送りました。メールのリンクを押してから、ここでログインしてください。'; }
     } else if (kind === 'reset') {
