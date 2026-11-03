@@ -1395,6 +1395,35 @@ label.btn { display: inline-block; }
 .gm-row.kp { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 @media (max-width: 560px) { .gm-row, .gm-row:has(> input[data-gname]), .gm-row:has(> select[data-gchar]):has(> input[data-gcname]) { grid-template-columns: minmax(0, 1fr) 36px; } .gm-row > :not(.icon-btn) { grid-column: 1; } .gm-row > .icon-btn { grid-column: 2; grid-row: 1; } .gm-row.kp { grid-template-columns: minmax(0, 1fr); } }
 
+
+/* ===== groups v2 (invite / join) ===== */
+.grp-gate { text-align: center; padding: 24px; border-radius: 18px; border: 1px dashed var(--line-strong); background: var(--solid); display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.grp-gate p { margin: 0; max-width: 46ch; color: var(--muted); }
+.grp-card.invite { border: 2px solid var(--amber); box-shadow: 0 0 0 4px color-mix(in srgb, var(--amber) 18%, transparent), var(--shadow); }
+.gc-invite { margin: 0; font-size: 13px; font-weight: 700; color: color-mix(in srgb, var(--amber) 65%, var(--ink)); }
+.gc-owner { display: inline-flex; align-items: center; gap: 5px; }
+.gc-owner .gc-dot { width: 18px; height: 18px; font-size: 10px; }
+.gc-role.wait { background: color-mix(in srgb, var(--amber) 70%, var(--ink)); }
+.gc-wait { font-size: 12.5px; padding: 2px 10px; border-radius: 999px; border: 1px dashed var(--line-strong); color: var(--muted); }
+.gc-kp { margin-right: 8px; }
+#grp-body .lock-btn { white-space: nowrap; justify-content: center; }
+#join-body .role-sw { margin-top: 4px; }
+.role-sw { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.role-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px; border-radius: 14px; border: 2px solid var(--line); background: var(--solid); cursor: pointer; color: var(--ink); transition: border-color .2s, transform .25s cubic-bezier(.3, 1.6, .5, 1); }
+.role-btn b { font-family: var(--f-display); font-size: 16px; }
+.role-btn small { font-size: 11.5px; color: var(--muted); }
+.role-btn:hover { transform: translateY(-2px); }
+.role-btn.on { border-color: var(--sky); background: color-mix(in srgb, var(--sky) 12%, var(--solid)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--sky) 15%, transparent); }
+.gm-sec .hint { font-size: 12px; color: var(--muted); }
+.gm-friends { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.gm-mem { display: inline-flex; align-items: center; gap: 6px; padding: 3px 4px 3px 3px; border-radius: 999px; background: var(--solid); border: 1px solid var(--line-strong); font-size: 13px; }
+.gm-mem small { color: var(--muted); font-size: 11px; }
+.gm-mem .icon-btn { padding: 2px 6px; min-width: 0; min-height: 0; }
+.gm-row.ex { grid-template-columns: 7em minmax(0, 1fr) minmax(0, 1fr) 36px; }
+#modal-join .hint { margin: 0; font-size: 12px; color: var(--muted); }
+#j-char { margin-top: -6px; }
+@media (max-width: 560px) { .gm-row.ex { grid-template-columns: minmax(0, 1fr) 36px; } }
+
 /* ===== phones ===== */
 .mbar, .touch-hint { display: none; }
 @media (pointer: coarse) {
@@ -1519,7 +1548,7 @@ label.btn { display: inline-block; }
       <div class="sel-tabs" role="tablist" aria-label="表示の切り替え">
         <button type="button" role="tab" data-seltab="mine" class="on" aria-selected="true">自分の探索者</button>
         <button type="button" role="tab" data-seltab="friends" aria-selected="false">フレンド<span id="sel-req"></span></button>
-        <button type="button" role="tab" data-seltab="groups" aria-selected="false">グループ</button>
+        <button type="button" role="tab" data-seltab="groups" aria-selected="false">グループ<span id="sel-greq"></span></button>
       </div>
       <div class="sel-sort" id="sel-sort">
         <label class="sort-by"><span>並び順</span>
@@ -1777,13 +1806,26 @@ label.btn { display: inline-block; }
 <div class="overlay" id="modal-group" hidden>
   <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="grp-title">
     <h2 id="grp-title">グループ</h2>
-    <p>遊んだシナリオと、キーパー・探索者（誰がどのキャラで参加したか）を記録します。フレンドは公開キャラから選べます。</p>
+    <p>あなたが代表者になってグループを作り、フレンドを招待します。招待された人は、参加するときにキーパーか探索者かを選びます。</p>
     <div id="grp-body"></div>
     <div class="modal-actions">
       <button class="btn danger" type="button" id="grp-del">このグループを削除</button>
       <span style="flex:1"></span>
       <button class="btn ghost" type="button" data-close>キャンセル</button>
       <button class="btn primary" type="button" id="grp-save">保存する</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-join" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="join-title">
+    <h2 id="join-title">グループに参加する</h2>
+    <div id="join-body"></div>
+    <div class="modal-actions">
+      <button class="btn danger" type="button" id="join-leave">グループから抜ける</button>
+      <span style="flex:1"></span>
+      <button class="btn ghost" type="button" data-close>キャンセル</button>
+      <button class="btn primary" type="button" id="join-ok">参加する</button>
     </div>
   </div>
 </div>
@@ -3869,7 +3911,6 @@ async function flushSync() {
     setSync('ok');
   } catch (e) { setSync('error', jaErr(e)); }
   finally { syncing = false; if (syncAgain) { syncAgain = false; scheduleSync(); } }
-  flushGroups();
 }
 async function pullAndMerge() {
   setSync('pending');
@@ -3885,7 +3926,6 @@ async function pullAndMerge() {
   const real = state.chars.filter(c => !c.sample);
   if (real.length && state.chars.some(c => c.sample)) state.chars = real;
   if (!state.chars.some(c => c.id === state.activeId)) state.activeId = state.chars[0].id;
-  await pullGroups();
   saveNow();
   renderAll();
   await flushSync();
@@ -3914,7 +3954,7 @@ async function loadFriendships() {
     else { friendsOf().push({ id: 'u-' + u.id, uid: u.id, name: u.username, color: FC[friendsOf().length % FC.length], note: 'キャラシ工房のフレンド' }); added = true; }
   });
   if (added) { save(); renderSheet(); }
-  renderAccountBtn();
+  renderAccountBtn(); renderGroupBadge();
   if (!$('modal-friends').hidden) { renderOnline(); renderFriends(); }
   if (!$('select').hidden && selTab === 'friends') renderSelect();
 }
@@ -3931,7 +3971,7 @@ async function handleSession(session) {
     await pullAndMerge();
     await loadFriendships();
     await loadFriendChars();
-    await loadFriendGroups();
+    await loadGroups();
     if (!$('select').hidden && (selTab === 'friends' || selTab === 'groups')) renderSelect();
   } catch (e) { setSync('error', jaErr(e)); }
 }
@@ -3952,11 +3992,10 @@ async function logout() {
   if (uid) {
     state.chars = state.chars.filter(c => c.owner !== uid);
     state.friends = friendsOf().filter(f => !f.uid);
-    state.groups = groupsOf().filter(g => g.owner !== uid);
     if (!state.chars.length) state.chars = [sample()];
     state.activeId = state.chars[0].id;
   }
-  me = null; online = null; lastSynced.clear(); lastGroupSync.clear(); acctTab = 'login';
+  me = null; online = null; lastSynced.clear(); G.list = []; G.err = ''; acctTab = 'login';
   saveNow(); setSync('off'); renderAll(); renderAccount();
   if (!$('select').hidden) renderSelect();
   stopBgm();
@@ -4462,7 +4501,7 @@ async function loadFriendChars() {
 async function refreshFriendView() {
   if (!sb || !me) return;
   try { await loadFriendships(); await loadFriendChars(); } catch (e) { toast(jaErr(e)); }
-  await loadFriendGroups();
+  await loadGroups();
   if (!$('select').hidden && (selTab === 'friends' || selTab === 'groups')) renderSelect();
 }
 function setSelTab(t) {
@@ -4473,204 +4512,258 @@ function setSelTab(t) {
 }
 
 
-/* ================= グループ（シナリオ・KP・探索者の記録） ================= */
-const groupsOf = () => (state.groups = state.groups || []);
-const lastGroupSync = new Map();
-let groupSyncWarned = false, gDraft = null;
-const missingTable = e => /relation .*groups.* does not exist|Could not find the table|groups/i.test(String(e && (e.message || e)));
-async function flushGroups() {
-  if (!sb || !me) return;
-  try {
-    const mine = groupsOf().filter(g => !g.owner || g.owner === me.id);
-    const rows = [];
-    mine.forEach(g => { g.owner = me.id; const js = JSON.stringify(g); if (lastGroupSync.get(g.id) !== js) rows.push([g, js]); });
-    if (rows.length) {
-      const { error } = await sb.from('groups').upsert(rows.map(([g]) => ({ id: g.id, owner: me.id, locked: !!g.locked, data: g, updated_at: new Date(g.updatedAt || Date.now()).toISOString() })));
-      if (error) throw error;
-      rows.forEach(([g, js]) => lastGroupSync.set(g.id, js));
-    }
-    const live = new Set(mine.map(g => g.id));
-    const gone = [...lastGroupSync.keys()].filter(id => !live.has(id));
-    if (gone.length) {
-      const { error } = await sb.from('groups').delete().in('id', gone);
-      if (error) throw error;
-      gone.forEach(id => lastGroupSync.delete(id));
-    }
-  } catch (e) {
-    if (!groupSyncWarned) { groupSyncWarned = true; toast(missingTable(e) ? 'グループをサーバーに保存するには、サーバーの追加設定（supabase-groups.sql）が必要です。今はこの端末にだけ保存しています。' : 'グループを同期できませんでした：' + jaErr(e)); }
-  }
+/* ================= グループ（代表者が作り、フレンドを招待する） ================= */
+const G = { list: [], names: {}, loaded: false, err: '' };
+let gDraft = null, joinCtx = null;
+const ROLE = { kp: 'キーパー', pl: '探索者' };
+const LOCK_ICON = '<svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg>', UNLOCK_ICON = '<svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 5.8-1"/></svg>';
+const groupMissing = e => /group_members|relation .* does not exist|Could not find the (table|function)/i.test(String((e && (e.message || e.details)) || e || ''));
+const gUser = uid => (me && uid === me.id) ? (me.username || 'あなた') : (G.names[uid] || ((online && online.friends.find(u => u.id === uid)) || {}).username || '？');
+const myRow = g => (g.members || []).find(m => me && m.user_id === me.id);
+const inviteCount = () => G.list.filter(g => { const r = myRow(g); return r && r.status === 'invited'; }).length;
+const isFriendUid = uid => !!(online && online.friends.some(u => u.id === uid));
+function renderGroupBadge() {
+  const n = inviteCount(), el = $('sel-greq');
+  if (el) el.innerHTML = n ? `<b class="req-badge">${n}</b>` : '';
 }
-async function pullGroups() {
-  if (!sb || !me) return;
+async function loadGroups() {
+  if (!sb || !me) { G.list = []; renderGroupBadge(); return; }
   try {
-    const { data, error } = await sb.from('groups').select('id,data,locked').eq('owner', me.id);
+    const { data, error } = await sb.from('groups').select('id,owner,locked,data,updated_at');
     if (error) throw error;
-    lastGroupSync.clear();
-    (data || []).forEach(r => {
-      const g = Object.assign({}, r.data, { locked: !!r.locked, owner: me.id });
-      const i = groupsOf().findIndex(x => x.id === r.id);
-      if (i < 0) groupsOf().push(g);
-      else if ((g.updatedAt || 0) >= (groupsOf()[i].updatedAt || 0)) groupsOf()[i] = g;
-      lastGroupSync.set(g.id, JSON.stringify(g));
+    const ids = (data || []).map(r => r.id);
+    let mem = [];
+    if (ids.length) {
+      const r = await sb.from('group_members').select('group_id,user_id,status,role,char_id,char_name,invited_by').in('group_id', ids);
+      if (r.error) throw r.error;
+      mem = r.data || [];
+    }
+    const uids = [...new Set([...mem.map(m => m.user_id), ...(data || []).map(r => r.owner)])].filter(u => u !== me.id && !G.names[u]);
+    if (uids.length) { const r = await sb.from('profiles').select('id,username').in('id', uids); (r.data || []).forEach(x => { G.names[x.id] = x.username; }); }
+    G.list = (data || []).map(r => ({ id: r.id, owner: r.owner, locked: !!r.locked, data: r.data || {}, updated: r.updated_at, members: mem.filter(m => m.group_id === r.id) }));
+    G.loaded = true; G.err = '';
+    if (await migrateLegacyGroups()) return loadGroups();
+  } catch (e) { G.err = groupMissing(e) ? 'setup' : jaErr(e); }
+  renderGroupBadge();
+}
+/* 前の形式（自分の端末だけ／KP・探索者を直接書いた形）のグループを新しい形に移す */
+async function migrateLegacyGroups() {
+  const legacy = [...(state.groups || []).map(g => ({ g, local: true })), ...G.list.filter(x => x.owner === me.id && x.data && (x.data.players || x.data.kp)).map(x => ({ g: Object.assign({ id: x.id, locked: x.locked }, x.data), local: false }))];
+  if (!legacy.length) return false;
+  for (const { g } of legacy) {
+    const extras = [];
+    let myRole = null, myChar = null;
+    if (g.kp) { if (g.kp.who === 'me') myRole = 'kp'; else if (g.kp.name) extras.push({ role: 'kp', name: g.kp.name, charName: '' }); }
+    (g.players || []).forEach(p => {
+      if (p.who === 'me' && !myRole) { myRole = 'pl'; myChar = p; }
+      else if (p.name || p.charName) extras.push({ role: 'pl', name: p.name || '', charName: p.charName || '' });
     });
-  } catch (e) { /* 追加設定前でも動くように */ }
+    const up = await sb.from('groups').upsert({ id: g.id, owner: me.id, locked: !!g.locked, data: { name: g.name || '', date: g.date || '', note: g.note || '', extras }, updated_at: new Date().toISOString() });
+    if (up.error) throw up.error;
+    const r = await sb.from('group_members').upsert({ group_id: g.id, user_id: me.id, status: 'joined', role: myRole || 'pl', char_id: myChar ? myChar.charId || null : null, char_name: myChar ? myChar.charName || null : null });
+    if (r.error) throw r.error;
+  }
+  state.groups = []; save();
+  return true;
 }
-async function loadFriendGroups() {
-  if (!sb || !me || !online) return;
-  const ids = online.friends.map(u => u.id);
-  if (!ids.length) { online.groups = []; return; }
-  try {
-    const { data, error } = await sb.from('groups').select('id,owner,data').in('owner', ids);
-    if (error) throw error;
-    online.groups = (data || []).map(r => Object.assign({}, r.data, { owner: r.owner }));
-  } catch (e) { online.groups = []; }
+function rosterOf(g) {
+  const joined = (g.members || []).filter(m => m.status === 'joined');
+  const kp = [...joined.filter(m => m.role === 'kp').map(m => ({ user: m.user_id, name: gUser(m.user_id) })), ...(g.data.extras || []).filter(x => x.role === 'kp').map(x => ({ name: x.name }))];
+  const pl = [...joined.filter(m => m.role === 'pl').map(m => ({ user: m.user_id, name: gUser(m.user_id), charId: m.char_id, charName: m.char_name })), ...(g.data.extras || []).filter(x => x.role !== 'kp').map(x => ({ name: x.name, charName: x.charName }))];
+  const pending = (g.members || []).filter(m => m.status === 'invited').map(m => gUser(m.user_id));
+  return { kp, pl, pending };
 }
-function whoName(w) {
-  if (!w) return '';
-  if (w.who === 'me') return (me && me.username) || w.name || 'あなた';
-  if (w.who && w.who.startsWith('f:')) { const f = friendsOf().find(x => x.id === w.who.slice(2)); return f ? f.name : (w.name || '？'); }
-  return w.name || '';
+function personColor(uid) {
+  if (!uid) return '#8a8f99';
+  if (me && uid === me.id) return 'var(--sky)';
+  const f = friendsOf().find(x => x.uid === uid);
+  return f ? f.color : '#6b7280';
 }
-const groupDate = g => g.date || '';
-function sortedGroups(list) { return [...list].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || (b.updatedAt || 0) - (a.updatedAt || 0)); }
-function memberColor(w, ownerUid) {
-  if (w.who === 'me' && (!ownerUid || (me && ownerUid === me.id))) return 'var(--sky)';
-  const uid = w.uid;
-  const f = friendsOf().find(x => (w.who && w.who === 'f:' + x.id) || (uid && x.uid === uid));
-  return f ? f.color : '#8a8f99';
-}
-function groupCardHtml(g, mine) {
-  const owner = !mine && online ? (online.friends.find(u => u.id === g.owner) || {}).username : '';
-  const kpName = mine ? whoName(g.kp) : (g.kp && g.kp.name) || '';
-  const pl = (g.players || []).map((p, i) => {
-    const nm = mine ? whoName(p) : p.name;
-    return `<button class="gc-pl" type="button" data-gopen="${i}" data-gid="${g.id}" data-gmine="${mine ? 1 : 0}" ${p.charName ? '' : 'disabled'}>
-      <span class="gc-dot" style="--c:${esc(memberColor(p, g.owner))}">${esc((nm || '？').charAt(0))}</span>
-      <span class="gc-pn">${esc(nm || '？')}</span>${p.charName ? `<span class="gc-cn">${esc(p.charName)}</span>` : ''}</button>`;
-  }).join('');
-  return `<article class="grp-card ${g.locked ? 'locked' : ''}">
+const dot = (name, uid) => `<span class="gc-dot" style="--c:${esc(personColor(uid))}">${esc((name || '？').charAt(0))}</span>`;
+function groupCardHtml(g, kind) {
+  const d = g.data || {}, { kp, pl, pending } = rosterOf(g), mine = myRow(g), owner = me && g.owner === me.id;
+  const chips = pl.map(x => `<button class="gc-pl" type="button" ${x.user && x.charId ? `data-gm-user="${x.user}" data-gm-char="${esc(x.charId)}"` : 'disabled'}>
+      ${dot(x.name, x.user)}<span class="gc-pn">${esc(x.name || '？')}</span>${x.charName ? `<span class="gc-cn">${esc(x.charName)}</span>` : '<span class="gc-none">キャラ未設定</span>'}</button>`).join('');
+  let actions = '';
+  if (kind === 'invite') actions = `<button class="btn small primary" type="button" data-gjoin="${g.id}">参加する</button><button class="btn small" type="button" data-gdecline="${g.id}">断る</button>`;
+  else if (owner) actions = `<button class="btn small" type="button" data-gedit="${g.id}">編集</button>`;
+  else if (mine && mine.status === 'joined') actions = `<button class="btn small" type="button" data-gjoin="${g.id}">参加内容を変更</button>`;
+  return `<article class="grp-card ${g.locked ? 'locked' : ''} ${kind === 'invite' ? 'invite' : ''}">
+    ${kind === 'invite' ? `<p class="gc-invite">${esc(gUser(g.owner))}さんから招待が届いています。キーパーか探索者かを選んで参加してください。</p>` : ''}
     <div class="gc-top">
-      <div class="gc-title"><b>${esc(g.name || '無題のシナリオ')}</b>${g.date ? `<span class="gc-date">${esc(g.date)}</span>` : ''}</div>
-      ${g.locked ? `<span class="gc-lock" title="フレンドに非公開">${LOCK_ICON}非公開</span>` : ''}
-      ${mine ? `<button class="btn small" type="button" data-gedit="${g.id}">編集</button>` : `<span class="gc-owner">${esc(owner || 'フレンド')}の記録</span>`}
+      <div class="gc-title"><b>${esc(d.name || '無題のシナリオ')}</b>${d.date ? `<span class="gc-date">${esc(d.date)}</span>` : ''}</div>
+      ${g.locked ? `<span class="gc-lock" title="グループの参加者以外には見えません">${LOCK_ICON}非公開</span>` : ''}
+      <span class="gc-owner">代表 ${dot(gUser(g.owner), g.owner)}${esc(gUser(g.owner))}</span>
+      ${actions}
     </div>
-    <div class="gc-row"><span class="gc-role kp">KP</span>${kpName ? `<span class="gc-kp"><span class="gc-dot" style="--c:${esc(memberColor(g.kp || {}, g.owner))}">${esc(kpName.charAt(0))}</span>${esc(kpName)}</span>` : '<span class="gc-none">未設定</span>'}</div>
-    <div class="gc-row"><span class="gc-role pl">探索者</span><div class="gc-pls">${pl || '<span class="gc-none">未設定</span>'}</div></div>
-    ${g.note ? `<p class="gc-note">${esc(g.note)}</p>` : ''}
+    <div class="gc-row"><span class="gc-role kp">KP</span><div class="gc-pls">${kp.length ? kp.map(x => `<span class="gc-kp">${dot(x.name, x.user)}${esc(x.name || '？')}</span>`).join('') : '<span class="gc-none">未定</span>'}</div></div>
+    <div class="gc-row"><span class="gc-role pl">探索者</span><div class="gc-pls">${chips || '<span class="gc-none">未定</span>'}</div></div>
+    ${pending.length ? `<div class="gc-row"><span class="gc-role wait">招待中</span><div class="gc-pls">${pending.map(n => `<span class="gc-wait">${esc(n)}</span>`).join('')}</div></div>` : ''}
+    ${d.note ? `<p class="gc-note">${esc(d.note)}</p>` : ''}
   </article>`;
 }
+function sortGroups(list) { return [...list].sort((a, b) => String(b.data.date || '').localeCompare(String(a.data.date || '')) || String(b.updated || '').localeCompare(String(a.updated || ''))); }
 function renderGroupSelect(stage) {
   stage.classList.remove('grid'); stage.classList.add('listv'); stage.style.height = '';
-  const mine = sortedGroups(groupsOf());
-  const fr = online && online.groups ? sortedGroups(online.groups) : [];
-  stage.innerHTML = `<button class="sel-list-new" type="button" id="sel-newgroup"><span class="plus">＋</span>新しいグループをつくる</button>
-    ${mine.length ? `<div class="grp-list">${mine.map(g => groupCardHtml(g, true)).join('')}</div>` : '<p class="empty grp-empty">まだグループがありません。遊んだシナリオごとに、KPと探索者を記録できます。</p>'}
-    ${fr.length ? `<h3 class="grp-h">フレンドのグループ</h3><div class="grp-list">${fr.map(g => groupCardHtml(g, false)).join('')}</div>` : ''}`;
-}
-const LOCK_ICON = '<svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg>', UNLOCK_ICON = '<svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 5.8-1"/></svg>';
-function whoOptions(cur) {
-  const opt = (v, l) => `<option value="${v}" ${cur === v ? 'selected' : ''}>${esc(l)}</option>`;
-  return opt('me', `自分（${(me && me.username) || 'あなた'}）`) + friendsOf().map(f => opt('f:' + f.id, f.name + (f.uid ? '（フレンド）' : '（仲間メモ）'))).join('') + opt('t', 'その他（名前を入力）');
-}
-function charChoices(w) {
-  if (w.who === 'me') return state.chars.map(c => ({ id: c.id, name: c.profile.name || '名無し' }));
-  if (w.who && w.who.startsWith('f:')) {
-    const f = friendsOf().find(x => x.id === w.who.slice(2));
-    if (f && f.uid && online && online.chars && online.chars[f.uid]) return online.chars[f.uid].filter(c => c.id).map(c => ({ id: c.id, name: c.name || '名無し' }));
+  if (!cloudReady() || !me) {
+    stage.innerHTML = `<div class="grp-gate"><p>グループは、アカウントを持っている人どうしで作ります。代表者がグループを作ってフレンドを招待し、招待された人がキーパーか探索者かを選んで参加します。</p><button class="btn primary" type="button" id="sel-login">ログイン・新規登録</button></div>`;
+    return;
   }
-  return null;
+  if (G.err === 'setup') {
+    stage.innerHTML = `<div class="grp-gate"><p>グループの招待機能を使うには、サーバーの追加設定（<b>supabase-groups2.sql</b>）が必要です。Supabase の SQL Editor で実行してから、ページを再読み込みしてください。</p></div>`;
+    return;
+  }
+  const inv = sortGroups(G.list.filter(g => { const r = myRow(g); return r && r.status === 'invited'; }));
+  const mine = sortGroups(G.list.filter(g => g.owner === me.id || (myRow(g) && myRow(g).status === 'joined')));
+  const fr = sortGroups(G.list.filter(g => g.owner !== me.id && !myRow(g)));
+  stage.innerHTML = `${inv.length ? `<h3 class="grp-h">届いている招待</h3><div class="grp-list">${inv.map(g => groupCardHtml(g, 'invite')).join('')}</div>` : ''}
+    <button class="sel-list-new" type="button" id="sel-newgroup"><span class="plus">＋</span>グループをつくってフレンドを招待する</button>
+    ${mine.length ? `<h3 class="grp-h">参加しているグループ</h3><div class="grp-list">${mine.map(g => groupCardHtml(g, 'mine')).join('')}</div>` : (G.err ? `<p class="err">${esc(G.err)}</p>` : '<p class="empty grp-empty">まだグループがありません。遊ぶシナリオごとにグループを作り、フレンドを招待しましょう。</p>')}
+    ${fr.length ? `<h3 class="grp-h">フレンドのグループ</h3><div class="grp-list">${fr.map(g => groupCardHtml(g, 'friend')).join('')}</div>` : ''}`;
 }
-function memberEditor(w, key, label) {
-  const choices = charChoices(w);
-  const charPart = key === 'kp' ? '' : (choices && choices.length
-    ? `<select class="inp" data-gchar="${key}" aria-label="${label}のキャラ"><option value="">キャラを選ぶ</option>${choices.map(c => `<option value="${c.id}" ${w.charId === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}<option value="__t" ${w.charId === '__t' ? 'selected' : ''}>（キャラ名を手入力）</option></select>${w.charId === '__t' ? `<input class="inp" data-gcname="${key}" placeholder="キャラ名" value="${esc(w.charName || '')}" aria-label="${label}のキャラ名">` : ''}`
-    : `<input class="inp" data-gcname="${key}" placeholder="キャラ名（公開キャラから選べない相手は手入力）" value="${esc(w.charName || '')}" aria-label="${label}のキャラ名">`);
-  return `<div class="gm-row ${key === 'kp' ? 'kp' : ''}">
-    <select class="inp" data-gwho="${key}" aria-label="${label}">${whoOptions(w.who || 'me')}</select>
-    ${w.who === 't' ? `<input class="inp" data-gname="${key}" placeholder="名前" value="${esc(w.name || '')}" aria-label="${label}の名前">` : ''}
-    ${charPart}
-    ${key === 'kp' ? '' : `<button class="icon-btn" type="button" data-gact="rm" data-i="${key}" aria-label="この探索者を外す">×</button>`}
-  </div>`;
-}
+const charOptions = sel => state.chars.filter(c => !c.sample || state.chars.length === 1).map(c => `<option value="${c.id}" ${sel === c.id ? 'selected' : ''}>${esc(c.profile.name || '名無し')}${c.locked ? '（非公開のキャラ）' : ''}</option>`).join('');
+const roleSwitch = (cur, attr) => `<div class="role-sw" role="group" aria-label="役割">${['kp', 'pl'].map(r => `<button type="button" class="role-btn ${cur === r ? 'on' : ''}" ${attr}="${r}" aria-pressed="${cur === r}"><b>${ROLE[r]}</b><small>${r === 'kp' ? 'シナリオを回す' : 'キャラで遊ぶ'}</small></button>`).join('')}</div>`;
+/* ---- 代表者の編集画面 ---- */
 function renderGroupEditor() {
-  const g = gDraft;
-  $('grp-title').textContent = g._new ? '新しいグループ' : 'グループを編集';
+  const d = gDraft;
+  $('grp-title').textContent = d._new ? '新しいグループ' : 'グループを編集';
+  const friends = (online && online.friends) || [];
+  const memberById = Object.fromEntries((d.members || []).map(m => [m.user_id, m]));
   $('grp-body').innerHTML = `
     <div class="fields">
-      <div class="field wide"><label for="g-name">シナリオ名</label><input class="inp" id="g-name" data-g="name" value="${esc(g.name || '')}" placeholder="例：悪霊の家"></div>
-      <div class="field"><label for="g-date">日付</label><input class="inp" id="g-date" data-g="date" value="${esc(g.date || '')}" placeholder="例：2026/10/01"></div>
-      <div class="field"><span class="lbl">公開</span><button class="btn lock-btn ${g.locked ? 'on' : ''}" type="button" data-gact="lock" aria-pressed="${!!g.locked}">${g.locked ? LOCK_ICON + '非公開（フレンドから見えない）' : UNLOCK_ICON + 'フレンドに公開'}</button></div>
+      <div class="field wide"><label for="g-name">シナリオ名</label><input class="inp" id="g-name" data-g="name" value="${esc(d.name)}" placeholder="例：悪霊の家"></div>
+      <div class="field"><label for="g-date">日付</label><input class="inp" id="g-date" data-g="date" value="${esc(d.date)}" placeholder="例：2026/10/01"></div>
+      <div class="field"><span class="lbl">公開</span><button class="btn lock-btn ${d.locked ? 'on' : ''}" type="button" data-gact="lock" aria-pressed="${d.locked}">${d.locked ? LOCK_ICON + '非公開（参加者だけ）' : UNLOCK_ICON + 'フレンドに公開'}</button></div>
     </div>
-    <div class="gm-sec"><b>キーパー（KP）</b>${memberEditor(g.kp || { who: 'me' }, 'kp', 'キーパー')}</div>
-    <div class="gm-sec"><b>探索者</b><div class="gm-list">${(g.players || []).map((p, i) => memberEditor(p, String(i), `探索者${i + 1}`)).join('')}</div>
-      <button class="btn small" type="button" data-gact="add">＋ 探索者を追加</button></div>
-    <div class="field wide"><label for="g-note">メモ（生還・ロスト・感想など）</label><textarea class="inp" id="g-note" data-g="note" rows="3">${esc(g.note || '')}</textarea></div>
+    <div class="gm-sec"><b>あなたの参加</b>${roleSwitch(d.myRole, 'data-gmyrole')}
+      ${d.myRole === 'pl' ? `<select class="inp" id="g-mychar" aria-label="使う探索者"><option value="">使う探索者を選ぶ</option>${charOptions(d.myChar)}</select>` : ''}</div>
+    <div class="gm-sec"><b>フレンドを招待</b><span class="hint">招待された人が、参加するときにキーパーか探索者かを選びます。</span>
+      <div class="gm-friends">${friends.length ? friends.map(u => {
+        const m = memberById[u.id], on = d.invite.includes(u.id), removed = d.remove.includes(u.id);
+        if (m && !removed) return `<span class="gm-mem">${dot(u.username, u.id)}<b>${esc(u.username)}</b><small>${m.status === 'joined' ? (m.role ? ROLE[m.role] + 'で参加中' : '参加中') : '招待中'}</small><button class="icon-btn" type="button" data-gact="remove" data-u="${u.id}" aria-label="${esc(u.username)}をグループから外す">×</button></span>`;
+        return `<button type="button" class="fchip ${on ? 'on' : ''}" style="--fc:${esc(personColor(u.id))}" data-gact="invite" data-u="${u.id}" aria-pressed="${on}"><span class="fdot">${esc((u.username || '？').charAt(0))}</span>${esc(u.username)}${removed ? '（外す）' : ''}</button>`;
+      }).join('') : '<span class="empty">オンラインのフレンドがいません。「フレンド」タブでフレンドを追加すると招待できます。</span>'}
+      ${(d.members || []).filter(m => m.user_id !== me.id && !friends.some(u => u.id === m.user_id)).map(m => `<span class="gm-mem">${dot(gUser(m.user_id), m.user_id)}<b>${esc(gUser(m.user_id))}</b><small>${m.status === 'joined' ? ROLE[m.role] || '参加中' : '招待中'}</small></span>`).join('')}</div></div>
+    <div class="gm-sec"><b>アプリを使っていない参加者</b><span class="hint">アカウントのない人は、ここに名前を書いておけます。</span>
+      <div class="gm-list">${d.extras.map((x, i) => `<div class="gm-row ex">
+        <select class="inp" data-gx="role" data-i="${i}" aria-label="役割"><option value="kp" ${x.role === 'kp' ? 'selected' : ''}>キーパー</option><option value="pl" ${x.role !== 'kp' ? 'selected' : ''}>探索者</option></select>
+        <input class="inp" data-gx="name" data-i="${i}" placeholder="名前" value="${esc(x.name || '')}" aria-label="名前">
+        <input class="inp" data-gx="charName" data-i="${i}" placeholder="キャラ名（探索者のとき）" value="${esc(x.charName || '')}" aria-label="キャラ名">
+        <button class="icon-btn" type="button" data-gact="rmx" data-i="${i}" aria-label="この参加者を消す">×</button></div>`).join('')}</div>
+      <button class="btn small" type="button" data-gact="addx">＋ 参加者を書き加える</button></div>
+    <div class="field wide"><label for="g-note">メモ（生還・ロスト・感想など）</label><textarea class="inp" id="g-note" data-g="note" rows="3">${esc(d.note)}</textarea></div>
     <p class="err" id="g-err" role="alert"></p>`;
-  $('grp-del').hidden = !!g._new;
+  $('grp-del').hidden = !!d._new;
 }
 function openGroupEditor(id) {
-  const g = id && groupsOf().find(x => x.id === id);
-  gDraft = g ? JSON.parse(JSON.stringify(g)) : { _new: true, id: uid(), name: '', date: '', note: '', locked: false, kp: { who: 't', name: '' }, players: [{ who: 'me', charId: state.activeId }] };
+  const g = id && G.list.find(x => x.id === id);
+  const mine = g && myRow(g);
+  gDraft = g
+    ? { id: g.id, name: g.data.name || '', date: g.data.date || '', note: g.data.note || '', locked: g.locked, extras: JSON.parse(JSON.stringify(g.data.extras || [])), members: g.members, invite: [], remove: [], myRole: (mine && mine.role) || 'kp', myChar: (mine && mine.char_id) || '' }
+    : { _new: true, id: uid(), name: '', date: '', note: '', locked: false, extras: [], members: [], invite: [], remove: [], myRole: 'kp', myChar: '' };
   renderGroupEditor(); openModal('modal-group');
-  if (me && !online?.chars) refreshFriendView();
 }
-const gTarget = key => key === 'kp' ? gDraft.kp : gDraft.players[+key];
 $('grp-body').addEventListener('input', e => {
   const t = e.target;
   if (t.dataset.g) gDraft[t.dataset.g] = t.value;
-  if (t.dataset.gname) gTarget(t.dataset.gname).name = t.value;
-  if (t.dataset.gcname) gTarget(t.dataset.gcname).charName = t.value;
+  if (t.dataset.gx) gDraft.extras[+t.dataset.i][t.dataset.gx] = t.value;
 });
 $('grp-body').addEventListener('change', e => {
-  const t = e.target;
-  if (t.dataset.gwho) { const w = gTarget(t.dataset.gwho); w.who = t.value; w.charId = ''; w.charName = ''; if (t.value === 'me' && t.dataset.gwho !== 'kp') w.charId = state.activeId; renderGroupEditor(); }
-  if (t.dataset.gchar) { const w = gTarget(t.dataset.gchar); w.charId = t.value; if (t.value !== '__t') w.charName = ''; renderGroupEditor(); }
+  if (e.target.id === 'g-mychar') gDraft.myChar = e.target.value;
+  if (e.target.dataset.gx === 'role') gDraft.extras[+e.target.dataset.i].role = e.target.value;
 });
 $('grp-body').addEventListener('click', e => {
+  const r = e.target.closest('[data-gmyrole]');
+  if (r) { gDraft.myRole = r.dataset.gmyrole; if (gDraft.myRole === 'pl' && !gDraft.myChar) gDraft.myChar = state.activeId; renderGroupEditor(); return; }
   const b = e.target.closest('[data-gact]'); if (!b) return;
-  if (b.dataset.gact === 'add') { gDraft.players.push({ who: 't', name: '', charName: '' }); renderGroupEditor(); return; }
-  if (b.dataset.gact === 'rm') { gDraft.players.splice(+b.dataset.i, 1); renderGroupEditor(); return; }
-  if (b.dataset.gact === 'lock') { gDraft.locked = !gDraft.locked; renderGroupEditor(); }
+  const u = b.dataset.u, act = b.dataset.gact;
+  if (act === 'lock') gDraft.locked = !gDraft.locked;
+  if (act === 'invite') { const rm = gDraft.remove.indexOf(u); if (rm >= 0) gDraft.remove.splice(rm, 1); else { const i = gDraft.invite.indexOf(u); if (i >= 0) gDraft.invite.splice(i, 1); else gDraft.invite.push(u); } }
+  if (act === 'remove') gDraft.remove.push(u);
+  if (act === 'addx') gDraft.extras.push({ role: 'pl', name: '', charName: '' });
+  if (act === 'rmx') gDraft.extras.splice(+b.dataset.i, 1);
+  renderGroupEditor();
 });
-function snapshot(w) {
-  const out = { who: w.who || 'me', name: w.who === 't' ? (w.name || '').trim() : whoName(w), charId: w.charId && w.charId !== '__t' ? w.charId : '', charName: w.charName || '' };
-  if (w.who === 'me' && me) out.uid = me.id;
-  if (w.who && w.who.startsWith('f:')) { const f = friendsOf().find(x => x.id === w.who.slice(2)); if (f && f.uid) out.uid = f.uid; }
-  if (out.charId && !out.charName) { const ch = (charChoices(w) || []).find(c => c.id === out.charId); out.charName = ch ? ch.name : ''; }
-  return out;
-}
-$('grp-save').addEventListener('click', () => {
-  if (!(gDraft.name || '').trim()) { $('g-err').textContent = 'シナリオ名を書いてください。'; $('g-name').focus(); return; }
-  const g = { id: gDraft.id, name: gDraft.name.trim(), date: (gDraft.date || '').trim(), note: gDraft.note || '', locked: !!gDraft.locked, kp: snapshot(gDraft.kp || { who: 'me' }), players: (gDraft.players || []).map(snapshot), updatedAt: Date.now(), owner: gDraft.owner };
-  const i = groupsOf().findIndex(x => x.id === g.id);
-  if (i < 0) groupsOf().push(g); else groupsOf()[i] = g;
-  save(); flushGroups(); closeModals(); renderSelect(); popSelect();
-  toast(i < 0 ? `グループ「${g.name}」を記録しました。` : `グループ「${g.name}」を更新しました。`);
+$('grp-save').addEventListener('click', async e => {
+  const d = gDraft, btn = e.currentTarget;
+  if (!d.name.trim()) { $('g-err').textContent = 'シナリオ名を書いてください。'; $('g-name').focus(); return; }
+  if (d.myRole === 'pl' && !d.myChar) { $('g-err').textContent = '使う探索者を選んでください。'; return; }
+  btn.disabled = true;
+  try {
+    const ch = state.chars.find(c => c.id === d.myChar);
+    let r = await sb.from('groups').upsert({ id: d.id, owner: me.id, locked: !!d.locked, data: { name: d.name.trim(), date: d.date.trim(), note: d.note, extras: d.extras.filter(x => (x.name || '').trim() || (x.charName || '').trim()) }, updated_at: new Date().toISOString() });
+    if (r.error) throw r.error;
+    r = await sb.from('group_members').upsert({ group_id: d.id, user_id: me.id, status: 'joined', role: d.myRole, char_id: d.myRole === 'pl' ? d.myChar : null, char_name: d.myRole === 'pl' && ch ? (ch.profile.name || '名無し') : null });
+    if (r.error) throw r.error;
+    const have = new Set((d.members || []).map(m => m.user_id));
+    const inv = d.invite.filter(u => !have.has(u));
+    if (inv.length) { r = await sb.from('group_members').insert(inv.map(u => ({ group_id: d.id, user_id: u, status: 'invited', invited_by: me.id }))); if (r.error) throw r.error; }
+    for (const u of d.remove) { r = await sb.from('group_members').delete().eq('group_id', d.id).eq('user_id', u); if (r.error) throw r.error; }
+    closeModals(); await loadGroups(); renderSelect(); popSelect();
+    toast(inv.length ? `グループ「${d.name.trim()}」を保存し、${inv.length}人を招待しました。` : `グループ「${d.name.trim()}」を保存しました。`);
+  } catch (er) { $('g-err').textContent = groupMissing(er) ? 'サーバーの追加設定（supabase-groups2.sql）がまだのようです。' : jaErr(er); }
+  finally { btn.disabled = false; }
 });
-$('grp-del').addEventListener('click', e => {
+$('grp-del').addEventListener('click', async e => {
   if (!arm(e.currentTarget, '本当に削除')) return;
-  state.groups = groupsOf().filter(x => x.id !== gDraft.id);
-  save(); flushGroups(); closeModals(); renderSelect();
+  const r = await sb.from('groups').delete().eq('id', gDraft.id);
+  if (r.error) { $('g-err').textContent = jaErr(r.error); return; }
+  closeModals(); await loadGroups(); renderSelect();
+  toast('グループを削除しました。');
 });
-function openGroupMember(gid, i, mine) {
-  const g = (mine ? groupsOf() : (online && online.groups) || []).find(x => x.id === gid); if (!g) return;
-  const p = (g.players || [])[i]; if (!p) return;
-  const myChar = p.charId && state.chars.find(c => c.id === p.charId && (!c.owner || !me || c.owner === me.id));
-  if (myChar && (p.who === 'me' && mine || (me && p.uid === me.id))) {
-    state.activeId = myChar.id; save(); renderShelf(); renderSheet(); renderOutput(); leaveSelect(null); playCharBgm(active()); return;
+/* ---- 招待された人：参加・変更・抜ける ---- */
+function renderJoin() {
+  const g = G.list.find(x => x.id === joinCtx.id); if (!g) return;
+  const r = myRow(g), joined = r && r.status === 'joined';
+  $('join-title').textContent = joined ? '参加内容を変更' : `「${g.data.name || '無題のシナリオ'}」に参加する`;
+  $('join-body').innerHTML = `<p>${esc(gUser(g.owner))}さんのグループです。${joined ? '役割や使う探索者を変えられます。' : 'キーパーか探索者かを選んでください。'}</p>
+    ${roleSwitch(joinCtx.role, 'data-jrole')}
+    ${joinCtx.role === 'pl' ? `<label class="lbl" for="j-char">使う探索者</label><select class="inp" id="j-char"><option value="">選ぶ</option>${charOptions(joinCtx.char)}</select><p class="hint">非公開のキャラを選ぶと、ほかの参加者にはキャラ名だけ表示され、キャラシは開けません。</p>` : ''}
+    <p class="err" id="j-err" role="alert"></p>`;
+  $('join-leave').hidden = !joined;
+  $('join-ok').textContent = joined ? '変更する' : '参加する';
+}
+function openJoin(id) {
+  const g = G.list.find(x => x.id === id); if (!g) return;
+  const r = myRow(g);
+  joinCtx = { id, role: (r && r.role) || 'pl', char: (r && r.char_id) || state.activeId };
+  renderJoin(); openModal('modal-join');
+}
+$('join-body').addEventListener('click', e => { const b = e.target.closest('[data-jrole]'); if (b) { joinCtx.role = b.dataset.jrole; renderJoin(); } });
+$('join-body').addEventListener('change', e => { if (e.target.id === 'j-char') joinCtx.char = e.target.value; });
+$('join-ok').addEventListener('click', async () => {
+  if (joinCtx.role === 'pl' && !joinCtx.char) { $('j-err').textContent = '使う探索者を選んでください。'; return; }
+  const ch = state.chars.find(c => c.id === joinCtx.char);
+  const r = await sb.from('group_members').update({ status: 'joined', role: joinCtx.role, char_id: joinCtx.role === 'pl' ? joinCtx.char : null, char_name: joinCtx.role === 'pl' && ch ? (ch.profile.name || '名無し') : null }).eq('group_id', joinCtx.id).eq('user_id', me.id);
+  if (r.error) { $('j-err').textContent = jaErr(r.error); return; }
+  closeModals(); await loadGroups(); renderSelect();
+  toast(`${ROLE[joinCtx.role]}として参加しました。`);
+});
+$('join-leave').addEventListener('click', async e => {
+  if (!arm(e.currentTarget, '本当に抜ける')) return;
+  const r = await sb.from('group_members').delete().eq('group_id', joinCtx.id).eq('user_id', me.id);
+  if (r.error) { $('j-err').textContent = jaErr(r.error); return; }
+  closeModals(); await loadGroups(); renderSelect();
+  toast('グループから抜けました。');
+});
+async function declineGroup(id) {
+  const r = await sb.from('group_members').delete().eq('group_id', id).eq('user_id', me.id);
+  if (r.error) { toast(jaErr(r.error)); return; }
+  await loadGroups(); renderSelect();
+  toast('招待を断りました。');
+}
+function openMemberChar(user, charId) {
+  if (me && user === me.id) {
+    const c = state.chars.find(x => x.id === charId);
+    if (!c) { toast('このキャラはこの端末に見つかりませんでした。'); return; }
+    state.activeId = c.id; save(); renderShelf(); renderSheet(); renderOutput(); leaveSelect(null); playCharBgm(active()); return;
   }
-  const uidOf = p.uid || (!mine && p.who === 'me' ? g.owner : '');
-  if (uidOf && me && uidOf !== me.id) {
-    const u = online && online.friends.find(x => x.id === uidOf);
-    if (!u) { toast('この人はフレンドではないため、キャラシを開けません。'); return; }
-    viewFriend(uidOf, u.username).then(() => {
-      const idx = fviewChars.findIndex(c => c.id === p.charId);
-      if (idx >= 0) document.querySelector(`#fview-body [data-fv="${idx}"]`)?.click();
-      else if (p.charId) toast('このキャラシは非公開か、見つかりませんでした。');
-    });
-    return;
-  }
-  toast(p.charName ? `「${p.charName}」はこのアプリに登録されていないキャラです。` : 'キャラが設定されていません。');
+  if (!isFriendUid(user)) { toast(`${gUser(user)}さんはフレンドではないため、キャラシを開けません。`); return; }
+  viewFriend(user, gUser(user)).then(() => {
+    const idx = fviewChars.findIndex(c => c.id === charId);
+    if (idx >= 0) document.querySelector(`#fview-body [data-fv="${idx}"]`)?.click();
+    else toast('このキャラシは非公開か、見つかりませんでした。');
+  });
 }
 
 /* ================= 探索者をえらぶ画面 ================= */
@@ -4681,7 +4774,7 @@ function renderSelect() {
   document.querySelectorAll('[data-seltab]').forEach(b => { const on = b.dataset.seltab === selTab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
   $('sel-eyebrow').textContent = { friends: 'FRIENDS', groups: 'GROUPS' }[selTab] || 'SELECT YOUR INVESTIGATOR';
   $('sel-title').textContent = { friends: 'フレンド一覧', groups: 'グループ' }[selTab] || '探索者をえらぶ';
-  $('sel-desc').textContent = { friends: 'フレンドを押すと、その人の公開キャラシが見られます。真ん中からフレンドを追加できます。', groups: 'どのシナリオを、誰と、どの探索者で遊んだかの記録です。キャラ名を押すとキャラシが開きます。' }[selTab] || 'キャラを押すとシートが開きます。真ん中から新しい探索者をつくれます。';
+  $('sel-desc').textContent = { friends: 'フレンドを押すと、その人の公開キャラシが見られます。真ん中からフレンドを追加できます。', groups: '代表者がグループを作ってフレンドを招待し、招待された人はキーパーか探索者かを選んで参加します。キャラ名を押すとキャラシが開きます。' }[selTab] || 'キャラを押すとシートが開きます。真ん中から新しい探索者をつくれます。';
   renderSortBar();
   if (selTab === 'friends') { renderFriendSelect(stage); return; }
   if (selTab === 'groups') { renderGroupSelect(stage); return; }
@@ -4771,8 +4864,12 @@ $('select').addEventListener('click', e => {
   if (e.target.closest('#sel-newgroup')) { openGroupEditor(null); return; }
   const ge = e.target.closest('[data-gedit]');
   if (ge) { openGroupEditor(ge.dataset.gedit); return; }
-  const go = e.target.closest('[data-gopen]');
-  if (go) { openGroupMember(go.dataset.gid, +go.dataset.gopen, go.dataset.gmine === '1'); return; }
+  const gj = e.target.closest('[data-gjoin]');
+  if (gj) { openJoin(gj.dataset.gjoin); return; }
+  const gd = e.target.closest('[data-gdecline]');
+  if (gd) { declineGroup(gd.dataset.gdecline); return; }
+  const gm = e.target.closest('[data-gm-user]');
+  if (gm) { openMemberChar(gm.dataset.gmUser, gm.dataset.gmChar); return; }
   if (e.target.closest('#sel-addfriend')) { openFriends(); setTimeout(() => $('ol-name')?.focus(), 60); return; }
   if (e.target.closest('#sel-login')) { acctTab = 'login'; openAccount(); return; }
   const fb = e.target.closest('.sel-friend');
