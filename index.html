@@ -612,20 +612,20 @@ label.btn { display: inline-block; }
 .select { position: fixed; inset: 0; z-index: 8; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
   background: radial-gradient(1100px 620px at 90% -10%, var(--glow-1), transparent 62%), radial-gradient(800px 520px at -8% 30%, var(--glow-2), transparent 60%), linear-gradient(180deg, var(--bg-2), var(--bg) 560px);
   background-color: var(--bg); }
-.has-bg .select { background: var(--bg); isolation: isolate; }
-.has-bg .select::before { content: ""; position: fixed; inset: -30px; z-index: -2; background: var(--sel-img) center / cover no-repeat; filter: blur(var(--bgblur, 0px)); }
-.has-bg .select::after { content: ""; position: fixed; inset: 0; z-index: -1; background: var(--bg); opacity: var(--veil, .15); }
+.sel-has-bg .select { background: var(--bg); isolation: isolate; }
+.sel-has-bg .select::before { content: ""; position: fixed; inset: -30px; z-index: -2; background: var(--sel-img) center / cover no-repeat; filter: blur(var(--bgblur, 0px)); }
+.sel-has-bg .select::after { content: ""; position: fixed; inset: 0; z-index: -1; background: var(--bg); opacity: var(--veil, .15); }
 .select-in { min-height: 100%; display: flex; flex-direction: column; align-items: center; padding: 22px 16px calc(env(safe-area-inset-bottom, 0px) + 28px); gap: 6px; }
 .sel-head { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
 .sel-head .eyebrow { justify-content: center; }
 .sel-head h2 { margin: 0; font-family: var(--f-display); font-weight: 800; font-size: clamp(24px, 4vw, 34px); background: linear-gradient(100deg, var(--sky), var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .sel-head p { margin: 0; color: var(--muted); font-size: 13px; }
-.has-bg .sel-head { background: color-mix(in srgb, var(--solid) 75%, transparent); padding: 10px 22px; border-radius: 22px; }
+.sel-has-bg .sel-head { background: color-mix(in srgb, var(--solid) 75%, transparent); padding: 10px 22px; border-radius: 22px; }
 .sel-stage { position: relative; width: min(1100px, 100%); flex: none; }
 .sel-rings { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 .sel-rings circle, .sel-rings ellipse { fill: none; stroke: var(--line-strong); stroke-width: 1.2; stroke-dasharray: 3 8; animation: dash-flow 50s linear infinite; }
 .sel-rings :nth-child(even) { animation-direction: reverse; }
-.has-bg .sel-rings circle, .has-bg .sel-rings ellipse { stroke: color-mix(in srgb, #ffffff 75%, transparent); }
+.sel-has-bg .sel-rings circle, .sel-has-bg .sel-rings ellipse { stroke: color-mix(in srgb, #ffffff 75%, transparent); }
 .sel-new { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 168px; height: 168px; border-radius: 50%; border: 0; cursor: pointer; z-index: 2;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #fff;
   background: radial-gradient(circle at 34% 28%, color-mix(in srgb, var(--cyan) 70%, #fff), var(--sky) 72%);
@@ -644,7 +644,7 @@ label.btn { display: inline-block; }
 .sel-char:focus-visible { outline: none; }
 .sel-name { max-width: 100%; padding: 3px 12px; border-radius: 999px; background: var(--solid); border: 1px solid var(--line); box-shadow: var(--shadow); font-weight: 800; font-family: var(--f-display); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sel-sys { font-size: 10.5px; color: var(--muted); white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; margin-top: -4px; }
-.has-bg .sel-sys { background: color-mix(in srgb, var(--solid) 75%, transparent); padding: 0 8px; border-radius: 999px; }
+.sel-has-bg .sel-sys { background: color-mix(in srgb, var(--solid) 75%, transparent); padding: 0 8px; border-radius: 999px; }
 .sel-stage.grid { display: flex; flex-direction: column; align-items: center; gap: 22px; padding-block: 16px; }
 .sel-stage.grid .sel-new { position: relative; left: auto; top: auto; translate: none; width: 140px; height: 140px; }
 .sel-stage.grid .sel-rings { display: none; }
@@ -879,6 +879,67 @@ label.btn { display: inline-block; }
 .sel-minis i:first-child { margin-left: 0; }
 .sel-minis i.more { background: var(--muted); font-size: 9px; }
 
+/* ===== theme looks ===== */
+:root[data-look~="dark"] { color-scheme: dark; --shadow: 0 12px 34px -14px rgb(0 0 0 / .75), 0 2px 6px -2px rgb(0 0 0 / .45); --gloss: rgb(255 255 255 / .12); }
+:root[data-look~="mincho"] { --f-display: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif; }
+:root[data-look~="dark"] .has-bg, :root[data-look~="dark"].has-bg { --glass-line: color-mix(in srgb, #ffffff 16%, transparent); }
+.th-sec { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+.th-sec b { font-size: 14px; }
+.th-sec span { font-size: 12px; color: var(--muted); }
+.theme-presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.tp { display: grid; grid-template-columns: 52px minmax(0, 1fr); grid-template-rows: auto auto; gap: 0 10px; align-items: center; text-align: left; padding: 8px; border-radius: 14px; border: 1px solid var(--line); background: var(--solid); cursor: pointer; color: var(--ink); transition: transform .25s cubic-bezier(.3, 1.6, .5, 1), border-color .2s; }
+.tp:hover { transform: translateY(-2px); border-color: var(--sky); }
+.tp.on { border: 2px solid var(--sky); padding: 7px; box-shadow: 0 0 0 4px color-mix(in srgb, var(--sky) 16%, transparent); }
+.tp-sw { grid-row: span 2; width: 52px; height: 40px; border-radius: 10px; display: grid; place-items: center; border: 1px solid rgb(0 0 0 / .08); }
+.tp-sw i { width: 36px; height: 26px; border-radius: 6px; border: 1px solid; position: relative; display: block; }
+.tp-sw b { position: absolute; left: 4px; top: 4px; width: 18px; height: 5px; border-radius: 3px; }
+.tp-sw em { position: absolute; right: 4px; top: 3px; width: 7px; height: 7px; border-radius: 50%; }
+.tp-sw u { position: absolute; left: 4px; bottom: 5px; width: 22px; height: 2px; border-radius: 1px; opacity: .6; }
+.tp-n { font-weight: 800; font-size: 14px; }
+.tp-s { font-size: 11px; color: var(--muted); }
+.bg-slots { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 14px; background: var(--code-bg); border: 1px solid var(--line); }
+.bg-slots button { flex: 1 1 auto; border: 0; background: transparent; border-radius: 10px; padding: 7px 10px; font-weight: 700; font-size: 12.5px; cursor: pointer; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.bg-slots button.on { background: var(--solid); color: var(--ink); box-shadow: var(--shadow); }
+.bg-hint { font-size: 11.5px; color: var(--muted); }
+.bg-thumb.sm { width: 112px; }
+
+/* ===== sort bar + list view ===== */
+.sel-sort { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+.sort-by { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); padding: 3px 4px 3px 12px; border-radius: 999px; background: var(--solid); border: 1px solid var(--line); }
+.sort-by select { border: 0; background: transparent; font-weight: 700; color: var(--ink); padding: 4px 6px; cursor: pointer; }
+.sort-dir { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--solid); color: var(--ink); font-weight: 700; font-size: 12px; cursor: pointer; }
+.sort-dir svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.view-tg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px; background: var(--solid); border: 1px solid var(--line); }
+.view-tg button { border: 0; background: transparent; border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 700; color: var(--muted); cursor: pointer; }
+.view-tg button.on { background: var(--sky); color: #fff; }
+.sel-stage.listv { display: flex; flex-direction: column; gap: 10px; padding-block: 14px 4px; width: min(860px, 100%); }
+.sel-list-new { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: 16px; border: 2px dashed var(--line-strong); background: color-mix(in srgb, var(--solid) 70%, transparent); color: var(--sky); font-weight: 800; font-family: var(--f-display); font-size: 15px; cursor: pointer; }
+.sel-list-new .plus { font-size: 22px; line-height: 1; }
+.sel-list-new:hover { border-color: var(--sky); background: var(--solid); }
+.sel-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.sel-row { width: 100%; display: grid; grid-template-columns: 30px 48px minmax(0, 1.2fr) minmax(0, 2fr) auto; gap: 12px; align-items: center; padding: 8px 14px 8px 10px; border-radius: 16px; border: 1px solid var(--line); background: var(--solid); cursor: pointer; text-align: left; color: var(--ink); transition: transform .25s cubic-bezier(.3, 1.6, .5, 1), box-shadow .2s, border-color .2s; }
+.sel-row:hover { transform: translateX(4px); border-color: var(--sky); box-shadow: var(--shadow); }
+.sel-row .token { width: 48px; height: 48px; font-size: 19px; }
+.sr-rank { font-family: var(--f-latin); font-weight: 800; font-size: 15px; color: var(--sky); text-align: center; }
+.sr-name { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+.sr-name b { font-family: var(--f-display); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sr-name small { font-size: 11px; color: var(--muted); }
+.sr-meta { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px 10px; font-size: 12.5px; }
+.sr-meta span { display: flex; flex-direction: column; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sr-meta i { font-style: normal; font-size: 10px; color: var(--muted); }
+.sr-flags { display: flex; gap: 4px; }
+.sr-flags em { font-style: normal; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; color: #fff; background: linear-gradient(135deg, var(--sky), var(--cyan)); }
+.sr-flags em.lk { background: linear-gradient(135deg, var(--amber), var(--orange)); }
+@media (max-width: 640px) {
+  .sel-row { grid-template-columns: 22px 40px minmax(0, 1fr); gap: 4px 10px; }
+  .sel-row .token { width: 40px; height: 40px; font-size: 16px; }
+  .sr-rank { grid-column: 1; grid-row: 1; }
+  .sel-row .token { grid-column: 2; grid-row: 1; }
+  .sr-name { grid-column: 3; grid-row: 1; padding-right: 64px; }
+  .sr-meta { grid-column: 2 / -1; grid-row: 2; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sr-flags { grid-column: 3; grid-row: 1; justify-self: end; align-self: start; }
+}
+
 /* ===== phones ===== */
 .mbar, .touch-hint { display: none; }
 @media (pointer: coarse) {
@@ -1004,12 +1065,21 @@ label.btn { display: inline-block; }
         <button type="button" role="tab" data-seltab="mine" class="on" aria-selected="true">自分の探索者</button>
         <button type="button" role="tab" data-seltab="friends" aria-selected="false">フレンド<span id="sel-req"></span></button>
       </div>
+      <div class="sel-sort" id="sel-sort">
+        <label class="sort-by"><span>並び順</span>
+          <select id="sort-key" aria-label="並び順">
+            <option value="created">追加した順</option><option value="name">名前（五十音）</option><option value="age">年齢</option>
+            <option value="birthday">誕生日（1月→12月）</option><option value="updated">最近さわった順</option><option value="system">版（6版／7版）</option>
+          </select></label>
+        <button type="button" class="sort-dir" id="sort-dir" aria-label="並びを逆にする"></button>
+        <div class="view-tg" role="group" aria-label="表示の形"><button type="button" data-view="orbit">ふよふよ</button><button type="button" data-view="list">一覧</button></div>
+      </div>
     </div>
     <div class="sel-stage" id="sel-stage"></div>
     <div class="sel-foot">
       <button class="btn" type="button" id="sel-import">読み込み（いあきゃら など）</button>
       <button class="btn" type="button" id="sel-friends">フレンド管理</button>
-      <button class="btn" type="button" id="sel-theme">カラー設定</button>
+      <button class="btn" type="button" id="sel-theme">テーマ・背景</button>
       <button class="btn acct-btn" type="button" id="sel-account">ログイン</button>
     </div>
   </div>
@@ -1036,7 +1106,7 @@ label.btn { display: inline-block; }
       <button class="btn primary" id="btn-new" type="button">＋ 新しい探索者</button>
       <button class="btn" id="btn-import" type="button">読み込み</button>
       <button class="btn" id="btn-export" type="button">バックアップ</button>
-      <button class="btn" id="btn-theme" type="button">カラー設定</button>
+      <button class="btn" id="btn-theme" type="button">テーマ・背景</button>
       <button class="btn acct-btn" id="btn-account" type="button">ログイン</button>
     </div>
   </header>
@@ -1148,12 +1218,20 @@ label.btn { display: inline-block; }
 
 <div class="overlay" id="modal-theme" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="theme-title">
-    <h2 id="theme-title">カラー設定</h2>
+    <h2 id="theme-title">テーマ・背景・カラー</h2>
     <p>背景に好きな画像を敷いたり、RGBのスライダーや数値で画面全体の色を変えたりできます。左の丸を押すと色を選ぶこともできます。変更はすぐ反映され、このブラウザに保存されます。</p>
+    <div class="th-sec"><b>テーマ</b><span>選ぶと全体の色と雰囲気が変わります。下の色で細かく調整もできます。</span></div>
+    <div class="theme-presets" id="theme-presets"></div>
+    <div class="th-sec"><b>背景画像</b><span>どこの背景を変えるか選んでから、画像を選んでください。</span></div>
+    <div class="bg-slots" id="bg-slots" role="group" aria-label="背景を設定する場所">
+      <button type="button" data-bgslot="all" class="on">共通</button>
+      <button type="button" data-bgslot="sel">探索者をえらぶ画面</button>
+      <button type="button" data-bgslot="char">このキャラ（<span id="bgslot-char-name"></span>）</button>
+    </div>
     <div class="bgset">
       <div class="bg-thumb" id="bg-thumb"></div>
       <div class="bg-ctl">
-        <b>背景画像</b>
+        <span class="bg-hint" id="bg-slot-hint"></span>
         <div class="row"><label class="btn small" for="bg-file">画像を選ぶ</label><input type="file" id="bg-file" accept="image/*" hidden><button class="btn small danger" type="button" id="bg-remove">画像を外す</button></div>
         <label class="bg-slider" for="bg-veil">色を重ねる濃さ<input type="range" id="bg-veil" min="0" max="90"><output id="bg-veil-v"></output></label>
         <label class="bg-slider" for="bg-blur">ぼかし<input type="range" id="bg-blur" min="0" max="20"><output id="bg-blur-v"></output></label>
@@ -1162,7 +1240,7 @@ label.btn { display: inline-block; }
     </div>
     <div class="theme-rows" id="theme-rows"></div>
     <div class="modal-actions">
-      <button class="btn ghost" type="button" id="theme-reset">色をデフォルトに戻す</button>
+      <button class="btn ghost" type="button" id="theme-reset">色をテーマの初期値に戻す</button>
       <button class="btn primary" type="button" data-close>完了</button>
     </div>
   </div>
@@ -1643,7 +1721,7 @@ const portraitSrc = c => c.portrait || (/^https?:\/\//.test(c.profile.iconUrl ||
 const tokenHtml = c => { const src = portraitSrc(c); return `<span class="token" style="--tc:${esc(c.profile.color || '#1f6fe0')}" aria-hidden="true">${esc(initial(c))}${src ? `<img src="${esc(imgSrc(src))}" alt="" onerror="this.remove()">` : ''}</span>`; };
 
 function renderShelf() {
-  $('shelf').innerHTML = state.chars.map(c => `
+  $('shelf').innerHTML = sortedChars().map(c => `
     <button class="char-item ${c.id === state.activeId ? 'active' : ''}" type="button" data-id="${c.id}">
       ${tokenHtml(c)}
       <span style="min-width:0"><span class="nm">${esc(c.profile.name || '名無し')}</span><span class="sys">${esc(SYS[c.system].short)}${c.profile.occupation ? ' ・ ' + esc(c.profile.occupation) : ''}</span></span>
@@ -1799,6 +1877,13 @@ function sectionBody(key, c) {
       </div>
       ${field('画像URL（ココフォリアのコマ画像）', 'profile.iconUrl', p.iconUrl, { wrap: 'wide', ph: 'https://…（空欄ならココフォリアで後から設定）' })}
       ${field('参照URL', 'profile.externalUrl', p.externalUrl, { wrap: 'wide', ph: 'https://…' })}
+      <div class="field wide"><span class="lbl">このキャラの背景画像（シートを開いているときの背景）</span>
+        <div class="portrait-row">
+          <div class="bg-thumb sm" style="${c.bgImage ? `background-image:url('${esc(imgSrc(c.bgImage))}')` : ''}">${c.bgImage ? '' : '共通の画像'}</div>
+          <div class="portrait-actions"><div class="row"><label class="btn small" for="f-charbg-file">画像を選ぶ</label><input type="file" id="f-charbg-file" accept="image/*" hidden>${c.bgImage ? '<button class="btn small danger" type="button" data-act="charbg-remove">画像を外す</button>' : ''}</div>
+          <p>未設定のときは、カラー設定の「共通」の背景が使われます。</p></div>
+        </div>
+      </div>
     </div></section>`;
 
     case 'abilities': {
@@ -2119,7 +2204,7 @@ function fxAt(el, burst) { const r = el.getBoundingClientRect(); fx(r.left + r.w
 function enter(el) { if (!el || reduceMotion.matches) return; el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter'); }
 document.addEventListener('pointerdown', e => { if (e.button === 0) fx(e.clientX, e.clientY); });
 
-function renderAll() { if (!$('select').hidden) renderSelect(); $('copy-status').textContent = ''; renderShelf(); renderSheet(); renderOutput(); enter($('sheet')); enter(document.querySelector('.koma')); }
+function renderAll() { applyBg(); if (!$('select').hidden) renderSelect(); $('copy-status').textContent = ''; renderShelf(); renderSheet(); renderOutput(); enter($('sheet')); enter(document.querySelector('.koma')); }
 function touch() {
   const c = active(); c.updatedAt = Date.now(); delete c.sample;
   save(); renderShelf(); renderOutput(); updateComputed();
@@ -2171,6 +2256,7 @@ onBoth('click', e => {
       focus = pid(`skills.${i + 1}.sub`); break;
     }
     case 'portrait-remove': c.portrait = ''; break;
+    case 'charbg-remove': c.bgImage = ''; applyBg(); break;
     case 'lock':
       c.locked = !c.locked;
       toast(c.locked ? 'このキャラシは非公開になりました。フレンドからは見えません。' : 'このキャラシはフレンドに公開されます。');
@@ -2389,25 +2475,64 @@ const THEME_ROWS = [
 ];
 const hexToRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 const rgbToHex = a => '#' + a.map(v => Math.max(0, Math.min(255, Math.round(v) || 0)).toString(16).padStart(2, '0')).join('');
-const themeVals = () => ({ ...THEME_DEFAULT, ...(state.theme || {}) });
+const THEME_PRESETS = {
+  sky:    { name: '近未来', sub: '白と空色', look: '', vals: {} },
+  abyss:  { name: '深淵', sub: 'ダーク・クトゥルフ', look: 'dark mincho', vals: { bg: '#0a1013', solid: '#141d21', ink: '#dbe7e2', sky: '#3fae94', cyan: '#71cfc0', amber: '#d4ae62' } },
+  tome:   { name: '古書', sub: 'セピアの羊皮紙', look: 'mincho', vals: { bg: '#e6dac1', solid: '#f6efdd', ink: '#3a2817', sky: '#8a4a26', cyan: '#b07a3a', amber: '#c0562a' } },
+  sakura: { name: '和風', sub: '桜と墨', look: 'mincho', vals: { bg: '#efe3e4', solid: '#fcf7f6', ink: '#2a1c22', sky: '#b23f68', cyan: '#d98aa6', amber: '#c08a2a' } },
+  neon:   { name: 'ネオン', sub: '夜のサイバー', look: 'dark', vals: { bg: '#0b0918', solid: '#16122b', ink: '#ece8ff', sky: '#a159f5', cyan: '#22c8e8', amber: '#f2569e' } },
+  forest: { name: '森', sub: '深緑とランタン', look: '', vals: { bg: '#dfe7dc', solid: '#f5f8f1', ink: '#1c2a1f', sky: '#2f7d4f', cyan: '#5aa78a', amber: '#d98a1f' } },
+};
+const presetOf = () => THEME_PRESETS[state.themePreset] || THEME_PRESETS.sky;
+const themeVals = () => ({ ...THEME_DEFAULT, ...presetOf().vals, ...(state.theme || {}) });
+function renderPresets() {
+  const cur = state.themePreset && THEME_PRESETS[state.themePreset] ? state.themePreset : 'sky';
+  $('theme-presets').innerHTML = Object.entries(THEME_PRESETS).map(([k, t]) => {
+    const v = { ...THEME_DEFAULT, ...t.vals };
+    return `<button type="button" class="tp ${k === cur ? 'on' : ''}" data-preset-theme="${k}" aria-pressed="${k === cur}">
+      <span class="tp-sw" style="background:${v.bg}"><i style="background:${v.solid};border-color:${v.sky}"><b style="background:linear-gradient(100deg, ${v.sky}, ${v.cyan})"></b><em style="background:${v.amber}"></em><u style="background:${v.ink}"></u></i></span>
+      <span class="tp-n">${t.name}</span><span class="tp-s">${t.sub}</span>
+    </button>`;
+  }).join('');
+}
+
 function applyTheme() {
   const t = themeVals();
   Object.entries(t).forEach(([k, v]) => document.documentElement.style.setProperty('--' + k, v));
-  const L = $('bg-layer');
-  L.classList.toggle('on', !!state.bgImage);
-  document.documentElement.classList.toggle('has-bg', !!state.bgImage);
-  L.style.backgroundImage = state.bgImage ? `url("${imgSrc(state.bgImage)}")` : '';
+  document.documentElement.dataset.look = presetOf().look;
+  applyBg();
+}
+function applyBg() {
+  const ac = state.chars && state.chars.find(c => c.id === state.activeId);
+  const sheetImg = (ac && ac.bgImage) || state.bgImage || '';
+  const selImg = state.selBgImage || state.bgImage || '';
+  const L = $('bg-layer'), R = document.documentElement.style;
+  L.classList.toggle('on', !!sheetImg);
+  document.documentElement.classList.toggle('has-bg', !!sheetImg);
+  document.documentElement.classList.toggle('sel-has-bg', !!selImg);
+  L.style.backgroundImage = sheetImg ? `url("${imgSrc(sheetImg)}")` : '';
   L.style.setProperty('--veil', (state.bgVeil ?? 15) / 100);
-  const R = document.documentElement.style;
-  R.setProperty('--veil', (state.bgVeil ?? 15) / 100); R.setProperty('--bgblur', (state.bgBlur ?? 0) + 'px');
-  R.setProperty('--sel-img', state.bgImage ? `url("${imgSrc(state.bgImage)}")` : 'none');
   L.style.setProperty('--bgblur', (state.bgBlur ?? 0) + 'px');
-  document.documentElement.style.setProperty('--glass-a', (100 - (state.bgGlass ?? 75)) + '%');
+  R.setProperty('--veil', (state.bgVeil ?? 15) / 100); R.setProperty('--bgblur', (state.bgBlur ?? 0) + 'px');
+  R.setProperty('--sel-img', selImg ? `url("${imgSrc(selImg)}")` : 'none');
+  R.setProperty('--glass-a', (100 - (state.bgGlass ?? 75)) + '%');
+}
+let bgSlot = 'all';
+const bgGet = slot => slot === 'sel' ? state.selBgImage : slot === 'char' ? (active() || {}).bgImage : state.bgImage;
+function bgSet(slot, v) {
+  if (slot === 'sel') state.selBgImage = v;
+  else if (slot === 'char') { const c = active(); c.bgImage = v; c.updatedAt = Date.now(); }
+  else state.bgImage = v;
 }
 function renderBgControls() {
-  $('bg-thumb').style.backgroundImage = state.bgImage ? `url("${imgSrc(state.bgImage)}")` : '';
-  $('bg-thumb').textContent = state.bgImage ? '' : '未設定';
-  $('bg-remove').hidden = !state.bgImage;
+  const ac = active();
+  document.querySelectorAll('[data-bgslot]').forEach(b => { const on = b.dataset.bgslot === bgSlot; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+  const cn = $('bgslot-char-name'); if (cn) cn.textContent = (ac && ac.profile.name) || '名無し';
+  const img = bgGet(bgSlot);
+  $('bg-thumb').style.backgroundImage = img ? `url("${imgSrc(img)}")` : '';
+  $('bg-thumb').textContent = img ? '' : (bgSlot === 'all' ? '未設定' : '共通の画像を使用');
+  $('bg-remove').hidden = !img;
+  $('bg-slot-hint').textContent = { all: '「探索者をえらぶ画面」と各キャラで画像を設定していないときに使われます。', sel: '探索者をえらぶ画面（フレンド一覧も）だけの背景です。未設定なら共通の画像を使います。', char: `「${(ac && ac.profile.name) || '名無し'}」のシートを開いているときだけの背景です。キャラを切り替えると、そのキャラの背景に変わります。` }[bgSlot];
   $('bg-veil').value = state.bgVeil ?? 15; $('bg-veil-v').textContent = (state.bgVeil ?? 15) + '%';
   $('bg-blur').value = state.bgBlur ?? 0; $('bg-blur-v').textContent = (state.bgBlur ?? 0) + 'px';
   $('bg-glass').value = state.bgGlass ?? 75; $('bg-glass-v').textContent = (state.bgGlass ?? 75) + '%';
@@ -2440,17 +2565,24 @@ $('theme-rows').addEventListener('input', e => {
   row.querySelector('[data-hex]').textContent = hex.toUpperCase();
   row.querySelectorAll('[data-ch]').forEach(el => { if (el !== e.target) el.value = rgb[+el.dataset.ch]; });
 });
-$('btn-theme').addEventListener('click', () => { renderThemeRows(); renderBgControls(); openModal('modal-theme'); });
+$('btn-theme').addEventListener('click', () => { bgSlot = $('select').hidden ? 'char' : 'sel'; renderPresets(); renderThemeRows(); renderBgControls(); openModal('modal-theme'); });
 $('bg-file').addEventListener('change', async e => {
   const f = e.target.files[0]; e.target.value = '';
   if (!f) return;
   try {
-    state.bgImage = await loadImageData(f, 1920, .8);
-    applyTheme(); renderBgControls(); saveNow();
-    toast('背景画像を設定しました。');
+    bgSet(bgSlot, await loadImageData(f, bgSlot === 'char' ? 1600 : 1920, bgSlot === 'char' ? .78 : .8));
+    applyBg(); renderBgControls(); saveNow(); if (bgSlot === 'char') { scheduleSync(); renderSheet(); }
+    toast({ all: '共通の背景画像を設定しました。', sel: '探索者をえらぶ画面の背景画像を設定しました。', char: 'このキャラの背景画像を設定しました。' }[bgSlot]);
   } catch (err) { toast(err.message); }
 });
-$('bg-remove').addEventListener('click', () => { state.bgImage = ''; applyTheme(); renderBgControls(); save(); });
+$('bg-remove').addEventListener('click', () => { bgSet(bgSlot, ''); applyBg(); renderBgControls(); save(); if (bgSlot === 'char') renderSheet(); });
+$('bg-slots').addEventListener('click', e => { const b = e.target.closest('[data-bgslot]'); if (!b) return; bgSlot = b.dataset.bgslot; renderBgControls(); });
+$('theme-presets').addEventListener('click', e => {
+  const b = e.target.closest('[data-preset-theme]'); if (!b) return;
+  state.themePreset = b.dataset.presetTheme; state.theme = {};
+  applyTheme(); save(); renderPresets(); renderThemeRows();
+  fxAt(b, true);
+});
 $('bg-veil').addEventListener('input', e => { state.bgVeil = +e.target.value; applyTheme(); renderBgControls(); save(); });
 $('bg-blur').addEventListener('input', e => { state.bgBlur = +e.target.value; applyTheme(); renderBgControls(); save(); });
 $('bg-glass').addEventListener('input', e => { state.bgGlass = +e.target.value; applyTheme(); renderBgControls(); save(); });
@@ -2540,6 +2672,13 @@ $('stage-ov').addEventListener('click', e => {
   if (!e.target.closest('.stage-tools, .stage-plate, .stage-empty')) closeStage();
 });
 document.addEventListener('change', async e => {
+  if (e.target.id === 'f-charbg-file') {
+    const f = e.target.files[0]; e.target.value = '';
+    if (!f) return;
+    try { const c = active(); c.bgImage = await loadImageData(f, 1600, .78); touch(); renderSheet(); applyBg(); toast('このキャラの背景画像を設定しました。'); }
+    catch (err) { toast(err.message); }
+    return;
+  }
   if (e.target.id !== 'f-portrait-file' && e.target.id !== 'stage-file') return;
   const f = e.target.files[0]; e.target.value = '';
   if (!f) return;
@@ -3399,6 +3538,76 @@ $('fview-body').addEventListener('click', e => {
 $('fview-title').addEventListener('click', e => { if (e.target.closest('[data-fvback]')) { fviewCur = null; renderFviewList(); } });
 
 
+
+/* ================= 並べ替え ================= */
+const SORT_LABEL = { created: ['新しい順', '古い順'], name: ['あ→ん', 'ん→あ'], age: ['若い順', '年上順'], birthday: ['1月→12月', '12月→1月'], updated: ['最近順', '昔順'], system: ['6版→7版', '7版→6版'] };
+function bdayKey(t) {
+  t = toHalf(t || '');
+  let m = t.match(/(\d{4})\s*[\/\-.年]\s*(\d{1,2})\s*[\/\-.月]\s*(\d{1,2})/);
+  if (m) return +m[2] * 100 + +m[3];
+  m = t.match(/(\d{1,2})\s*[月\/\-.]\s*(\d{1,2})/);
+  if (m) return +m[1] * 100 + +m[2];
+  m = t.match(/(\d{1,2})\s*月/);
+  return m ? +m[1] * 100 : null;
+}
+function ageKey(t) { const m = toHalf(t || '').match(/\d+/); return m ? +m[0] : null; }
+function sortedChars() {
+  const key = state.sortKey || 'created', desc = !!state.sortDesc;
+  const list = state.chars.map((c, i) => ({ c, i }));
+  const val = ({ c, i }) => {
+    switch (key) {
+      case 'name': { const n = (c.profile.kana || c.profile.name || '').trim(); return n || null; }
+      case 'age': return ageKey(c.profile.age);
+      case 'birthday': return bdayKey(c.profile.birthday);
+      case 'updated': return -(c.updatedAt || 0);
+      case 'system': return c.system === 'coc7' ? 7 : 6;
+      default: return i;
+    }
+  };
+  list.forEach(x => { x.v = val(x); });
+  list.sort((a, b) => {
+    if (a.v == null && b.v == null) return a.i - b.i;
+    if (a.v == null) return 1;
+    if (b.v == null) return -1;
+    const d = typeof a.v === 'string' ? a.v.localeCompare(b.v, 'ja') : a.v - b.v;
+    return (desc ? -d : d) || a.i - b.i;
+  });
+  return list.map(x => x.c);
+}
+function sortValueText(c) {
+  switch (state.sortKey) {
+    case 'age': return c.profile.age ? c.profile.age + '歳' : '年齢未設定';
+    case 'birthday': return c.profile.birthday ? '誕生日 ' + c.profile.birthday : '誕生日未設定';
+    case 'updated': { const d = new Date(c.updatedAt || 0); return c.updatedAt ? `${d.getMonth() + 1}/${d.getDate()} 更新` : ''; }
+    default: return '';
+  }
+}
+function renderSortBar() {
+  $('sel-sort').hidden = selTab !== 'mine';
+  $('sort-key').value = state.sortKey || 'created';
+  const lab = SORT_LABEL[state.sortKey || 'created'];
+  $('sort-dir').innerHTML = `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4v12M3 13l3 3 3-3M14 16V4M11 7l3-3 3 3"/></svg>${lab[state.sortDesc ? 1 : 0]}`;
+  document.querySelectorAll('[data-view]').forEach(b => { const on = b.dataset.view === (state.selView || 'orbit'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+}
+function listViewHtml(chars) {
+  return `<button class="sel-list-new" type="button" id="sel-new"><span class="plus">＋</span>新しい探索者をつくる</button>
+  <ol class="sel-list">${chars.map((c, i) => {
+    const p = c.profile;
+    return `<li><button class="sel-row" type="button" data-id="${c.id}" aria-label="${esc(p.name || '名無し')}のシートを開く">
+      <span class="sr-rank">${i + 1}</span>${tokenHtml(c)}
+      <span class="sr-name"><b>${esc(p.name || '名無し')}</b><small>${esc(p.kana || '')}</small></span>
+      <span class="sr-meta"><span><i>年齢</i>${esc(p.age ? p.age + '歳' : '—')}</span><span><i>誕生日</i>${esc(p.birthday || '—')}</span><span><i>職業</i>${esc(p.occupation || '—')}</span><span><i>版</i>${esc(SYS[c.system].short)}</span></span>
+      <span class="sr-flags">${c.bgm ? '<em title="BGMあり">♪</em>' : ''}${c.locked ? '<em class="lk" title="フレンドに非公開">非公開</em>' : ''}</span>
+    </button></li>`;
+  }).join('')}</ol>`;
+}
+$('sel-sort').addEventListener('change', e => { if (e.target.id === 'sort-key') { state.sortKey = e.target.value; state.sortDesc = false; save(); renderSelect(); popSelect(); renderShelf(); } });
+$('sel-sort').addEventListener('click', e => {
+  if (e.target.closest('#sort-dir')) { state.sortDesc = !state.sortDesc; save(); renderSelect(); popSelect(); renderShelf(); return; }
+  const v = e.target.closest('[data-view]');
+  if (v && v.dataset.view !== (state.selView || 'orbit')) { state.selView = v.dataset.view; save(); renderSelect(); popSelect(); }
+});
+
 /* ---- フレンド一覧（探索者をえらぶ画面の「フレンド」タブ） ---- */
 let selTab = 'mine';
 function ringLayout(n, W, B) {
@@ -3480,11 +3689,18 @@ function renderSelect() {
   $('sel-eyebrow').textContent = selTab === 'friends' ? 'FRIENDS' : 'SELECT YOUR INVESTIGATOR';
   $('sel-title').textContent = selTab === 'friends' ? 'フレンド一覧' : '探索者をえらぶ';
   $('sel-desc').textContent = selTab === 'friends' ? 'フレンドを押すと、その人の公開キャラシが見られます。真ん中からフレンドを追加できます。' : 'キャラを押すとシートが開きます。真ん中から新しい探索者をつくれます。';
+  renderSortBar();
   if (selTab === 'friends') { renderFriendSelect(stage); return; }
+  if ((state.selView || 'orbit') === 'list') {
+    stage.classList.remove('grid'); stage.classList.add('listv'); stage.style.height = '';
+    stage.innerHTML = listViewHtml(sortedChars());
+    return;
+  }
+  stage.classList.remove('listv');
   const W = stage.clientWidth || Math.min(1100, innerWidth - 32);
   const small = W < 560;
   const B = small ? 70 : 100;
-  const chars = state.chars;
+  const chars = sortedChars();
   const pos = [], radii = [];
   let r = small ? Math.min(150, W / 2 - (B + 44) / 2 - 4) : 210, ring = 0, idx = 0, grid = false;
   const ky = small ? 1.45 : 1;
@@ -3501,7 +3717,7 @@ function renderSelect() {
   }
   const newBtn = `<button class="sel-new" type="button" id="sel-new"><span class="plus">＋</span><b>新しい探索者</b><small>NEW INVESTIGATOR</small></button>`;
   const charBtn = (c, i, xy) => `<button class="sel-char" type="button" data-id="${c.id}" style="--i:${i};--B:${B}px${xy ? `;left:calc(50% + ${xy[0].toFixed(1)}px);top:calc(50% + ${xy[1].toFixed(1)}px)` : ''}" aria-label="${esc(c.profile.name || '名無し')}のシートを開く">
-      ${tokenHtml(c)}${c.bgm ? '<span class="sel-bgm" title="BGMあり">♪</span>' : ''}${c.locked ? '<span class="sel-lock" title="フレンドに非公開"><svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg></span>' : ''}<span class="sel-name">${esc(c.profile.name || '名無し')}</span><span class="sel-sys">${esc(SYS[c.system].short)}${c.profile.occupation ? ' ・ ' + esc(c.profile.occupation) : ''}</span>
+      ${tokenHtml(c)}${c.bgm ? '<span class="sel-bgm" title="BGMあり">♪</span>' : ''}${c.locked ? '<span class="sel-lock" title="フレンドに非公開"><svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg></span>' : ''}<span class="sel-name">${esc(c.profile.name || '名無し')}</span><span class="sel-sys">${esc(sortValueText(c) || (SYS[c.system].short + (c.profile.occupation ? ' ・ ' + c.profile.occupation : '')))}</span>
     </button>`;
   stage.classList.toggle('grid', grid);
   if (grid) idx = chars.length;
@@ -3523,7 +3739,7 @@ function renderSelect() {
 function popSelect() {
   if (reduceMotion.matches) return;
   const stage = $('sel-stage');
-  stage.querySelectorAll('.sel-char').forEach((el, i) => el.animate(
+  stage.querySelectorAll('.sel-char, .sel-row').forEach((el, i) => el.animate(
     [{ opacity: 0, transform: 'scale(.3)', filter: 'blur(6px)' }, { opacity: 1, transform: 'scale(1)', filter: 'blur(0)' }],
     { duration: 700, delay: 120 + i * 70, easing: 'cubic-bezier(.2, .9, .3, 1.25)', fill: 'backwards' }));
   $('sel-new')?.animate([{ opacity: 0, scale: .6 }, { opacity: 1, scale: 1 }], { duration: 700, easing: 'cubic-bezier(.2, .9, .3, 1.2)' });
@@ -3534,6 +3750,7 @@ function showSelect() {
   if (selTab === 'friends') setTimeout(refreshFriendView, 0);
   stopBgm(); $('bgm').hidden = true;
   const sel = $('select'); sel.hidden = false; sel.scrollTop = 0;
+  applyBg();
   document.documentElement.style.overflow = 'hidden';
   renderSelect();
   if (!reduceMotion.matches) sel.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: 'ease-out' });
@@ -3564,7 +3781,7 @@ $('select').addEventListener('click', e => {
   if (e.target.closest('#sel-new')) { openModal('modal-new'); return; }
   if (e.target.closest('#sel-import')) { $('btn-import').click(); return; }
   if (e.target.closest('#sel-theme')) { $('btn-theme').click(); return; }
-  const ch = e.target.closest('.sel-char'); if (!ch) return;
+  const ch = e.target.closest('.sel-char, .sel-row'); if (!ch) return;
   if (selLong) { selLong = false; return; }
   state.activeId = ch.dataset.id; save();
   renderShelf(); renderSheet(); renderOutput();
@@ -3573,7 +3790,7 @@ $('select').addEventListener('click', e => {
 });
 $('select').addEventListener('pointerover', e => {
   if (!canHover.matches) return;
-  const ch = e.target.closest('.sel-char');
+  const ch = e.target.closest('.sel-char:not(.sel-friend), .sel-row');
   if (ch && ch.dataset.id !== peekId) showPeek(ch);
   if (!ch && peekId) hidePeek();
 });
