@@ -864,7 +864,7 @@ label.btn { display: inline-block; }
 @media (max-width: 700px) { .sv-top, .sv-grid { grid-template-columns: minmax(0, 1fr); } .sv-art { min-height: 200px; } }
 
 /* ===== friend list on the select screen ===== */
-.sel-tabs { display: inline-grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-top: 10px; border-radius: 999px; background: var(--solid); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.sel-tabs { display: inline-grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; padding: 4px; margin-top: 10px; border-radius: 999px; background: var(--solid); border: 1px solid var(--line); box-shadow: var(--shadow); }
 .sel-tabs button { border: 0; background: transparent; border-radius: 999px; padding: 8px 20px; font-weight: 800; font-family: var(--f-display); cursor: pointer; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; gap: 4px; white-space: nowrap; transition: background .25s, color .25s; }
 .sel-tabs button.on { background: linear-gradient(100deg, var(--sky), var(--cyan)); color: #fff; box-shadow: 0 6px 16px -8px var(--sky); }
 .sel-tabs .req-badge { margin-left: 2px; }
@@ -1355,6 +1355,46 @@ label.btn { display: inline-block; }
 .bk-ribbon { background: linear-gradient(90deg, rgb(0 0 0 / .35), transparent 30%, transparent 70%, rgb(0 0 0 / .4)), #1d1a22; }
 .bk-clasp { filter: saturate(.4); }
 
+
+/* ===== groups ===== */
+.grp-list { display: flex; flex-direction: column; gap: 10px; }
+.grp-h { margin: 18px 0 2px; font-size: 14px; font-family: var(--f-display); color: var(--muted); letter-spacing: .1em; }
+.grp-empty { text-align: center; padding: 18px; }
+.grp-card { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border-radius: 18px; background: var(--solid); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.grp-card.locked { border-style: dashed; }
+.gc-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.gc-title { display: flex; align-items: baseline; gap: 10px; flex: 1; min-width: 0; flex-wrap: wrap; }
+.gc-title b { font-family: var(--f-display); font-size: 17px; overflow-wrap: anywhere; }
+.gc-date { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.gc-owner { font-size: 12px; color: var(--muted); }
+.gc-lock { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 700; padding: 2px 10px; border-radius: 999px; color: color-mix(in srgb, var(--amber) 70%, var(--ink)); background: color-mix(in srgb, var(--amber) 18%, var(--solid)); border: 1px solid var(--amber); }
+.gc-lock .lk, .lock-btn .lk { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.gc-row { display: grid; grid-template-columns: 4.2em minmax(0, 1fr); gap: 8px; align-items: start; }
+.gc-role { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-align: center; padding: 3px 0; border-radius: 6px; color: #fff; }
+.gc-role.kp { background: color-mix(in srgb, var(--ink) 75%, var(--solid)); }
+.gc-role.pl { background: var(--sky); }
+.gc-kp { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+.gc-pls { display: flex; flex-wrap: wrap; gap: 6px; }
+.gc-pl { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px 3px 3px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--code-bg); cursor: pointer; color: var(--ink); font-size: 13px; transition: transform .25s cubic-bezier(.3, 1.6, .5, 1), border-color .2s; }
+.gc-pl:hover:not(:disabled) { border-color: var(--sky); transform: translateY(-1px); }
+.gc-pl:disabled { cursor: default; }
+.gc-pn { font-weight: 700; }
+.gc-cn { color: var(--sky); font-weight: 700; }
+.gc-cn::before { content: "「"; color: var(--muted); }
+.gc-cn::after { content: "」"; color: var(--muted); }
+.gc-dot { --c: var(--sky); width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 11px; font-weight: 800; color: #fff; background: var(--c); flex: none; }
+.gc-none { color: var(--muted); font-size: 12.5px; }
+.gc-note { margin: 0; font-size: 12.5px; color: var(--muted); white-space: pre-wrap; }
+#g-note { min-height: 80px; }
+.gm-sec { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 14px; background: var(--code-bg); border: 1px solid var(--line); }
+.gm-list { display: flex; flex-direction: column; gap: 8px; }
+.gm-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 36px; gap: 8px; align-items: center; }
+.gm-row:has(> input[data-gname]) { grid-template-columns: minmax(0, 1fr) minmax(0, .8fr) minmax(0, 1fr) 36px; }
+.gm-row:has(> input[data-gname]):has(> select[data-gchar]):has(input[data-gcname]) { grid-template-columns: minmax(0, 1fr) minmax(0, .8fr) minmax(0, 1fr) minmax(0, 1fr) 36px; }
+.gm-row:has(> select[data-gchar]):has(> input[data-gcname]):not(:has(> input[data-gname])) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 36px; }
+.gm-row.kp { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+@media (max-width: 560px) { .gm-row, .gm-row:has(> input[data-gname]), .gm-row:has(> select[data-gchar]):has(> input[data-gcname]) { grid-template-columns: minmax(0, 1fr) 36px; } .gm-row > :not(.icon-btn) { grid-column: 1; } .gm-row > .icon-btn { grid-column: 2; grid-row: 1; } .gm-row.kp { grid-template-columns: minmax(0, 1fr); } }
+
 /* ===== phones ===== */
 .mbar, .touch-hint { display: none; }
 @media (pointer: coarse) {
@@ -1479,6 +1519,7 @@ label.btn { display: inline-block; }
       <div class="sel-tabs" role="tablist" aria-label="表示の切り替え">
         <button type="button" role="tab" data-seltab="mine" class="on" aria-selected="true">自分の探索者</button>
         <button type="button" role="tab" data-seltab="friends" aria-selected="false">フレンド<span id="sel-req"></span></button>
+        <button type="button" role="tab" data-seltab="groups" aria-selected="false">グループ</button>
       </div>
       <div class="sel-sort" id="sel-sort">
         <label class="sort-by"><span>並び順</span>
@@ -1730,6 +1771,20 @@ label.btn { display: inline-block; }
   <div class="modal modal-xwide" role="dialog" aria-modal="true" aria-labelledby="fview-title">
     <div class="fview-head"><h2 id="fview-title"></h2><button class="btn ghost" type="button" data-close>閉じる</button></div>
     <div id="fview-body"></div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-group" hidden>
+  <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="grp-title">
+    <h2 id="grp-title">グループ</h2>
+    <p>遊んだシナリオと、キーパー・探索者（誰がどのキャラで参加したか）を記録します。フレンドは公開キャラから選べます。</p>
+    <div id="grp-body"></div>
+    <div class="modal-actions">
+      <button class="btn danger" type="button" id="grp-del">このグループを削除</button>
+      <span style="flex:1"></span>
+      <button class="btn ghost" type="button" data-close>キャンセル</button>
+      <button class="btn primary" type="button" id="grp-save">保存する</button>
+    </div>
   </div>
 </div>
 
@@ -3814,6 +3869,7 @@ async function flushSync() {
     setSync('ok');
   } catch (e) { setSync('error', jaErr(e)); }
   finally { syncing = false; if (syncAgain) { syncAgain = false; scheduleSync(); } }
+  flushGroups();
 }
 async function pullAndMerge() {
   setSync('pending');
@@ -3829,6 +3885,7 @@ async function pullAndMerge() {
   const real = state.chars.filter(c => !c.sample);
   if (real.length && state.chars.some(c => c.sample)) state.chars = real;
   if (!state.chars.some(c => c.id === state.activeId)) state.activeId = state.chars[0].id;
+  await pullGroups();
   saveNow();
   renderAll();
   await flushSync();
@@ -3841,7 +3898,7 @@ async function loadFriendships() {
   let profs = [];
   if (ids.length) { const r = await sb.from('profiles').select('id,username').in('id', ids); if (r.error) throw r.error; profs = r.data || []; }
   const nm = id => (profs.find(p => p.id === id) || {}).username || '（退会したユーザー）';
-  online = { friends: [], incoming: [], outgoing: [], chars: (online && online.chars) || {} };
+  online = { friends: [], incoming: [], outgoing: [], chars: (online && online.chars) || {}, groups: (online && online.groups) || [] };
   (data || []).forEach(r => {
     const other = r.requester === me.id ? r.addressee : r.requester;
     const u = { id: other, username: nm(other) };
@@ -3874,7 +3931,8 @@ async function handleSession(session) {
     await pullAndMerge();
     await loadFriendships();
     await loadFriendChars();
-    if (!$('select').hidden && selTab === 'friends') renderSelect();
+    await loadFriendGroups();
+    if (!$('select').hidden && (selTab === 'friends' || selTab === 'groups')) renderSelect();
   } catch (e) { setSync('error', jaErr(e)); }
 }
 async function initCloud() {
@@ -3894,10 +3952,11 @@ async function logout() {
   if (uid) {
     state.chars = state.chars.filter(c => c.owner !== uid);
     state.friends = friendsOf().filter(f => !f.uid);
+    state.groups = groupsOf().filter(g => g.owner !== uid);
     if (!state.chars.length) state.chars = [sample()];
     state.activeId = state.chars[0].id;
   }
-  me = null; online = null; lastSynced.clear(); acctTab = 'login';
+  me = null; online = null; lastSynced.clear(); lastGroupSync.clear(); acctTab = 'login';
   saveNow(); setSync('off'); renderAll(); renderAccount();
   if (!$('select').hidden) renderSelect();
   stopBgm();
@@ -4396,20 +4455,222 @@ async function loadFriendChars() {
   if (ids.length) {
     const { data, error } = await sb.from('characters').select('id,owner,name,color:data->profile->>color').in('owner', ids);
     if (error) throw error;
-    (data || []).forEach(r => { (map[r.owner] = map[r.owner] || []).push({ name: r.name || (r.data && r.data.profile && r.data.profile.name) || '', color: r.color || (r.data && r.data.profile && r.data.profile.color) || '#1f6fe0' }); });
+    (data || []).forEach(r => { (map[r.owner] = map[r.owner] || []).push({ id: r.id, name: r.name || (r.data && r.data.profile && r.data.profile.name) || '', color: r.color || (r.data && r.data.profile && r.data.profile.color) || '#1f6fe0' }); });
   }
   online.chars = map;
 }
 async function refreshFriendView() {
   if (!sb || !me) return;
   try { await loadFriendships(); await loadFriendChars(); } catch (e) { toast(jaErr(e)); }
-  if (!$('select').hidden && selTab === 'friends') renderSelect();
+  await loadFriendGroups();
+  if (!$('select').hidden && (selTab === 'friends' || selTab === 'groups')) renderSelect();
 }
 function setSelTab(t) {
-  if (selTab === t) return;
+  if (selTab === t) { if (t !== 'mine') refreshFriendView(); return; }
   selTab = t; hidePeek();
   renderSelect(); popSelect();
-  if (t === 'friends') refreshFriendView();
+  if (t === 'friends' || t === 'groups') refreshFriendView();
+}
+
+
+/* ================= グループ（シナリオ・KP・探索者の記録） ================= */
+const groupsOf = () => (state.groups = state.groups || []);
+const lastGroupSync = new Map();
+let groupSyncWarned = false, gDraft = null;
+const missingTable = e => /relation .*groups.* does not exist|Could not find the table|groups/i.test(String(e && (e.message || e)));
+async function flushGroups() {
+  if (!sb || !me) return;
+  try {
+    const mine = groupsOf().filter(g => !g.owner || g.owner === me.id);
+    const rows = [];
+    mine.forEach(g => { g.owner = me.id; const js = JSON.stringify(g); if (lastGroupSync.get(g.id) !== js) rows.push([g, js]); });
+    if (rows.length) {
+      const { error } = await sb.from('groups').upsert(rows.map(([g]) => ({ id: g.id, owner: me.id, locked: !!g.locked, data: g, updated_at: new Date(g.updatedAt || Date.now()).toISOString() })));
+      if (error) throw error;
+      rows.forEach(([g, js]) => lastGroupSync.set(g.id, js));
+    }
+    const live = new Set(mine.map(g => g.id));
+    const gone = [...lastGroupSync.keys()].filter(id => !live.has(id));
+    if (gone.length) {
+      const { error } = await sb.from('groups').delete().in('id', gone);
+      if (error) throw error;
+      gone.forEach(id => lastGroupSync.delete(id));
+    }
+  } catch (e) {
+    if (!groupSyncWarned) { groupSyncWarned = true; toast(missingTable(e) ? 'グループをサーバーに保存するには、サーバーの追加設定（supabase-groups.sql）が必要です。今はこの端末にだけ保存しています。' : 'グループを同期できませんでした：' + jaErr(e)); }
+  }
+}
+async function pullGroups() {
+  if (!sb || !me) return;
+  try {
+    const { data, error } = await sb.from('groups').select('id,data,locked').eq('owner', me.id);
+    if (error) throw error;
+    lastGroupSync.clear();
+    (data || []).forEach(r => {
+      const g = Object.assign({}, r.data, { locked: !!r.locked, owner: me.id });
+      const i = groupsOf().findIndex(x => x.id === r.id);
+      if (i < 0) groupsOf().push(g);
+      else if ((g.updatedAt || 0) >= (groupsOf()[i].updatedAt || 0)) groupsOf()[i] = g;
+      lastGroupSync.set(g.id, JSON.stringify(g));
+    });
+  } catch (e) { /* 追加設定前でも動くように */ }
+}
+async function loadFriendGroups() {
+  if (!sb || !me || !online) return;
+  const ids = online.friends.map(u => u.id);
+  if (!ids.length) { online.groups = []; return; }
+  try {
+    const { data, error } = await sb.from('groups').select('id,owner,data').in('owner', ids);
+    if (error) throw error;
+    online.groups = (data || []).map(r => Object.assign({}, r.data, { owner: r.owner }));
+  } catch (e) { online.groups = []; }
+}
+function whoName(w) {
+  if (!w) return '';
+  if (w.who === 'me') return (me && me.username) || w.name || 'あなた';
+  if (w.who && w.who.startsWith('f:')) { const f = friendsOf().find(x => x.id === w.who.slice(2)); return f ? f.name : (w.name || '？'); }
+  return w.name || '';
+}
+const groupDate = g => g.date || '';
+function sortedGroups(list) { return [...list].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || (b.updatedAt || 0) - (a.updatedAt || 0)); }
+function memberColor(w, ownerUid) {
+  if (w.who === 'me' && (!ownerUid || (me && ownerUid === me.id))) return 'var(--sky)';
+  const uid = w.uid;
+  const f = friendsOf().find(x => (w.who && w.who === 'f:' + x.id) || (uid && x.uid === uid));
+  return f ? f.color : '#8a8f99';
+}
+function groupCardHtml(g, mine) {
+  const owner = !mine && online ? (online.friends.find(u => u.id === g.owner) || {}).username : '';
+  const kpName = mine ? whoName(g.kp) : (g.kp && g.kp.name) || '';
+  const pl = (g.players || []).map((p, i) => {
+    const nm = mine ? whoName(p) : p.name;
+    return `<button class="gc-pl" type="button" data-gopen="${i}" data-gid="${g.id}" data-gmine="${mine ? 1 : 0}" ${p.charName ? '' : 'disabled'}>
+      <span class="gc-dot" style="--c:${esc(memberColor(p, g.owner))}">${esc((nm || '？').charAt(0))}</span>
+      <span class="gc-pn">${esc(nm || '？')}</span>${p.charName ? `<span class="gc-cn">${esc(p.charName)}</span>` : ''}</button>`;
+  }).join('');
+  return `<article class="grp-card ${g.locked ? 'locked' : ''}">
+    <div class="gc-top">
+      <div class="gc-title"><b>${esc(g.name || '無題のシナリオ')}</b>${g.date ? `<span class="gc-date">${esc(g.date)}</span>` : ''}</div>
+      ${g.locked ? `<span class="gc-lock" title="フレンドに非公開">${LOCK_ICON}非公開</span>` : ''}
+      ${mine ? `<button class="btn small" type="button" data-gedit="${g.id}">編集</button>` : `<span class="gc-owner">${esc(owner || 'フレンド')}の記録</span>`}
+    </div>
+    <div class="gc-row"><span class="gc-role kp">KP</span>${kpName ? `<span class="gc-kp"><span class="gc-dot" style="--c:${esc(memberColor(g.kp || {}, g.owner))}">${esc(kpName.charAt(0))}</span>${esc(kpName)}</span>` : '<span class="gc-none">未設定</span>'}</div>
+    <div class="gc-row"><span class="gc-role pl">探索者</span><div class="gc-pls">${pl || '<span class="gc-none">未設定</span>'}</div></div>
+    ${g.note ? `<p class="gc-note">${esc(g.note)}</p>` : ''}
+  </article>`;
+}
+function renderGroupSelect(stage) {
+  stage.classList.remove('grid'); stage.classList.add('listv'); stage.style.height = '';
+  const mine = sortedGroups(groupsOf());
+  const fr = online && online.groups ? sortedGroups(online.groups) : [];
+  stage.innerHTML = `<button class="sel-list-new" type="button" id="sel-newgroup"><span class="plus">＋</span>新しいグループをつくる</button>
+    ${mine.length ? `<div class="grp-list">${mine.map(g => groupCardHtml(g, true)).join('')}</div>` : '<p class="empty grp-empty">まだグループがありません。遊んだシナリオごとに、KPと探索者を記録できます。</p>'}
+    ${fr.length ? `<h3 class="grp-h">フレンドのグループ</h3><div class="grp-list">${fr.map(g => groupCardHtml(g, false)).join('')}</div>` : ''}`;
+}
+const LOCK_ICON = '<svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg>', UNLOCK_ICON = '<svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 5.8-1"/></svg>';
+function whoOptions(cur) {
+  const opt = (v, l) => `<option value="${v}" ${cur === v ? 'selected' : ''}>${esc(l)}</option>`;
+  return opt('me', `自分（${(me && me.username) || 'あなた'}）`) + friendsOf().map(f => opt('f:' + f.id, f.name + (f.uid ? '（フレンド）' : '（仲間メモ）'))).join('') + opt('t', 'その他（名前を入力）');
+}
+function charChoices(w) {
+  if (w.who === 'me') return state.chars.map(c => ({ id: c.id, name: c.profile.name || '名無し' }));
+  if (w.who && w.who.startsWith('f:')) {
+    const f = friendsOf().find(x => x.id === w.who.slice(2));
+    if (f && f.uid && online && online.chars && online.chars[f.uid]) return online.chars[f.uid].filter(c => c.id).map(c => ({ id: c.id, name: c.name || '名無し' }));
+  }
+  return null;
+}
+function memberEditor(w, key, label) {
+  const choices = charChoices(w);
+  const charPart = key === 'kp' ? '' : (choices && choices.length
+    ? `<select class="inp" data-gchar="${key}" aria-label="${label}のキャラ"><option value="">キャラを選ぶ</option>${choices.map(c => `<option value="${c.id}" ${w.charId === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}<option value="__t" ${w.charId === '__t' ? 'selected' : ''}>（キャラ名を手入力）</option></select>${w.charId === '__t' ? `<input class="inp" data-gcname="${key}" placeholder="キャラ名" value="${esc(w.charName || '')}" aria-label="${label}のキャラ名">` : ''}`
+    : `<input class="inp" data-gcname="${key}" placeholder="キャラ名（公開キャラから選べない相手は手入力）" value="${esc(w.charName || '')}" aria-label="${label}のキャラ名">`);
+  return `<div class="gm-row ${key === 'kp' ? 'kp' : ''}">
+    <select class="inp" data-gwho="${key}" aria-label="${label}">${whoOptions(w.who || 'me')}</select>
+    ${w.who === 't' ? `<input class="inp" data-gname="${key}" placeholder="名前" value="${esc(w.name || '')}" aria-label="${label}の名前">` : ''}
+    ${charPart}
+    ${key === 'kp' ? '' : `<button class="icon-btn" type="button" data-gact="rm" data-i="${key}" aria-label="この探索者を外す">×</button>`}
+  </div>`;
+}
+function renderGroupEditor() {
+  const g = gDraft;
+  $('grp-title').textContent = g._new ? '新しいグループ' : 'グループを編集';
+  $('grp-body').innerHTML = `
+    <div class="fields">
+      <div class="field wide"><label for="g-name">シナリオ名</label><input class="inp" id="g-name" data-g="name" value="${esc(g.name || '')}" placeholder="例：悪霊の家"></div>
+      <div class="field"><label for="g-date">日付</label><input class="inp" id="g-date" data-g="date" value="${esc(g.date || '')}" placeholder="例：2026/10/01"></div>
+      <div class="field"><span class="lbl">公開</span><button class="btn lock-btn ${g.locked ? 'on' : ''}" type="button" data-gact="lock" aria-pressed="${!!g.locked}">${g.locked ? LOCK_ICON + '非公開（フレンドから見えない）' : UNLOCK_ICON + 'フレンドに公開'}</button></div>
+    </div>
+    <div class="gm-sec"><b>キーパー（KP）</b>${memberEditor(g.kp || { who: 'me' }, 'kp', 'キーパー')}</div>
+    <div class="gm-sec"><b>探索者</b><div class="gm-list">${(g.players || []).map((p, i) => memberEditor(p, String(i), `探索者${i + 1}`)).join('')}</div>
+      <button class="btn small" type="button" data-gact="add">＋ 探索者を追加</button></div>
+    <div class="field wide"><label for="g-note">メモ（生還・ロスト・感想など）</label><textarea class="inp" id="g-note" data-g="note" rows="3">${esc(g.note || '')}</textarea></div>
+    <p class="err" id="g-err" role="alert"></p>`;
+  $('grp-del').hidden = !!g._new;
+}
+function openGroupEditor(id) {
+  const g = id && groupsOf().find(x => x.id === id);
+  gDraft = g ? JSON.parse(JSON.stringify(g)) : { _new: true, id: uid(), name: '', date: '', note: '', locked: false, kp: { who: 't', name: '' }, players: [{ who: 'me', charId: state.activeId }] };
+  renderGroupEditor(); openModal('modal-group');
+  if (me && !online?.chars) refreshFriendView();
+}
+const gTarget = key => key === 'kp' ? gDraft.kp : gDraft.players[+key];
+$('grp-body').addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.g) gDraft[t.dataset.g] = t.value;
+  if (t.dataset.gname) gTarget(t.dataset.gname).name = t.value;
+  if (t.dataset.gcname) gTarget(t.dataset.gcname).charName = t.value;
+});
+$('grp-body').addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.gwho) { const w = gTarget(t.dataset.gwho); w.who = t.value; w.charId = ''; w.charName = ''; if (t.value === 'me' && t.dataset.gwho !== 'kp') w.charId = state.activeId; renderGroupEditor(); }
+  if (t.dataset.gchar) { const w = gTarget(t.dataset.gchar); w.charId = t.value; if (t.value !== '__t') w.charName = ''; renderGroupEditor(); }
+});
+$('grp-body').addEventListener('click', e => {
+  const b = e.target.closest('[data-gact]'); if (!b) return;
+  if (b.dataset.gact === 'add') { gDraft.players.push({ who: 't', name: '', charName: '' }); renderGroupEditor(); return; }
+  if (b.dataset.gact === 'rm') { gDraft.players.splice(+b.dataset.i, 1); renderGroupEditor(); return; }
+  if (b.dataset.gact === 'lock') { gDraft.locked = !gDraft.locked; renderGroupEditor(); }
+});
+function snapshot(w) {
+  const out = { who: w.who || 'me', name: w.who === 't' ? (w.name || '').trim() : whoName(w), charId: w.charId && w.charId !== '__t' ? w.charId : '', charName: w.charName || '' };
+  if (w.who === 'me' && me) out.uid = me.id;
+  if (w.who && w.who.startsWith('f:')) { const f = friendsOf().find(x => x.id === w.who.slice(2)); if (f && f.uid) out.uid = f.uid; }
+  if (out.charId && !out.charName) { const ch = (charChoices(w) || []).find(c => c.id === out.charId); out.charName = ch ? ch.name : ''; }
+  return out;
+}
+$('grp-save').addEventListener('click', () => {
+  if (!(gDraft.name || '').trim()) { $('g-err').textContent = 'シナリオ名を書いてください。'; $('g-name').focus(); return; }
+  const g = { id: gDraft.id, name: gDraft.name.trim(), date: (gDraft.date || '').trim(), note: gDraft.note || '', locked: !!gDraft.locked, kp: snapshot(gDraft.kp || { who: 'me' }), players: (gDraft.players || []).map(snapshot), updatedAt: Date.now(), owner: gDraft.owner };
+  const i = groupsOf().findIndex(x => x.id === g.id);
+  if (i < 0) groupsOf().push(g); else groupsOf()[i] = g;
+  save(); flushGroups(); closeModals(); renderSelect(); popSelect();
+  toast(i < 0 ? `グループ「${g.name}」を記録しました。` : `グループ「${g.name}」を更新しました。`);
+});
+$('grp-del').addEventListener('click', e => {
+  if (!arm(e.currentTarget, '本当に削除')) return;
+  state.groups = groupsOf().filter(x => x.id !== gDraft.id);
+  save(); flushGroups(); closeModals(); renderSelect();
+});
+function openGroupMember(gid, i, mine) {
+  const g = (mine ? groupsOf() : (online && online.groups) || []).find(x => x.id === gid); if (!g) return;
+  const p = (g.players || [])[i]; if (!p) return;
+  const myChar = p.charId && state.chars.find(c => c.id === p.charId && (!c.owner || !me || c.owner === me.id));
+  if (myChar && (p.who === 'me' && mine || (me && p.uid === me.id))) {
+    state.activeId = myChar.id; save(); renderShelf(); renderSheet(); renderOutput(); leaveSelect(null); playCharBgm(active()); return;
+  }
+  const uidOf = p.uid || (!mine && p.who === 'me' ? g.owner : '');
+  if (uidOf && me && uidOf !== me.id) {
+    const u = online && online.friends.find(x => x.id === uidOf);
+    if (!u) { toast('この人はフレンドではないため、キャラシを開けません。'); return; }
+    viewFriend(uidOf, u.username).then(() => {
+      const idx = fviewChars.findIndex(c => c.id === p.charId);
+      if (idx >= 0) document.querySelector(`#fview-body [data-fv="${idx}"]`)?.click();
+      else if (p.charId) toast('このキャラシは非公開か、見つかりませんでした。');
+    });
+    return;
+  }
+  toast(p.charName ? `「${p.charName}」はこのアプリに登録されていないキャラです。` : 'キャラが設定されていません。');
 }
 
 /* ================= 探索者をえらぶ画面 ================= */
@@ -4418,11 +4679,12 @@ function renderSelect() {
   const stage = $('sel-stage');
   $('sel-rest')?.remove();
   document.querySelectorAll('[data-seltab]').forEach(b => { const on = b.dataset.seltab === selTab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
-  $('sel-eyebrow').textContent = selTab === 'friends' ? 'FRIENDS' : 'SELECT YOUR INVESTIGATOR';
-  $('sel-title').textContent = selTab === 'friends' ? 'フレンド一覧' : '探索者をえらぶ';
-  $('sel-desc').textContent = selTab === 'friends' ? 'フレンドを押すと、その人の公開キャラシが見られます。真ん中からフレンドを追加できます。' : 'キャラを押すとシートが開きます。真ん中から新しい探索者をつくれます。';
+  $('sel-eyebrow').textContent = { friends: 'FRIENDS', groups: 'GROUPS' }[selTab] || 'SELECT YOUR INVESTIGATOR';
+  $('sel-title').textContent = { friends: 'フレンド一覧', groups: 'グループ' }[selTab] || '探索者をえらぶ';
+  $('sel-desc').textContent = { friends: 'フレンドを押すと、その人の公開キャラシが見られます。真ん中からフレンドを追加できます。', groups: 'どのシナリオを、誰と、どの探索者で遊んだかの記録です。キャラ名を押すとキャラシが開きます。' }[selTab] || 'キャラを押すとシートが開きます。真ん中から新しい探索者をつくれます。';
   renderSortBar();
   if (selTab === 'friends') { renderFriendSelect(stage); return; }
+  if (selTab === 'groups') { renderGroupSelect(stage); return; }
   if ((state.selView || 'orbit') === 'list') {
     stage.classList.remove('grid'); stage.classList.add('listv'); stage.style.height = '';
     stage.innerHTML = listViewHtml(sortedChars());
@@ -4506,6 +4768,11 @@ function leaveSelect(fromEl, quick) {
 $('select').addEventListener('click', e => {
   const tb = e.target.closest('[data-seltab]');
   if (tb) { setSelTab(tb.dataset.seltab); return; }
+  if (e.target.closest('#sel-newgroup')) { openGroupEditor(null); return; }
+  const ge = e.target.closest('[data-gedit]');
+  if (ge) { openGroupEditor(ge.dataset.gedit); return; }
+  const go = e.target.closest('[data-gopen]');
+  if (go) { openGroupMember(go.dataset.gid, +go.dataset.gopen, go.dataset.gmine === '1'); return; }
   if (e.target.closest('#sel-addfriend')) { openFriends(); setTimeout(() => $('ol-name')?.focus(), 60); return; }
   if (e.target.closest('#sel-login')) { acctTab = 'login'; openAccount(); return; }
   const fb = e.target.closest('.sel-friend');
