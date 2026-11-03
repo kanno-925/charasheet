@@ -1228,7 +1228,7 @@ label.btn { display: inline-block; }
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
 <script>
 (() => {
 'use strict';
@@ -2935,8 +2935,8 @@ $('sel-friends').addEventListener('click', openFriends);
 
 /* ================= アカウント・クラウド同期（Supabase） ================= */
 const CLOUD = Object.assign({
-  url: '',
-  key: '',
+  url: 'https://umrouqvbmnttirdzixvc.supabase.co',
+  key: 'sb_publishable_9GwpXgDVVrzCeWjihR6yzQ_uKQsxbia',
 }, window.CHARASHEET_CLOUD || {});
 const cloudReady = () => /^https:\/\/[\w-]+\.supabase\.co\/?$/.test(CLOUD.url) && CLOUD.key.length > 20 && !!(window.supabase && window.supabase.createClient);
 let sb = null, me = null, online = null, syncTimer = null, syncing = false, syncAgain = false, syncState = 'off', syncMsg = '', acctTab = 'login';
