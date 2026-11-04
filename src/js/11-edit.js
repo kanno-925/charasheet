@@ -46,7 +46,7 @@ onBoth('click', e => {
       focus = pid(`skills.${i + 1}.sub`); break;
     }
     case 'icon-edit': openIconEditor(); return;
-    case 'sfx': state.sfx = state.sfx === false; save(); renderSheet(); if (state.sfx !== false) sfxFlip(0, .7); toast(state.sfx === false ? '効果音をオフにしました。' : '効果音をオンにしました。'); return;
+    case 'sfx': state.sfx = state.sfx === false; save(); renderSheet(); if (state.sfx !== false) sfxFlip(0, 700); toast(state.sfx === false ? '効果音をオフにしました。' : '効果音をオンにしました。'); return;
     case 'portrait-remove': c.portrait = ''; c.avatar = ''; break;
     case 'charbg-remove': c.bgImage = ''; applyBg(); break;
     case 'lock':

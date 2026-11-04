@@ -22,17 +22,60 @@ function noiseBurst(ctx, at, dur, { f0, f1, q = 1, vol = .3, attack = .01, hp = 
   src.connect(bp).connect(hpf).connect(g).connect(ctx.destination);
   src.start(at, offset, dur + .05);
 }
-/* 紙が1枚めくれる音：ふわっとした擦れ＋最後のぱさっ */
-function sfxFlip(delayMs = 0, vol = 1) {
-  if (!sfxOn()) return; const ctx = actx(); if (!ctx) return;
-  const t = ctx.currentTime + delayMs / 1000, v = vol * (.85 + Math.random() * .3);
-  noiseBurst(ctx, t, .34, { f0: 1400, f1: 3600, q: .8, vol: .16 * v, attack: .12, hp: 500 });
-  noiseBurst(ctx, t + .26, .12, { f0: 2600, f1: 900, q: 1.2, vol: .28 * v, attack: .006, hp: 700 });
-  noiseBurst(ctx, t + .33, .05, { f0: 4200, f1: 2000, q: 2, vol: .12 * v, attack: .003, hp: 1500 });
+/* 録音した効果音（assets/ の mp3）。読み込めないときは上の合成音で代わりに鳴らす */
+const SFX_SRC = { flip: 'assets/sfx-flip.mp3', write: 'assets/sfx-write.mp3' };
+const SFX_LEAD = { flip: 0, write: .8 }; // 頭の無音を飛ばす秒数
+function sfxPreload() {
+  Object.keys(SFX_SRC).forEach(k => {
+    if (SFX.raw?.[k] !== undefined) return;
+    SFX.raw = SFX.raw || {}; SFX.raw[k] = null;
+    fetch(SFX_SRC[k]).then(r => r.ok ? r.arrayBuffer() : null).then(b => { SFX.raw[k] = b || false; }, () => { SFX.raw[k] = false; });
+  });
 }
-/* 万年筆で書く音：かりかりとした短い筆跡の連続 */
+function sfxBuffer(ctx, k) {
+  SFX.buf = SFX.buf || {};
+  if (SFX.buf[k] !== undefined) return SFX.buf[k];
+  const raw = SFX.raw?.[k];
+  if (!raw) return raw === false ? (SFX.buf[k] = false) : null; // 失敗 → false、読み込み中 → null
+  SFX.buf[k] = SFX.raw[k] = null;
+  return (SFX.buf[k] = ctx.decodeAudioData(raw).then(b => (SFX.buf[k] = b), () => (SFX.buf[k] = false)));
+}
+/* 録音を ms ミリ秒だけ鳴らして、最後はふわっと消す。鳴らせたら true */
+function sfxSample(k, delayMs, ms, vol) {
+  const ctx = actx(); if (!ctx) return false;
+  const b = sfxBuffer(ctx, k);
+  if (b === false || b === null) return false;
+  const start = ctx.currentTime + delayMs / 1000;
+  const play = buf => {
+    const t = Math.max(ctx.currentTime + .01, start), lead = SFX_LEAD[k] || 0;
+    const len = Math.min(ms / 1000, buf.duration - lead);
+    const from = lead + Math.random() * Math.max(0, buf.duration - lead - len);
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const g = ctx.createGain(), fade = Math.min(.35, len / 3);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .05);
+    g.gain.setValueAtTime(vol, t + len - fade); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    src.connect(g).connect(ctx.destination); src.start(t, from, len + .05);
+  };
+  if (b instanceof Promise) b.then(x => x && play(x)); else play(b);
+  return true;
+}
+/* ページをめくる音：n 枚を gap ミリ秒ずつずらしてめくる */
+function sfxFlip(delayMs, ms, n = 1, gap = 0) {
+  if (!sfxOn()) return;
+  if (sfxSample('flip', delayMs, ms, .9)) return;
+  const ctx = actx(); if (!ctx) return;
+  for (let i = 0; i < n; i++) {
+    const t = ctx.currentTime + (delayMs + i * gap) / 1000, v = (i === n - 1 ? 1 : .8) * (.85 + Math.random() * .3);
+    noiseBurst(ctx, t, .34, { f0: 1400, f1: 3600, q: .8, vol: .16 * v, attack: .12, hp: 500 });
+    noiseBurst(ctx, t + .26, .12, { f0: 2600, f1: 900, q: 1.2, vol: .28 * v, attack: .006, hp: 700 });
+    noiseBurst(ctx, t + .33, .05, { f0: 4200, f1: 2000, q: 2, vol: .12 * v, attack: .003, hp: 1500 });
+  }
+}
+/* 万年筆で書く音 */
 function sfxWrite(ms) {
-  if (!sfxOn()) return; const ctx = actx(); if (!ctx) return;
+  if (!sfxOn()) return;
+  if (sfxSample('write', 20, Math.min(ms, 7000), .8)) return;
+  const ctx = actx(); if (!ctx) return;
   let t = ctx.currentTime + .02; const end = t + Math.min(ms, 6000) / 1000;
   while (t < end) {
     const d = .05 + Math.random() * .14;
@@ -40,9 +83,11 @@ function sfxWrite(ms) {
     t += d + (Math.random() < .25 ? .14 + Math.random() * .16 : .02 + Math.random() * .05);
   }
 }
-/* 消す音：ゆっくり擦るこすれ */
+/* 消す音：書く音を小さく短く */
 function sfxErase(ms) {
-  if (!sfxOn()) return; const ctx = actx(); if (!ctx) return;
+  if (!sfxOn()) return;
+  if (sfxSample('write', 0, ms, .45)) return;
+  const ctx = actx(); if (!ctx) return;
   let t = ctx.currentTime + .01; const end = t + ms / 1000;
   while (t < end) { const d = .12 + Math.random() * .1; noiseBurst(ctx, t, d, { f0: 900, f1: 1400, q: .9, vol: .07, attack: .05, hp: 250 }); t += d * .8; }
 }
@@ -222,12 +267,26 @@ function flipLeaves(fromIdx, toIdx, count) {
     const k = seq.map(x => ({ offset: x.t, transform: `rotateY(${x.ry}deg) rotateZ(${x.rz}deg) translateZ(${x.tz}px)`, opacity: narrow && Math.abs(x.ry) > 95 ? 0 : 1 }));
     anims.push(leaf.animate(k, { duration: dur, delay: i * gap, easing: 'cubic-bezier(.42, .02, .3, 1)', fill: 'both' }));
     leaf.querySelectorAll('.lf').forEach(f => anims.push(f.animate(seq.map(x => ({ offset: x.t, filter: `brightness(${x.b})` })), { duration: dur, delay: i * gap, easing: 'cubic-bezier(.42, .02, .3, 1)', fill: 'both' })));
-    sfxFlip(i * gap + dur * .12, i === n - 1 ? 1 : .8);
   }
+  sfxFlip(dur * .08, dur + (n - 1) * gap, n, gap);
   pg.querySelector('.bk-head')?.animate([{ opacity: 0 }, { opacity: 0, offset: .55 }, { opacity: 1 }], { duration: dur + n * gap, easing: 'ease-out' });
   pg.querySelector('.bk-body')?.animate([{ opacity: 0, filter: 'blur(3px)' }, { opacity: 0, offset: .55 }, { opacity: 1, filter: 'blur(0)' }], { duration: dur + n * gap + 120, easing: 'ease-out' });
   setTimeout(() => writeIn(pg), Math.max(0, dur + n * gap - 260));
   Promise.all(anims.map(a => a.finished)).then(() => wrap.remove(), () => wrap.remove());
+}
+/* 探索者を選んで本を開くとき：閉じた魔導書が手前に開く */
+function bookOpening() {
+  if (reduceMotion.matches || !isBook()) return false;
+  const ov = document.createElement('div'); ov.className = 'bk-opening'; ov.setAttribute('aria-hidden', 'true');
+  ov.innerHTML = '<img src="assets/book-closed.webp" alt="">';
+  document.body.appendChild(ov);
+  const img = ov.firstChild;
+  sfxFlip(380, 1400, 3, 160);
+  img.animate([{ opacity: 0, transform: 'scale(.9) translateY(18px)' }, { opacity: 1, transform: 'scale(1)', offset: .3 }, { opacity: 1, transform: 'scale(1.04)', offset: .55 }, { opacity: 0, transform: 'perspective(1400px) rotateX(18deg) scale(1.25)', filter: 'blur(6px)' }],
+    { duration: 1500, easing: 'cubic-bezier(.4, 0, .3, 1)', fill: 'forwards' });
+  ov.animate([{ opacity: 1 }, { opacity: 1, offset: .6 }, { opacity: 0 }], { duration: 1500, fill: 'forwards' }).finished.then(() => ov.remove(), () => ov.remove());
+  document.querySelector('.app').animate([{ opacity: 0, transform: 'scale(.96)' }, { opacity: 0, offset: .5 }, { opacity: 1, transform: 'none' }], { duration: 1500, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+  return true;
 }
 function setBookTab(key) {
   if (!SECTIONS.some(x => x.key === key)) key = 'profile';
@@ -247,6 +306,7 @@ function renderSheet() {
   const c = active();
   const book = isBook();
   $('sheet').classList.toggle('is-book', book);
+  if (book) sfxPreload();
   $('sheet').innerHTML = book ? bookHtml(c) : hubHtml(c);
   if (panelKey && !$('panel-ov').hidden) {
     const body = $('panel-body'), st = body.scrollTop;

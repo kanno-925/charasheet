@@ -11,6 +11,8 @@ src/ にあるソース（index.html・css/・js/）を組み立てて、次の3
 結合の順番は src/files.txt に書いてあります。JS は全体を1つの即時関数で包むので、
 ファイルをまたいで同じ変数・関数を使えます（順番は大事です）。
 """
+import base64
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).parent
@@ -64,7 +66,18 @@ site = ROOT
 # single-file versions
 dist = ROOT / 'dist'
 dist.mkdir(exist_ok=True)
-inline_css, inline_js = f'<style>\n{css}</style>', f'<script>\n{js}</script>'
+MIME = {'.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.mp3': 'audio/mpeg'}
+
+
+def data_uri(name):
+    f = ROOT / 'assets' / name
+    return f'data:{MIME[f.suffix]};base64,' + base64.b64encode(f.read_bytes()).decode()
+
+
+# 1ファイル版は assets/ の画像・音も中に埋め込む
+css1 = re.sub(r'\.\./assets/([\w.-]+)', lambda m: data_uri(m.group(1)), css)
+js1 = re.sub(r'(?<=[\'"])assets/([\w.-]+)(?=[\'"])', lambda m: data_uri(m.group(1)), js)
+inline_css, inline_js = f'<style>\n{css1}</style>', f'<script>\n{js1}</script>'
 (dist / 'キャラシ工房.html').write_text(page(inline_css, inline_js), encoding='utf-8')
 (dist / 'claude-artifact.html').write_text(f'{head}\n{inline_css}\n\n{markup}\n{inline_js}\n', encoding='utf-8')
 

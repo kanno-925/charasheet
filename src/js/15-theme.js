@@ -12,7 +12,7 @@ const THEME_PRESETS = {
   tome:   { name: '古書', sub: 'セピアの羊皮紙', look: 'mincho', vals: { bg: '#e6dac1', solid: '#f6efdd', ink: '#3a2817', sky: '#8a4a26', cyan: '#b07a3a', amber: '#c0562a' } },
   sakura: { name: '和風', sub: '桜と墨', look: 'mincho', vals: { bg: '#efe3e4', solid: '#fcf7f6', ink: '#2a1c22', sky: '#b23f68', cyan: '#d98aa6', amber: '#c08a2a' } },
   neon:   { name: 'ネオン', sub: '夜のサイバー', look: 'dark', vals: { bg: '#0b0918', solid: '#16122b', ink: '#ece8ff', sky: '#a159f5', cyan: '#22c8e8', amber: '#f2569e' } },
-  book:   { name: '魔導書', sub: '古本に万年筆で書きこむ記録', look: 'dark mincho book', vals: { bg: '#0b0b0c', solid: '#19181a', ink: '#e4e1db', sky: '#5d5468', cyan: '#a9a49b', amber: '#9a8c6e' } },
+  book:   { name: '魔導書', sub: '古本に万年筆で書きこむ記録', look: 'dark mincho book', vals: { bg: '#140c07', solid: '#22160d', ink: '#efe0c4', sky: '#7a5a8c', cyan: '#c9a04e', amber: '#c9a04e' } },
   forest: { name: '森', sub: '深緑とランタン', look: '', vals: { bg: '#dfe7dc', solid: '#f5f8f1', ink: '#1c2a1f', sky: '#2f7d4f', cyan: '#5aa78a', amber: '#d98a1f' } },
 };
 const presetOf = () => THEME_PRESETS[state.themePreset] || THEME_PRESETS.sky;
