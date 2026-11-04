@@ -1560,3 +1560,9 @@ body.ue-on .ue-panel { cursor: auto; }
 }
 .ue-pub { display: flex; flex-direction: column; gap: 6px; padding: 8px; background: #f3f7fc; border-radius: 8px; }
 .ue-dirty { color: #c8372d; font-weight: 600; }
+.ue-search { width: 100%; border: 1px solid #c7d3e3; border-radius: 6px; padding: 5px 8px; background: #fff; }
+.ue-users { display: flex; flex-direction: column; gap: 4px; }
+.ue-user { display: flex; align-items: center; gap: 8px; padding: 5px 8px; background: #eef3f9; border-radius: 6px; }
+.ue-user span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ue-user small { color: #5a6b80; margin-left: 4px; }
+.ue-user select { border: 1px solid #c7d3e3; border-radius: 6px; padding: 3px 4px; background: #fff; }

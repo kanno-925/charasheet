@@ -5,7 +5,7 @@
 const UE_KEY = 'charasheet-kobo.ui-edit';
 const UE_PUB_KEY = UE_KEY + '.pub';
 const UE_EMPTY = () => ({ v: 1, items: {} });
-const UE = { on: false, pause: false, sel: null, el: null, data: UE_EMPTY(), pub: UE_EMPTY(), admin: false, busy: false, drag: null, noClick: false };
+const UE = { on: false, pause: false, sel: null, el: null, data: UE_EMPTY(), pub: UE_EMPTY(), admin: false, role: null, tab: 'look', users: null, userQ: '', busy: false, drag: null, noClick: false };
 const UE_STATE_CLS = /^(on|off|open|land|listv|slidev|free|warn|pulse|playing|over|out|enter|leave|drag|changed|center|armed|grid|hidden|active|show|in|is-.*|has-.*|sel-has-bg|res-.*|ue-.*)$/;
 const UE_SKIP_DATA = /^data-(i|id|uid|fid|u|row|p|del|ch|tk|gjoin|fv|final|max|sum|open|ring|sides|close|close-panel)$/;
 
@@ -31,13 +31,52 @@ async function uePull() {
     ueApply(); if (UE.on) ueRenderBody();
   } catch (e) { /* つながらないときは前回の公開版のまま */ }
 }
-/* ログインした人がマスターかどうか */
+/* ログインした人の権限（'master' マスター / 'editor' 編集者 / null なし） */
 async function ueCheckAdmin() {
-  let ok = false;
-  if (me && sb) { try { const { data } = await sb.rpc('is_app_admin'); ok = data === true; } catch (e) { ok = false; } }
-  UE.admin = ok;
+  let role = null;
+  if (me && sb) {
+    try {
+      const r = await sb.rpc('my_app_role');
+      if (!r.error) role = r.data || null;
+      else { const r2 = await sb.rpc('is_app_admin'); role = r2.data === true ? 'editor' : null; } // 05-app-roles.sql がまだのとき
+    } catch (e) { role = null; }
+  }
+  UE.role = role;
+  const ok = UE.admin = !!role;
+  if (role !== 'master' && UE.tab === 'roles') UE.tab = 'look';
   const b = $('ue-open'); if (b) b.hidden = !ok;
   if (!ok && UE.on) ueStop();
+}
+const ueNoPick = () => UE.pause || UE.tab === 'roles';
+/* ===== 権限（マスターだけ） ===== */
+const UE_ROLE = { master: 'マスター', editor: '編集者', none: 'なし' };
+async function ueLoadUsers() {
+  UE.users = null; ueRenderBody();
+  const { data, error } = await sb.rpc('app_users_list');
+  UE.users = error ? { err: jaErr(error) } : (data || []);
+  ueRenderBody();
+}
+function ueRolesHtml() {
+  if (!UE.users) return '<p class="ue-hint">読み込み中…</p>';
+  if (UE.users.err) return `<p class="ue-hint">${esc(UE.users.err)}</p>`;
+  const q = UE.userQ.trim().toLowerCase();
+  const list = UE.users.filter(u => !q || String(u.username).toLowerCase().includes(q));
+  return `<p class="ue-hint">マスター：画面の編集 ＋ 権限の変更<br>編集者：画面の編集だけ</p>
+    <input type="search" class="ue-search" id="ue-user-q" placeholder="ユーザー名でさがす" value="${esc(UE.userQ)}">
+    <div class="ue-users">${list.map(u => `<label class="ue-user"><span>${esc(u.username)}${me && u.user_id === me.id ? '<small>（あなた）</small>' : ''}</span>
+      <select data-ue-role="${esc(u.user_id)}">${Object.entries(UE_ROLE).map(([k, l]) => `<option value="${k}" ${(u.role || 'none') === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>`).join('') || '<p class="ue-hint">見つかりません</p>'}</div>`;
+}
+async function ueSetRole(sel) {
+  const u = UE.users.find(x => x.user_id === sel.dataset.ueRole); if (!u) return;
+  const role = sel.value, before = u.role || 'none';
+  if (me && u.user_id === me.id && role !== 'master' && !confirm('自分の権限を下げると、権限の変更ができなくなります。よろしいですか？')) { sel.value = before; return; }
+  sel.disabled = true;
+  const { data, error } = await sb.rpc('set_app_role', { target: u.user_id, new_role: role });
+  sel.disabled = false;
+  if (error || data !== 'ok') { sel.value = before; toast(error ? jaErr(error) : data); return; }
+  u.role = role === 'none' ? null : role;
+  toast(`${u.username}さんを「${UE_ROLE[role]}」にしました`);
+  if (me && u.user_id === me.id) ueCheckAdmin();
 }
 async function uePublish() {
   if (!UE.admin || !sb || !me || UE.busy) return;
@@ -144,6 +183,7 @@ const UE_NUM = [
 ];
 function uePanelHtml() {
   return `<div class="ue-head"><b>画面の編集</b>
+      <button type="button" class="ue-b" id="ue-roles" hidden>権限</button>
       <button type="button" class="ue-b" id="ue-pause"></button>
       <button type="button" class="ue-b" id="ue-exit" aria-label="編集モードを終える">終了</button></div>
     <div class="ue-body" id="ue-body"></div>
@@ -175,6 +215,16 @@ function ueRenderFoot() {
 function ueRenderBody() {
   const body = $('ue-body'); if (!body) return;
   ueRenderFoot();
+  $('ue-roles').hidden = UE.role !== 'master';
+  $('ue-roles').classList.toggle('on', UE.tab === 'roles');
+  $('ue-roles').textContent = UE.tab === 'roles' ? '見た目に戻る' : '権限';
+  $('ue-pause').hidden = UE.tab === 'roles';
+  if (UE.tab === 'roles') {
+    const f = document.activeElement && document.activeElement.id === 'ue-user-q', pos = f ? document.activeElement.selectionStart : 0;
+    body.innerHTML = ueRolesHtml();
+    if (f) { const i = $('ue-user-q'); i.focus(); i.setSelectionRange(pos, pos); }
+    return;
+  }
   if (UE.pause) { body.innerHTML = '<p class="ue-hint">いまはアプリを普通に操作できます。編集したい画面（ウィンドウなど）を開いてから「部品を選ぶ」を押してください。</p>'; return; }
   const el = UE.el;
   if (!el || !el.isConnected) {
@@ -222,14 +272,14 @@ function ueSelect(el) {
 function uePlaceBox() {
   const box = $('ue-box'); if (!box) return;
   const el = UE.el;
-  if (!UE.on || UE.pause || !el || !el.isConnected) { box.hidden = true; return; }
+  if (!UE.on || ueNoPick() || !el || !el.isConnected) { box.hidden = true; return; }
   const r = el.getBoundingClientRect();
   box.hidden = false;
   Object.assign(box.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
 }
 function ueHover(el) {
   const h = $('ue-hover'); if (!h) return;
-  if (!el || UE.pause) { h.hidden = true; return; }
+  if (!el || ueNoPick()) { h.hidden = true; return; }
   const r = el.getBoundingClientRect();
   h.hidden = false;
   Object.assign(h.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
@@ -237,7 +287,7 @@ function ueHover(el) {
 
 const ueInPanel = t => t && t.closest && t.closest('#ue-panel');
 function ueOnPointerDown(e) {
-  if (!UE.on || UE.pause || ueInPanel(e.target)) return;
+  if (!UE.on || ueNoPick() || ueInPanel(e.target)) return;
   e.preventDefault(); e.stopPropagation();
   if (UE.el && UE.el.contains(e.target) && e.button === 0) {
     const o = UE.data.items[UE.sel] || {};
@@ -245,7 +295,7 @@ function ueOnPointerDown(e) {
   }
 }
 function ueOnPointerMove(e) {
-  if (!UE.on || UE.pause) return;
+  if (!UE.on || ueNoPick()) return;
   if (UE.drag) {
     const d = UE.drag, dx = e.clientX - d.sx, dy = e.clientY - d.sy;
     if (!d.moved && Math.hypot(dx, dy) < 4) return;
@@ -267,18 +317,18 @@ function ueOnPointerUp(e) {
   if (moved) { UE.noClick = true; ueSave(); ueRenderBody(); e.stopPropagation(); }
 }
 function ueOnClick(e) {
-  if (!UE.on || UE.pause || ueInPanel(e.target)) return;
+  if (!UE.on || ueNoPick() || ueInPanel(e.target)) return;
   e.preventDefault(); e.stopPropagation();
   if (UE.noClick) { UE.noClick = false; return; }
   let t = e.target;
   if (t.closest('#toast')) { $('toast').hidden = true; t = document.elementFromPoint(e.clientX, e.clientY) || t; }
   ueSelect(t.ownerSVGElement ? t.closest('svg') : t);
 }
-const ueBlock = e => { if (UE.on && !UE.pause && !ueInPanel(e.target)) { e.preventDefault(); e.stopPropagation(); } };
+const ueBlock = e => { if (UE.on && !ueNoPick() && !ueInPanel(e.target)) { e.preventDefault(); e.stopPropagation(); } };
 
 function ueStart() {
   if (UE.on) return;
-  if (!UE.admin) { toast('画面の編集は、マスターとしてログインしているときだけ使えます'); return; }
+  if (!UE.admin) { toast('画面の編集は、マスターか編集者としてログインしているときだけ使えます'); return; }
   closeModals();
   UE.on = true; UE.pause = false;
   document.body.classList.add('ue-on');
@@ -331,12 +381,22 @@ function ueInput(e) {
   const clr = t.closest('.ue-f')?.querySelector('.ue-x'); if (clr) clr.disabled = false;
   const rs = $('ue-reset'); if (rs) rs.disabled = false;
 }
-document.addEventListener('input', e => { if (ueInPanel(e.target)) ueInput(e); });
+document.addEventListener('input', e => {
+  if (!ueInPanel(e.target)) return;
+  if (e.target.id === 'ue-user-q') { UE.userQ = e.target.value; ueRenderBody(); return; }
+  ueInput(e);
+});
+document.addEventListener('change', e => { if (ueInPanel(e.target) && e.target.dataset.ueRole) ueSetRole(e.target); });
 document.addEventListener('change', e => { if (ueInPanel(e.target) && e.target.type === 'checkbox') ueInput(e); });
 document.addEventListener('click', e => {
   const t = e.target; if (!ueInPanel(t)) return;
   const b = t.closest('button'); if (!b) return;
   if (b.id === 'ue-exit') return ueStop();
+  if (b.id === 'ue-roles') {
+    UE.tab = UE.tab === 'roles' ? 'look' : 'roles'; ueHover(null); uePlaceBox();
+    if (UE.tab === 'roles') ueLoadUsers(); else ueRenderBody();
+    return;
+  }
   if (b.id === 'ue-pause') { UE.pause = !UE.pause; ueHover(null); ueRenderBody(); uePlaceBox(); return; }
   if (b.id === 'ue-parent') return ueSelect(UE.el.parentElement);
   if (b.id === 'ue-publish') return uePublish();
@@ -359,7 +419,7 @@ document.addEventListener('click', e => {
   if (b.dataset.ueSel) {
     const el = ueFind(b.dataset.ueSel);
     if (!el) { UE.el = null; UE.sel = b.dataset.ueSel; toast('その部品はいまの画面にありません（別の画面やウィンドウの中かもしれません）'); return; }
-    UE.pause = false; ueSelect(el); el.scrollIntoView({ block: 'nearest' }); return;
+    UE.pause = false; UE.tab = 'look'; ueSelect(el); el.scrollIntoView({ block: 'nearest' }); return;
   }
   if (b.id === 'ue-reset-all') {
     if (!Object.keys(UE.data.items).length) return;
