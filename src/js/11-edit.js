@@ -138,8 +138,8 @@ let pressTimer = null, longPressed = false;
 $('shelf').addEventListener('click', e => {
   const b = e.target.closest('[data-id]'); if (!b) return;
   if (longPressed) { longPressed = false; e.preventDefault(); return; }
-  state.activeId = b.dataset.id; save(); renderAll();
-  playCharBgm(active());
+  const go = () => { state.activeId = b.dataset.id; save(); renderAll(); playCharBgm(active()); };
+  if (isBook() && b.dataset.id !== state.activeId) bookCover(go); else go();   // 魔導書では、別の探索者の本に持ちかえる
 });
 $('shelf').addEventListener('pointerdown', e => {
   if (e.pointerType === 'mouse') return;

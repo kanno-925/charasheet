@@ -301,5 +301,5 @@ function dotMosaic(mid) {
   const run = (ms, fill, then) => { const t0 = performance.now(); const step = t => { const k = Math.min(1, (t - t0) / ms); draw(k, fill); if (k < 1) requestAnimationFrame(step); else then(); }; requestAnimationFrame(step); };
   run(360, true, () => { try { mid(); } catch (e) { console.error(e); } setTimeout(() => run(420, false, () => cv.remove()), 90); });
 }
-/* テーマごとの画面切りかえ（和風は襖、ドットはモザイク） */
-const themeSwitchFx = () => isWa() ? waDoors : isDot() ? dotMosaic : null;
+/* テーマごとの画面切りかえ（和風は襖、ドットはモザイク、魔導書は表紙が閉じてひらく） */
+const themeSwitchFx = () => isWa() ? waDoors : isDot() ? dotMosaic : isBook() ? bookCover : null;

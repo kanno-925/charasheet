@@ -1119,6 +1119,14 @@ function sfxFlip(delayMs, ms, n = 1, gap = 0) {
     noiseBurst(ctx, t + .33, .05, { f0: 4200, f1: 2000, q: 2, vol: .12 * v, attack: .003, hp: 1500 });
   }
 }
+/* 表紙が閉じる「ドン」という低い音 */
+function sfxThud(delayMs = 0) {
+  if (!sfxOn()) return;
+  const ctx = actx(); if (!ctx) return;
+  const t = ctx.currentTime + delayMs / 1000;
+  noiseBurst(ctx, t, .32, { f0: 180, f1: 70, q: .7, vol: .55, attack: .004, hp: 40 });
+  noiseBurst(ctx, t, .08, { f0: 900, f1: 400, q: .9, vol: .12, attack: .002, hp: 200 });
+}
 /* 万年筆で書く音 */
 function sfxWrite(ms, delayMs = 0) {
   if (!sfxOn()) return;
@@ -1327,19 +1335,67 @@ function flipLeaves(fromIdx, toIdx, count) {
   writeIn(pg, Math.max(0, dur + n * gap - 260));
   Promise.all(anims.map(a => a.finished)).then(() => wrap.remove(), () => wrap.remove());
 }
-/* 探索者を選んで本を開くとき：閉じた魔導書が手前に開く */
-function bookOpening() {
-  if (reduceMotion.matches || !isBook()) return false;
-  const ov = document.createElement('div'); ov.className = 'bk-opening'; ov.setAttribute('aria-hidden', 'true');
-  ov.innerHTML = '<img src="assets/book/closed.webp" alt="">';
+/* 魔導書の画面切りかえ：
+   ① 左の背を軸に、革の表紙がバタンと閉じる（今の画面にふたをする）
+   ② 閉じた表紙の魔法陣が金色に光り、行き先（探索者の名前／探索者名簿）が浮かぶ … この間に画面を入れかえる（mid）
+   ③ 表紙がひらき、つづけて紙が数枚めくれて、新しい画面があらわれる */
+let bookCoverBusy = false;
+function bookCover(mid) {
+  if (reduceMotion.matches || bookCoverBusy) { mid(); return; }
+  bookCoverBusy = true;
+  const ov = document.createElement('div'); ov.className = 'bk-trans'; ov.setAttribute('aria-hidden', 'true');
+  const ring = (r, cls = '') => `<circle class="${cls}" cx="100" cy="100" r="${r}"/>`;
+  ov.innerHTML = `<i class="bt-leaf"></i><i class="bt-leaf"></i><i class="bt-leaf"></i>
+    <div class="bt-cover"><i class="bt-frame"></i><i class="bt-glow"></i>
+      <svg class="bt-seal" viewBox="0 0 200 200">${ring(96)}${ring(90, 'th')}${ring(77)}<polygon points="100.0,24.0 144.7,161.5 27.7,76.5 172.3,76.5 55.3,161.5"/>${ring(21, 'th')}</svg>
+      <div class="bt-title"><span class="bt-kick"></span><b class="bt-name"></b></div><i class="bt-shade"></i></div>`;
   document.body.appendChild(ov);
-  const img = ov.firstChild;
-  sfxFlip(380, 1400, 3, 160);
-  img.animate([{ opacity: 0, transform: 'scale(.9) translateY(18px)' }, { opacity: 1, transform: 'scale(1)', offset: .3 }, { opacity: 1, transform: 'scale(1.04)', offset: .55 }, { opacity: 0, transform: 'perspective(1400px) rotateX(18deg) scale(1.25)', filter: 'blur(6px)' }],
-    { duration: 1500, easing: 'cubic-bezier(.4, 0, .3, 1)', fill: 'forwards' });
-  ov.animate([{ opacity: 1 }, { opacity: 1, offset: .6 }, { opacity: 0 }], { duration: 1500, fill: 'forwards' }).finished.then(() => ov.remove(), () => ov.remove());
-  document.querySelector('.app').animate([{ opacity: 0, transform: 'scale(.96)' }, { opacity: 0, offset: .5 }, { opacity: 1, transform: 'none' }], { duration: 1500, easing: 'cubic-bezier(.2, .8, .2, 1)' });
-  return true;
+  const cover = ov.querySelector('.bt-cover'), shade = ov.querySelector('.bt-shade'), leaves = [...ov.querySelectorAll('.bt-leaf')].reverse(); // 上の紙からめくる
+  // 光る魔法陣を、表紙の絵に彫られた魔法陣に重ねる（表紙の絵は 760×980 で、魔法陣の半径はおよそ 255）
+  ov.style.setProperty('--seal', Math.round(531 * Math.max(innerWidth / 760, innerHeight / 980)) + 'px');
+  ov.querySelectorAll('.bt-seal > *').forEach(el => { const len = el.getTotalLength ? el.getTotalLength() : 600; el.style.strokeDasharray = len; el.style.strokeDashoffset = len; el.dataset.len = len; });
+  const P = `perspective(${Math.round(Math.max(innerWidth, innerHeight) * 2.4)}px)`;
+  const turn = (deg, z = 0) => `${P} rotateY(${deg}deg) translateZ(${z}px)`;
+  const finish = () => { ov.remove(); bookCoverBusy = false; };
+  // ① 閉じる
+  sfxFlip(120, 420);
+  sfxThud(430);
+  ov.animate([{ backgroundColor: 'rgb(8 4 2 / 0)' }, { backgroundColor: 'rgb(8 4 2 / .85)' }], { duration: 460, easing: 'ease-in', fill: 'forwards' });
+  shade.animate([{ opacity: .95 }, { opacity: 0 }], { duration: 470, easing: 'cubic-bezier(.6, 0, .9, .5)', fill: 'forwards' });
+  cover.animate([
+    { transform: turn(-89.5, 30) },
+    { transform: turn(-40, 18), offset: .55 },
+    { transform: turn(0) },
+  ], { duration: 470, easing: 'cubic-bezier(.55, 0, .85, .4)', fill: 'forwards' }).finished.then(() => {
+    // 閉じた衝撃で、表紙が少しだけ沈む
+    cover.animate([{ transform: turn(0) + ' scale(1)' }, { transform: turn(0) + ' scale(.985)' }, { transform: turn(0) + ' scale(1)' }], { duration: 260, easing: 'ease-out' });
+    try { mid(); } catch (e) { console.error(e); }
+    // ② 行き先の名前を浮かべ、魔法陣を光らせる
+    const sel = !$('select').hidden, c = active();
+    ov.querySelector('.bt-kick').textContent = sel ? 'Liber Investigatorum' : 'Grimoire of';
+    ov.querySelector('.bt-name').textContent = sel ? '探索者名簿' : (c?.profile.name || '名無しの探索者');
+    leaves.forEach(l => { l.style.visibility = 'visible'; });
+    ov.querySelectorAll('.bt-seal > *').forEach((el, i) => el.animate([{ strokeDashoffset: el.dataset.len, opacity: .3 }, { strokeDashoffset: 0, opacity: 1 }], { duration: 560, delay: i * 50, easing: 'cubic-bezier(.4, 0, .2, 1)', fill: 'both' }));
+    ov.querySelector('.bt-glow').animate([{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'scale(1)', offset: .5 }, { opacity: .55, transform: 'scale(1.08)' }], { duration: 760, easing: 'ease-out', fill: 'both' });
+    ov.querySelector('.bt-title').animate([{ opacity: 0, letterSpacing: '.5em', filter: 'blur(3px)' }, { opacity: 1, letterSpacing: '.18em', filter: 'blur(0)' }], { duration: 620, delay: 120, easing: 'cubic-bezier(.2, .7, .2, 1)', fill: 'both' });
+    setTimeout(() => {
+      // ③ 表紙をひらき、紙をめくる
+      ov.animate([{ backgroundColor: 'rgb(8 4 2 / .85)' }, { backgroundColor: 'rgb(8 4 2 / 0)' }], { duration: 900, delay: 300, easing: 'ease-out', fill: 'forwards' });
+      const dur = 760, gap = 120, wait = 240;
+      sfxFlip(0, dur + leaves.length * gap + wait, leaves.length + 1, gap);
+      const open = [cover.animate([
+        { transform: turn(0), filter: 'brightness(1)' },
+        { transform: turn(-28, 14), filter: 'brightness(1.08)', offset: .3 },
+        { transform: turn(-89.5, 30), filter: 'brightness(.55)' },
+      ], { duration: dur, easing: 'cubic-bezier(.45, .05, .55, .95)', fill: 'forwards' })];
+      leaves.forEach((l, i) => open.push(l.animate([
+        { transform: turn(0), filter: 'brightness(1)' },
+        { transform: turn(-35, 10), filter: 'brightness(.95)', offset: .35 },
+        { transform: turn(-89.5, 20), filter: 'brightness(.6)' },
+      ], { duration: dur - 120, delay: wait + i * gap, easing: 'cubic-bezier(.42, .02, .45, 1)', fill: 'both' })));
+      Promise.all(open.map(a => a.finished)).then(finish, finish);
+    }, 680);
+  }, finish);
 }
 function setBookTab(key) {
   if (!SECTIONS.some(x => x.key === key)) key = 'profile';
@@ -1773,8 +1829,8 @@ let pressTimer = null, longPressed = false;
 $('shelf').addEventListener('click', e => {
   const b = e.target.closest('[data-id]'); if (!b) return;
   if (longPressed) { longPressed = false; e.preventDefault(); return; }
-  state.activeId = b.dataset.id; save(); renderAll();
-  playCharBgm(active());
+  const go = () => { state.activeId = b.dataset.id; save(); renderAll(); playCharBgm(active()); };
+  if (isBook() && b.dataset.id !== state.activeId) bookCover(go); else go();   // 魔導書では、別の探索者の本に持ちかえる
 });
 $('shelf').addEventListener('pointerdown', e => {
   if (e.pointerType === 'mouse') return;
@@ -2232,8 +2288,8 @@ function dotMosaic(mid) {
   const run = (ms, fill, then) => { const t0 = performance.now(); const step = t => { const k = Math.min(1, (t - t0) / ms); draw(k, fill); if (k < 1) requestAnimationFrame(step); else then(); }; requestAnimationFrame(step); };
   run(360, true, () => { try { mid(); } catch (e) { console.error(e); } setTimeout(() => run(420, false, () => cv.remove()), 90); });
 }
-/* テーマごとの画面切りかえ（和風は襖、ドットはモザイク） */
-const themeSwitchFx = () => isWa() ? waDoors : isDot() ? dotMosaic : null;
+/* テーマごとの画面切りかえ（和風は襖、ドットはモザイク、魔導書は表紙が閉じてひらく） */
+const themeSwitchFx = () => isWa() ? waDoors : isDot() ? dotMosaic : isBook() ? bookCover : null;
 
 /* ================= 立ち絵 ================= */
 const blobUrls = new Map();
@@ -3975,6 +4031,14 @@ function initSlide() {
 function popSelect() {
   if (reduceMotion.matches) return;
   const stage = $('sel-stage');
+  if (isBook()) {
+    const d0 = bookCoverBusy ? 980 : 80;   // 表紙がひらいてから書きこむ
+    stage.querySelectorAll('.sel-char, .sel-row').forEach((el, i) => el.animate(
+      [{ clipPath: 'inset(0 100% 0 0)', opacity: .35 }, { clipPath: 'inset(0 0% 0 0)', opacity: 1 }],
+      { duration: 620, delay: d0 + i * 60, easing: 'cubic-bezier(.45, .1, .35, 1)', fill: 'backwards' }));
+    [$('sel-new'), document.querySelector('.sel-head')].forEach(el => el?.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: 560, delay: d0, easing: 'cubic-bezier(.45, .1, .35, 1)', fill: 'backwards' }));
+    return;
+  }
   stage.querySelectorAll('.sel-char, .sel-row').forEach((el, i) => el.animate(
     [{ opacity: 0, transform: 'scale(.3)', filter: 'blur(6px)' }, { opacity: 1, transform: 'scale(1)', filter: 'blur(0)' }],
     { duration: 700, delay: 120 + i * 70, easing: 'cubic-bezier(.2, .9, .3, 1.25)', fill: 'backwards' }));
@@ -3990,7 +4054,7 @@ function showSelect() {
   applyBg();
   document.documentElement.style.overflow = 'hidden';
   renderSelect();
-  if (!reduceMotion.matches) sel.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: 'ease-out' });
+  if (!reduceMotion.matches && !isBook()) sel.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: 'ease-out' });
   popSelect();
 }
 function leaveSelect(fromEl, quick) {
@@ -3998,7 +4062,7 @@ function leaveSelect(fromEl, quick) {
   const sel = $('select');
   const done = () => { sel.hidden = true; document.documentElement.style.overflow = ''; scrollTo(0, 0); renderPlayer(); };
   if (reduceMotion.matches || quick) { done(); return; }
-  if (themeSwitchFx()) { themeSwitchFx()(done); return; } // 和風は襖、ドットはモザイクで切りかえ
+  if (themeSwitchFx()) { themeSwitchFx()(done); return; } // 和風は襖、ドットはモザイク、魔導書は表紙で切りかえ
   if (fromEl) {
     fxAt(fromEl, true);
     fromEl.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.5)', opacity: 0 }], { duration: 520, easing: 'cubic-bezier(.5, 0, .3, 1)', fill: 'forwards' });
@@ -4006,7 +4070,6 @@ function leaveSelect(fromEl, quick) {
   const a = sel.animate([{ opacity: 1, transform: 'none', filter: 'blur(0)' }, { opacity: 0, transform: 'scale(1.06)', filter: 'blur(10px)' }], { duration: 560, delay: 140, easing: 'cubic-bezier(.5, 0, .3, 1)', fill: 'forwards' });
   a.finished.then(() => {
     done(); a.cancel();
-    if (bookOpening()) return;
     document.querySelector('.app').animate([{ opacity: .2, transform: 'scale(1.03)', filter: 'blur(10px)' }, { opacity: 1, transform: 'none', filter: 'none' }], { duration: 800, easing: 'cubic-bezier(.2, .8, .2, 1)' });
   });
 }

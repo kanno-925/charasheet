@@ -123,6 +123,14 @@ function initSlide() {
 function popSelect() {
   if (reduceMotion.matches) return;
   const stage = $('sel-stage');
+  if (isBook()) {
+    const d0 = bookCoverBusy ? 980 : 80;   // 表紙がひらいてから書きこむ
+    stage.querySelectorAll('.sel-char, .sel-row').forEach((el, i) => el.animate(
+      [{ clipPath: 'inset(0 100% 0 0)', opacity: .35 }, { clipPath: 'inset(0 0% 0 0)', opacity: 1 }],
+      { duration: 620, delay: d0 + i * 60, easing: 'cubic-bezier(.45, .1, .35, 1)', fill: 'backwards' }));
+    [$('sel-new'), document.querySelector('.sel-head')].forEach(el => el?.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: 560, delay: d0, easing: 'cubic-bezier(.45, .1, .35, 1)', fill: 'backwards' }));
+    return;
+  }
   stage.querySelectorAll('.sel-char, .sel-row').forEach((el, i) => el.animate(
     [{ opacity: 0, transform: 'scale(.3)', filter: 'blur(6px)' }, { opacity: 1, transform: 'scale(1)', filter: 'blur(0)' }],
     { duration: 700, delay: 120 + i * 70, easing: 'cubic-bezier(.2, .9, .3, 1.25)', fill: 'backwards' }));
@@ -138,7 +146,7 @@ function showSelect() {
   applyBg();
   document.documentElement.style.overflow = 'hidden';
   renderSelect();
-  if (!reduceMotion.matches) sel.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: 'ease-out' });
+  if (!reduceMotion.matches && !isBook()) sel.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: 'ease-out' });
   popSelect();
 }
 function leaveSelect(fromEl, quick) {
@@ -146,7 +154,7 @@ function leaveSelect(fromEl, quick) {
   const sel = $('select');
   const done = () => { sel.hidden = true; document.documentElement.style.overflow = ''; scrollTo(0, 0); renderPlayer(); };
   if (reduceMotion.matches || quick) { done(); return; }
-  if (themeSwitchFx()) { themeSwitchFx()(done); return; } // 和風は襖、ドットはモザイクで切りかえ
+  if (themeSwitchFx()) { themeSwitchFx()(done); return; } // 和風は襖、ドットはモザイク、魔導書は表紙で切りかえ
   if (fromEl) {
     fxAt(fromEl, true);
     fromEl.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.5)', opacity: 0 }], { duration: 520, easing: 'cubic-bezier(.5, 0, .3, 1)', fill: 'forwards' });
@@ -154,7 +162,6 @@ function leaveSelect(fromEl, quick) {
   const a = sel.animate([{ opacity: 1, transform: 'none', filter: 'blur(0)' }, { opacity: 0, transform: 'scale(1.06)', filter: 'blur(10px)' }], { duration: 560, delay: 140, easing: 'cubic-bezier(.5, 0, .3, 1)', fill: 'forwards' });
   a.finished.then(() => {
     done(); a.cancel();
-    if (bookOpening()) return;
     document.querySelector('.app').animate([{ opacity: .2, transform: 'scale(1.03)', filter: 'blur(10px)' }, { opacity: 1, transform: 'none', filter: 'none' }], { duration: 800, easing: 'cubic-bezier(.2, .8, .2, 1)' });
   });
 }

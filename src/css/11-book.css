@@ -266,11 +266,34 @@
 .bk-flip .flip-shade { position: absolute; inset: 0; pointer-events: none; transform: translateZ(1px);
   background: linear-gradient(to right, rgb(0 0 0 / .42), rgb(0 0 0 / .14) 38%, transparent 70%); border-radius: 0 8px 8px 0; opacity: 0; }
 
-/* --- opening: the closed grimoire from the photo swings open --- */
-.bk-opening { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; pointer-events: none;
-  background: radial-gradient(ellipse at 50% 50%, rgb(20 12 6 / .55), rgb(10 6 3 / .92)); }
-.bk-opening img { width: min(78vw, 760px); max-height: 82vh; object-fit: contain; border-radius: 10px; box-shadow: 0 40px 80px -30px #000;
-  -webkit-mask-image: radial-gradient(ellipse 52% 52% at 50% 50%, #000 70%, transparent 100%); mask-image: radial-gradient(ellipse 52% 52% at 50% 50%, #000 70%, transparent 100%); }
+/* --- 画面の切りかえ：革の表紙が閉じて、魔法陣が光り、表紙と紙がめくれてひらく（09-book.js の bookCover） --- */
+.bk-trans { position: fixed; inset: 0; z-index: 200; overflow: hidden; background-color: rgb(8 4 2 / 0); }
+.bt-cover, .bt-leaf { position: absolute; transform-origin: left center; will-change: transform; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+.bt-cover { inset: 0; transform: perspective(2400px) rotateY(-89.5deg); overflow: hidden;
+  background: linear-gradient(to right, rgb(0 0 0 / .7), rgb(0 0 0 / .2) 3%, transparent 7%), radial-gradient(ellipse at 50% 50%, transparent 38%, rgb(0 0 0 / .6) 100%),
+    var(--tx-cover) center / cover, #2a1c12;
+  box-shadow: inset 0 0 0 1px rgb(214 168 92 / .3), inset 0 0 60px rgb(0 0 0 / .6); }
+.bt-frame { position: absolute; inset: 14px 14px 14px 26px; border: 1.5px solid rgb(201 160 84 / .6); border-radius: 4px 10px 10px 4px; pointer-events: none;
+  box-shadow: inset 0 0 0 4px transparent, inset 0 0 0 5px rgb(201 160 84 / .25); }
+.bt-glow { position: absolute; left: 50%; top: 50%; width: var(--seal, 60vmin); aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; opacity: 0; pointer-events: none; mix-blend-mode: screen;
+  background: radial-gradient(circle, rgb(200 140 255 / .6), rgb(150 90 230 / .28) 22%, rgb(235 185 95 / .14) 46%, transparent 68%); }
+.bt-seal { position: absolute; left: 50%; top: 50%; width: var(--seal, 60vmin); translate: -50% -50%; overflow: visible; pointer-events: none;
+  fill: none; stroke: #f6d688; stroke-width: 1.1; stroke-linejoin: round;
+  filter: drop-shadow(0 0 2px rgb(255 214 130 / .95)) drop-shadow(0 0 10px rgb(255 190 90 / .6)) drop-shadow(0 0 22px rgb(180 110 255 / .55)); }
+.bt-seal > * { opacity: 0; }
+.bt-seal .th { stroke-width: .6; }
+.bt-title { position: absolute; left: 50%; bottom: 8%; translate: -50% 0; min-width: min(80vw, 420px); max-width: 90vw; padding: 10px 34px 14px; text-align: center; opacity: 0; letter-spacing: .18em;
+  background: linear-gradient(rgb(30 17 8 / .86), rgb(16 9 4 / .92)); border: 1px solid rgb(214 168 92 / .75); border-radius: 3px;
+  outline: 1px solid rgb(214 168 92 / .3); outline-offset: 4px; box-shadow: 0 14px 34px rgb(0 0 0 / .65); }
+.bt-kick { display: block; font-family: "Pinyon Script", "Shippori Mincho B1", cursive; font-size: 19px; color: #d9b46a; }
+.bt-name { display: block; margin-top: 2px; font-family: "Shippori Mincho B1", "Hiragino Mincho ProN", serif; font-weight: 700; font-size: clamp(22px, 4.6vw, 38px); line-height: 1.3; overflow-wrap: anywhere;
+  background: linear-gradient(#fff3cc, #e2b45a 55%, #93662a); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 1px 0 rgb(0 0 0 / .85)); }
+.bt-shade { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; }
+/* 表紙の下の紙：インクの書きこみがある古い頁 */
+.bt-leaf { top: 1.2%; bottom: 1.2%; left: 0; right: .8%; visibility: hidden; border-radius: 0 6px 6px 0; background-color: #d3b480;
+  background-image: linear-gradient(rgb(232 210 168 / .35), rgb(232 210 168 / .35)), linear-gradient(to right, rgb(50 25 6 / .55), transparent 60px), var(--tx-ink-right), var(--tx-page-right-tile);
+  background-size: auto, auto, 100% auto, 100% auto; background-repeat: no-repeat, no-repeat, repeat-y, repeat-y;
+  box-shadow: inset 0 0 80px rgb(80 38 8 / .5), 3px 0 0 #b89464, 5px 0 0 #8f6e44, -8px 0 26px rgb(0 0 0 / .35); }
 
 /* --- seen from slightly below on wide screens --- */
 @media (min-width: 901px) {
@@ -342,5 +365,4 @@
   .bk-tab:hover, .bk-tab:focus-visible { transform: translateY(5px); }
   .bk-tab.on { transform: translateY(0); }
   .bk-sound { top: auto; bottom: 22px; right: 18px; }
-  .bk-opening img { width: 92vw; }
 }
