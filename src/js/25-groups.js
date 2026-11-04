@@ -145,7 +145,9 @@ async function transferGroup(btn) {
     toast(`グループ「${d.name || '名前なし'}」の代表を${gUser(to)}さんにゆずりました。あなたは参加者として残っています。`);
   } catch (er) {
     const m = String(er && er.message || '');
-    err.textContent = /transfer_group|Could not find the function|schema cache/.test(m) ? 'サーバーの追加設定（supabase/08-group-transfer.sql）がまだのようです。Supabase の SQL Editor で実行してください。'
+    const known = { not_found: 'グループが見つかりません。', not_owner: '代表をゆずれるのは、いまの代表者だけです。', bad_target: 'ゆずる相手を選んでください。', not_member: '代表をゆずれるのは、このグループに参加中のメンバーだけです。' };
+    const code = Object.keys(known).find(k => m.includes(k));
+    err.textContent = code ? known[code] : /transfer_group|Could not find the function|schema cache/.test(m) ? 'サーバーの追加設定（supabase/08-group-transfer.sql）がまだのようです。Supabase の SQL Editor で実行してください。'
       : /[ぁ-んァ-ヶ一-龠]/.test(m) ? m : jaErr(er);
   } finally { btn.disabled = false; }
 }
