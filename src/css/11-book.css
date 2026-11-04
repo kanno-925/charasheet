@@ -7,6 +7,9 @@
   --tx-edge: url("../assets/book-edge.webp");
   --tx-page-left-tile: url("../assets/book-page-left-tile.webp");
   --tx-page-right-tile: url("../assets/book-page-right-tile.webp");
+  --tx-ink-left: url("../assets/book-ink-left.svg");
+  --tx-ink-right: url("../assets/book-ink-right.svg");
+  --tx-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .18 0 0 0 0 .07 0 0 0 .55 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* --- the desk under everything while the book theme is on --- */
@@ -21,6 +24,9 @@
 
 .sheet.is-book, .has-bg .sheet.is-book { background: transparent; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 .book { position: relative; padding: 66px 34px 64px; }
+/* give the book more room: slimmer side columns while the book theme is on */
+@media (min-width: 1181px) { .layout:has(> .sheet.is-book) { grid-template-columns: 190px minmax(0, 1fr) 300px; gap: 14px; } }
+@media (min-width: 901px) and (max-width: 1180px) { .layout:has(> .sheet.is-book) { grid-template-columns: 170px minmax(0, 1fr); gap: 14px; } }
 .book::before { content: ""; position: absolute; inset: 20px 0 -10px; z-index: -1; pointer-events: none; border-radius: 40px;
   background: radial-gradient(ellipse at 50% 45%, rgb(255 170 80 / .18), transparent 65%); filter: blur(34px); animation: grim-glow 7s ease-in-out infinite; }
 @keyframes grim-glow { 50% { opacity: .6; } }
@@ -44,8 +50,9 @@
 .bk-clasp, .bk-cover::after { position: absolute; z-index: 4; top: 44%; width: 112px; height: 50px; pointer-events: none;
   background: var(--tx-clasp) center / contain no-repeat; filter: drop-shadow(0 5px 6px rgb(0 0 0 / .7));
   -webkit-mask-image: radial-gradient(ellipse 52% 50% at 50% 50%, #000 62%, transparent 100%); mask-image: radial-gradient(ellipse 52% 50% at 50% 50%, #000 62%, transparent 100%); }
-.bk-clasp { right: -66px; }
-.bk-cover::after { content: ""; left: -66px; transform: scaleX(-1); }
+.bk-clasp { right: -50px; }
+@media (max-width: 1180px) { .bk-clasp { right: -32px; } .bk-cover::after { left: -32px; } }
+.bk-cover::after { content: ""; left: -50px; transform: scaleX(-1); }
 
 /* --- the page block --- */
 .bk-pages {
@@ -56,7 +63,7 @@
   --sao-ink: var(--ink); --sao-mute: var(--muted); --shadow: none; --gloss: transparent;
   --f-body: "Zen Kurenaido", "Klee One", "Yu Mincho", serif; --f-mono: "Zen Kurenaido", "Klee One", serif; --f-latin: "Cinzel", "Times New Roman", serif;
   color-scheme: light; color: var(--ink); font-family: var(--f-body);
-  position: relative; z-index: 1; display: grid; grid-template-columns: minmax(300px, 1fr) minmax(0, 1.75fr); border-radius: 3px 8px 8px 3px;
+  position: relative; z-index: 1; display: grid; grid-template-columns: minmax(220px, 1fr) minmax(0, 1.75fr); border-radius: 3px 8px 8px 3px;
   perspective: 2000px; perspective-origin: 30% 60%; filter: drop-shadow(4px 8px 8px rgb(0 0 0 / .6)); }
 /* page layers peeking out under the top sheet */
 .bk-pages::before, .bk-pages::after { content: ""; position: absolute; z-index: 0; top: 4px; bottom: -6px; pointer-events: none;
@@ -72,6 +79,11 @@
 .bk-right { background-image: linear-gradient(rgb(232 210 168 / .56), rgb(232 210 168 / .56)), linear-gradient(to right, rgb(60 30 8 / .55), transparent 80px), var(--tx-page-right-tile);
   background-size: auto, auto, 100% auto; background-repeat: no-repeat, no-repeat, repeat-y;
   border-radius: 0 8px 8px 0; min-height: 760px; padding: 34px 38px 56px; clip-path: polygon(0.00% 3.5px, 3.57% 7.7px, 7.14% 5.8px, 10.71% 0.9px, 14.29% 8.9px, 17.86% 1.9px, 21.43% 2.3px, 25.00% 7.0px, 28.57% 3.0px, 32.14% 2.7px, 35.71% 0.7px, 39.29% 0.8px, 42.86% 5.2px, 46.43% 2.2px, 50.00% 5.4px, 53.57% 3.3px, 57.14% 4.1px, 60.71% 8.6px, 64.29% 4.4px, 67.86% 5.2px, 71.43% 7.8px, 75.00% 1.6px, 78.57% 1.4px, 82.14% 8.2px, 85.71% 7.4px, 89.29% 2.2px, 92.86% 1.7px, 96.43% 6.7px, 100.00% 8.5px, calc(100% - 1.8px) 3.57%, calc(100% - 8.6px) 7.14%, calc(100% - 7.9px) 10.71%, calc(100% - 5.4px) 14.29%, calc(100% - 3.8px) 17.86%, calc(100% - 0.9px) 21.43%, calc(100% - 0.3px) 25.00%, calc(100% - 8.7px) 28.57%, calc(100% - 2.1px) 32.14%, calc(100% - 6.3px) 35.71%, calc(100% - 2.3px) 39.29%, calc(100% - 7.4px) 42.86%, calc(100% - 5.4px) 46.43%, calc(100% - 2.6px) 50.00%, calc(100% - 1.6px) 53.57%, calc(100% - 6.5px) 57.14%, calc(100% - 0.6px) 60.71%, calc(100% - 2.1px) 64.29%, calc(100% - 5.0px) 67.86%, calc(100% - 7.7px) 71.43%, calc(100% - 5.5px) 75.00%, calc(100% - 2.5px) 78.57%, calc(100% - 8.3px) 82.14%, calc(100% - 1.8px) 85.71%, calc(100% - 0.1px) 89.29%, calc(100% - 2.4px) 92.86%, calc(100% - 4.0px) 96.43%, 100.00% calc(100% - 0.5px), 96.43% calc(100% - 1.6px), 92.86% calc(100% - 3.3px), 89.29% calc(100% - 5.1px), 85.71% calc(100% - 1.2px), 82.14% calc(100% - 3.3px), 78.57% calc(100% - 8.0px), 75.00% calc(100% - 8.8px), 71.43% calc(100% - 5.9px), 67.86% calc(100% - 6.2px), 64.29% calc(100% - 5.3px), 60.71% calc(100% - 1.3px), 57.14% calc(100% - 0.3px), 53.57% calc(100% - 0.2px), 50.00% calc(100% - 8.2px), 46.43% calc(100% - 6.3px), 42.86% calc(100% - 8.7px), 39.29% calc(100% - 0.2px), 35.71% calc(100% - 5.7px), 32.14% calc(100% - 4.3px), 28.57% calc(100% - 6.6px), 25.00% calc(100% - 2.9px), 21.43% calc(100% - 9.0px), 17.86% calc(100% - 0.7px), 14.29% calc(100% - 4.9px), 10.71% calc(100% - 6.6px), 7.14% calc(100% - 8.1px), 3.57% calc(100% - 6.6px), 0.00% calc(100% - 6.3px)); }
+/* sharp pen drawings (vector) and paper grain over the photo's stains */
+.bk-page::before, .bk-flip .lf::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; border-radius: inherit;
+  background: var(--tx-ink-right) 0 0 / 100% auto repeat-y, var(--tx-grain) 0 0 / 220px 220px; opacity: .5; }
+.bk-left::before { opacity: .62; }
+.bk-left::before, .bk-flip .lf.back::before { background: var(--tx-ink-left) 0 0 / 100% auto repeat-y, var(--tx-grain) 0 0 / 220px 220px; }
 .bk-right > * { position: relative; z-index: 1; }
 .bk-left > :not(.bk-circle) { position: relative; z-index: 1; }
 .bk-circle { display: none; }
@@ -128,8 +140,10 @@
 /* --- right page: the entry being written --- */
 .bk-head { text-align: center; margin-bottom: 22px; }
 .bk-head h3 { margin: 4px 0 0; display: flex; align-items: center; justify-content: center; gap: 14px; }
-.bk-head h3::before, .bk-head h3::after { content: ""; flex: 0 1 110px; min-width: 24px; height: 6px; background: linear-gradient(var(--ink), var(--ink)) center / 100% 1px no-repeat, radial-gradient(circle, var(--ink) 0 2.5px, transparent 3px) right center / 6px 6px no-repeat; opacity: .7; }
+.bk-head h3::before, .bk-head h3::after { content: ""; flex: 0 100 110px; min-width: 18px; height: 6px; background: linear-gradient(var(--ink), var(--ink)) center / 100% 1px no-repeat, radial-gradient(circle, var(--ink) 0 2.5px, transparent 3px) right center / 6px 6px no-repeat; opacity: .7; }
 .bk-head h3::after { transform: scaleX(-1); }
+.bk-head h3 .bk-ht { flex: none; max-width: calc(100% - 64px); padding-right: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
 .bk-note { margin: 0 0 12px; font-size: 14px; color: var(--muted); }
 .bk-empty { margin: 80px 0; text-align: center; color: var(--muted); font-size: 17px; line-height: 2; }
 .bk-entry-act { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
@@ -240,10 +254,20 @@
     background: radial-gradient(ellipse at 50% 50%, rgb(0 0 0 / .75), transparent 70%); filter: blur(12px); }
 }
 
+/* a slim left page: portrait above the name */
+.bk-left { container: bkleft / inline-size; }
+@container bkleft (max-width: 290px) {
+  .bk-owner { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; }
+  .bk-owner-t { align-items: center; }
+  .bk-pages .bk-name { font-size: 22px; }
+  .bk-pages .bk-chapter h3 { font-size: 22px; letter-spacing: .04em; }
+  .bk-toc { grid-template-columns: 1.6em minmax(0, 1fr) auto; }
+  .bk-toc .bt-d { display: none; }
+}
 /* --- a narrow book on a wide screen (e.g. 1280px with the side panel): pages stack like on phones --- */
 @media (min-width: 901px) {
   .bk-cover { container: bkcover / inline-size; }
-  @container bkcover (max-width: 640px) {
+  @container bkcover (max-width: 500px) {
     .bk-pages { grid-template-columns: minmax(0, 1fr); }
     .bk-pages::before, .bk-pages::after { display: none; }
     .bk-left, .bk-right { clip-path: polygon(0.00% 7.1px, 3.57% 8.2px, 7.14% 3.2px, 10.71% 6.2px, 14.29% 8.1px, 17.86% 7.8px, 21.43% 3.8px, 25.00% 7.1px, 28.57% 7.8px, 32.14% 5.2px, 35.71% 5.6px, 39.29% 3.4px, 42.86% 5.2px, 46.43% 5.5px, 50.00% 0.7px, 53.57% 5.8px, 57.14% 8.9px, 60.71% 7.9px, 64.29% 6.6px, 67.86% 3.5px, 71.43% 6.6px, 75.00% 5.2px, 78.57% 4.0px, 82.14% 7.5px, 85.71% 0.8px, 89.29% 6.8px, 92.86% 0.3px, 96.43% 5.4px, 100.00% 4.3px, calc(100% - 2.1px) 3.57%, calc(100% - 6.3px) 7.14%, calc(100% - 4.5px) 10.71%, calc(100% - 5.5px) 14.29%, calc(100% - 8.3px) 17.86%, calc(100% - 2.3px) 21.43%, calc(100% - 0.1px) 25.00%, calc(100% - 2.7px) 28.57%, calc(100% - 6.1px) 32.14%, calc(100% - 1.8px) 35.71%, calc(100% - 1.5px) 39.29%, calc(100% - 8.2px) 42.86%, calc(100% - 5.9px) 46.43%, calc(100% - 4.0px) 50.00%, calc(100% - 8.0px) 53.57%, calc(100% - 2.9px) 57.14%, calc(100% - 6.0px) 60.71%, calc(100% - 1.8px) 64.29%, calc(100% - 3.9px) 67.86%, calc(100% - 7.3px) 71.43%, calc(100% - 8.2px) 75.00%, calc(100% - 7.9px) 78.57%, calc(100% - 3.5px) 82.14%, calc(100% - 5.2px) 85.71%, calc(100% - 2.8px) 89.29%, calc(100% - 1.2px) 92.86%, calc(100% - 4.5px) 96.43%, 100.00% calc(100% - 7.5px), 96.43% calc(100% - 7.6px), 92.86% calc(100% - 6.4px), 89.29% calc(100% - 8.6px), 85.71% calc(100% - 2.5px), 82.14% calc(100% - 1.5px), 78.57% calc(100% - 4.1px), 75.00% calc(100% - 2.5px), 71.43% calc(100% - 1.9px), 67.86% calc(100% - 3.7px), 64.29% calc(100% - 5.6px), 60.71% calc(100% - 4.4px), 57.14% calc(100% - 2.8px), 53.57% calc(100% - 7.6px), 50.00% calc(100% - 8.8px), 46.43% calc(100% - 4.1px), 42.86% calc(100% - 0.7px), 39.29% calc(100% - 0.3px), 35.71% calc(100% - 7.9px), 32.14% calc(100% - 0.4px), 28.57% calc(100% - 6.4px), 25.00% calc(100% - 5.1px), 21.43% calc(100% - 2.8px), 17.86% calc(100% - 7.1px), 14.29% calc(100% - 0.2px), 10.71% calc(100% - 1.2px), 7.14% calc(100% - 4.1px), 3.57% calc(100% - 0.2px), 0.00% calc(100% - 7.5px), 2.1px 96.43%, 1.3px 92.86%, 0.4px 89.29%, 5.7px 85.71%, 4.0px 82.14%, 5.7px 78.57%, 5.9px 75.00%, 7.3px 71.43%, 8.6px 67.86%, 6.2px 64.29%, 1.8px 60.71%, 4.3px 57.14%, 1.6px 53.57%, 0.1px 50.00%, 4.2px 46.43%, 6.4px 42.86%, 1.6px 39.29%, 2.5px 35.71%, 3.1px 32.14%, 6.3px 28.57%, 4.7px 25.00%, 5.5px 21.43%, 6.8px 17.86%, 3.5px 14.29%, 7.1px 10.71%, 8.2px 7.14%, 0.8px 3.57%); }

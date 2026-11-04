@@ -66,7 +66,7 @@ site = ROOT
 # single-file versions
 dist = ROOT / 'dist'
 dist.mkdir(exist_ok=True)
-MIME = {'.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.mp3': 'audio/mpeg'}
+MIME = {'.svg': 'image/svg+xml', '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.mp3': 'audio/mpeg'}
 
 
 def data_uri(name):

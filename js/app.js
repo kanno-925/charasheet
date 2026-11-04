@@ -857,7 +857,7 @@ function bookHtml(c) {
         <span class="bk-ribbon" aria-hidden="true"></span>
         <div class="bk-page bk-right" id="bk-right">
           <span class="bk-stain" aria-hidden="true"></span>
-          <div class="bk-head"><span class="bk-en">第${kn(idx)}章 ・ ${kn(curNo)}</span><h3>${cur ? esc(cur.label) : sec.jp}</h3></div>
+          <div class="bk-head"><span class="bk-en">第${kn(idx)}章 ・ ${kn(curNo)}</span><h3><span class="bk-ht">${cur ? esc(cur.label) : sec.jp}</span></h3></div>
           <div class="bk-body">${body}</div>
           <p class="bk-folio">${idx * 20 + curNo * 2 + 13}</p>
         </div>
