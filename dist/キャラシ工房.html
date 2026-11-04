@@ -1440,6 +1440,9 @@ label.btn { display: inline-block; }
 #modal-join .hint { margin: 0; font-size: 12px; color: var(--muted); }
 #j-char { margin-top: -6px; }
 @media (max-width: 560px) { .gm-row.ex { grid-template-columns: minmax(0, 1fr) 36px; } }
+.gm-transfer .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.gm-transfer select { flex: 1 1 200px; min-width: 0; }
+.gm-transfer { border-color: color-mix(in srgb, var(--amber) 40%, var(--line)); }
 
 /* ===== icon editor ===== */
 .token img { transform-origin: 50% 15%; }
@@ -5714,6 +5717,32 @@ function renderGroupSelect(stage) {
 }
 const charOptions = sel => state.chars.filter(c => !c.sample || state.chars.length === 1).map(c => `<option value="${c.id}" ${sel === c.id ? 'selected' : ''}>${esc(c.profile.name || '名無し')}${c.locked ? '（非公開のキャラ）' : ''}</option>`).join('');
 const roleSwitch = (cur, attr) => `<div class="role-sw" role="group" aria-label="役割">${['kp', 'pl'].map(r => `<button type="button" class="role-btn ${cur === r ? 'on' : ''}" ${attr}="${r}" aria-pressed="${cur === r}"><b>${ROLE[r]}</b><small>${r === 'kp' ? 'シナリオを回す' : 'キャラで遊ぶ'}</small></button>`).join('')}</div>`;
+/* ---- 代表をゆずる（参加中のメンバーだけが相手になれる） ---- */
+function transferHtml(d) {
+  const joined = (d.members || []).filter(m => m.status === 'joined' && m.user_id !== me.id);
+  return `<div class="gm-sec gm-transfer"><b>代表をゆずる</b>
+    <span class="hint">代表（グループの編集・招待・削除ができる人）を、参加中のメンバーにゆずれます。ゆずったあと、あなたは参加者として残ります。ほかの変更は先に「保存」してください。</span>
+    ${joined.length ? `<div class="row"><select class="inp" id="g-newowner" aria-label="代表をゆずる相手"><option value="">ゆずる相手を選ぶ</option>${joined.map(m => `<option value="${m.user_id}">${esc(gUser(m.user_id))}（${m.role ? ROLE[m.role] : '参加中'}）</option>`).join('')}</select>
+      <button class="btn small" type="button" data-gact="transfer">代表をゆずる</button></div>`
+      : '<span class="empty">まだ参加中のメンバーがいないので、ゆずれません。招待した人が参加すると選べるようになります。</span>'}</div>`;
+}
+async function transferGroup(btn) {
+  const d = gDraft, to = $('g-newowner') && $('g-newowner').value, err = $('g-err');
+  err.textContent = '';
+  if (!to) { err.textContent = 'ゆずる相手を選んでください。'; return; }
+  if (!arm(btn, `${gUser(to)}さんにゆずる（もう一度押す）`)) return;
+  btn.disabled = true;
+  try {
+    const { error } = await sb.rpc('transfer_group', { gid: d.id, new_owner: to });
+    if (error) throw error;
+    closeModals(); await loadGroups(); renderSelect(); popSelect();
+    toast(`グループ「${d.name || '名前なし'}」の代表を${gUser(to)}さんにゆずりました。あなたは参加者として残っています。`);
+  } catch (er) {
+    const m = String(er && er.message || '');
+    err.textContent = /transfer_group|Could not find the function|schema cache/.test(m) ? 'サーバーの追加設定（supabase/08-group-transfer.sql）がまだのようです。Supabase の SQL Editor で実行してください。'
+      : /[ぁ-んァ-ヶ一-龠]/.test(m) ? m : jaErr(er);
+  } finally { btn.disabled = false; }
+}
 /* ---- 代表者の編集画面 ---- */
 function renderGroupEditor() {
   const d = gDraft;
@@ -5744,6 +5773,7 @@ function renderGroupEditor() {
         <button class="icon-btn" type="button" data-gact="rmx" data-i="${i}" aria-label="この参加者を消す">×</button></div>`).join('')}</div>
       <button class="btn small" type="button" data-gact="addx">＋ 参加者を書き加える</button></div>
     <div class="field wide"><label for="g-note">メモ（生還・ロスト・感想など）</label><textarea class="inp" id="g-note" data-g="note" rows="3">${esc(d.note)}</textarea></div>
+    ${d._new ? '' : transferHtml(d)}
     <p class="err" id="g-err" role="alert"></p>`;
   $('grp-del').hidden = !!d._new;
 }
@@ -5769,6 +5799,7 @@ $('grp-body').addEventListener('click', e => {
   if (r) { gDraft.myRole = r.dataset.gmyrole; if (gDraft.myRole === 'pl' && !gDraft.myChar) gDraft.myChar = state.activeId; renderGroupEditor(); return; }
   const b = e.target.closest('[data-gact]'); if (!b) return;
   const u = b.dataset.u, act = b.dataset.gact;
+  if (act === 'transfer') { transferGroup(b); return; }
   if (act === 'lock') gDraft.locked = !gDraft.locked;
   if (act === 'invite') { const rm = gDraft.remove.indexOf(u); if (rm >= 0) gDraft.remove.splice(rm, 1); else { const i = gDraft.invite.indexOf(u); if (i >= 0) gDraft.invite.splice(i, 1); else gDraft.invite.push(u); } }
   if (act === 'remove') gDraft.remove.push(u);

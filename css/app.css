@@ -1422,6 +1422,9 @@ label.btn { display: inline-block; }
 #modal-join .hint { margin: 0; font-size: 12px; color: var(--muted); }
 #j-char { margin-top: -6px; }
 @media (max-width: 560px) { .gm-row.ex { grid-template-columns: minmax(0, 1fr) 36px; } }
+.gm-transfer .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.gm-transfer select { flex: 1 1 200px; min-width: 0; }
+.gm-transfer { border-color: color-mix(in srgb, var(--amber) 40%, var(--line)); }
 
 /* ===== icon editor ===== */
 .token img { transform-origin: 50% 15%; }
