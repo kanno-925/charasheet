@@ -72,6 +72,13 @@ function charDot(x) {
   return av ? `<span class="gc-dot img"><img src="${esc(av)}" alt=""></span>` : '';
 }
 const dot = (name, uid) => `<span class="gc-dot" style="--c:${esc(personColor(uid))}">${esc((name || '？').charAt(0))}</span>`;
+const safeRoom = u => /^https:\/\/[^\s"'<>]+$/.test(u || '') ? u : '';
+function roomRow(g, member) {
+  const url = safeRoom((g.data || {}).roomUrl);
+  if (!url) return '';
+  if (!member) return '<div class="gc-room"><span class="gc-room-n">ココフォリアのルームあり（参加者だけが開けます）</span></div>';
+  return `<div class="gc-room"><a class="btn small primary gc-room-go" href="${esc(url)}" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 3h6v6M17 3l-8 8M15 12v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h4"/></svg>ココフォリアのルームを開く</a><button class="btn small ghost" type="button" data-gcopy="${esc(url)}">URLをコピー</button></div>`;
+}
 function groupCardHtml(g, kind) {
   const d = g.data || {}, { kp, pl, pending } = rosterOf(g), mine = myRow(g), owner = me && g.owner === me.id;
   const chips = pl.map(x => `<button class="gc-pl" type="button" ${x.user && x.charId ? `data-gm-user="${x.user}" data-gm-char="${esc(x.charId)}"` : 'disabled'}>
@@ -91,6 +98,7 @@ function groupCardHtml(g, kind) {
     <div class="gc-row"><span class="gc-role kp">KP</span><div class="gc-pls">${kp.length ? kp.map(x => `<span class="gc-kp">${dot(x.name, x.user)}${esc(x.name || '？')}</span>`).join('') : '<span class="gc-none">未定</span>'}</div></div>
     <div class="gc-row"><span class="gc-role pl">探索者</span><div class="gc-pls">${chips || '<span class="gc-none">未定</span>'}</div></div>
     ${pending.length ? `<div class="gc-row"><span class="gc-role wait">招待中</span><div class="gc-pls">${pending.map(n => `<span class="gc-wait">${esc(n)}</span>`).join('')}</div></div>` : ''}
+    ${roomRow(g, owner || (mine && mine.status === 'joined'))}
     ${d.note ? `<p class="gc-note">${esc(d.note)}</p>` : ''}
   </article>`;
 }
@@ -124,6 +132,7 @@ function renderGroupEditor() {
   $('grp-body').innerHTML = `
     <div class="fields">
       <div class="field wide"><label for="g-name">シナリオ名</label><input class="inp" id="g-name" data-g="name" value="${esc(d.name)}" placeholder="例：悪霊の家"></div>
+      <div class="field wide"><label for="g-room">ココフォリアのルームURL</label><input class="inp" id="g-room" data-g="roomUrl" value="${esc(d.roomUrl)}" placeholder="https://ccfolia.com/rooms/…" inputmode="url" autocomplete="off"><span class="hint">参加者のカードに「ルームを開く」ボタンが出ます。公開グループでも、ボタンは参加者にだけ表示されます。</span></div>
       <div class="field"><label for="g-date">日付</label><input class="inp" id="g-date" data-g="date" value="${esc(d.date)}" placeholder="例：2026/10/01"></div>
       <div class="field"><span class="lbl">公開</span><button class="btn lock-btn ${d.locked ? 'on' : ''}" type="button" data-gact="lock" aria-pressed="${d.locked}">${d.locked ? LOCK_ICON + '非公開（参加者だけ）' : UNLOCK_ICON + 'フレンドに公開'}</button></div>
     </div>
@@ -151,8 +160,8 @@ function openGroupEditor(id) {
   const g = id && G.list.find(x => x.id === id);
   const mine = g && myRow(g);
   gDraft = g
-    ? { id: g.id, name: g.data.name || '', date: g.data.date || '', note: g.data.note || '', locked: g.locked, extras: JSON.parse(JSON.stringify(g.data.extras || [])), members: g.members, invite: [], remove: [], myRole: (mine && mine.role) || 'kp', myChar: (mine && mine.char_id) || '' }
-    : { _new: true, id: uid(), name: '', date: '', note: '', locked: false, extras: [], members: [], invite: [], remove: [], myRole: 'kp', myChar: '' };
+    ? { id: g.id, name: g.data.name || '', date: g.data.date || '', note: g.data.note || '', roomUrl: g.data.roomUrl || '', locked: g.locked, extras: JSON.parse(JSON.stringify(g.data.extras || [])), members: g.members, invite: [], remove: [], myRole: (mine && mine.role) || 'kp', myChar: (mine && mine.char_id) || '' }
+    : { _new: true, id: uid(), name: '', date: '', note: '', roomUrl: '', locked: false, extras: [], members: [], invite: [], remove: [], myRole: 'kp', myChar: '' };
   renderGroupEditor(); openModal('modal-group');
 }
 $('grp-body').addEventListener('input', e => {
@@ -180,10 +189,12 @@ $('grp-save').addEventListener('click', async e => {
   const d = gDraft, btn = e.currentTarget;
   if (!d.name.trim()) { $('g-err').textContent = 'シナリオ名を書いてください。'; $('g-name').focus(); return; }
   if (d.myRole === 'pl' && !d.myChar) { $('g-err').textContent = '使う探索者を選んでください。'; return; }
+  d.roomUrl = (d.roomUrl || '').trim();
+  if (d.roomUrl && !safeRoom(d.roomUrl)) { $('g-err').textContent = 'ルームURLは https:// で始まるURLを入れてください。'; $('g-room').focus(); return; }
   btn.disabled = true;
   try {
     const ch = state.chars.find(c => c.id === d.myChar);
-    let r = await sb.from('groups').upsert({ id: d.id, owner: me.id, locked: !!d.locked, data: { name: d.name.trim(), date: d.date.trim(), note: d.note, extras: d.extras.filter(x => (x.name || '').trim() || (x.charName || '').trim()) }, updated_at: new Date().toISOString() });
+    let r = await sb.from('groups').upsert({ id: d.id, owner: me.id, locked: !!d.locked, data: { name: d.name.trim(), date: d.date.trim(), note: d.note, roomUrl: d.roomUrl, extras: d.extras.filter(x => (x.name || '').trim() || (x.charName || '').trim()) }, updated_at: new Date().toISOString() });
     if (r.error) throw r.error;
     r = await sb.from('group_members').upsert({ group_id: d.id, user_id: me.id, status: 'joined', role: d.myRole, char_id: d.myRole === 'pl' ? d.myChar : null, char_name: d.myRole === 'pl' && ch ? (ch.profile.name || '名無し') : null });
     if (r.error) throw r.error;

@@ -100,6 +100,8 @@ $('select').addEventListener('click', e => {
   if (gj) { openJoin(gj.dataset.gjoin); return; }
   const gd = e.target.closest('[data-gdecline]');
   if (gd) { declineGroup(gd.dataset.gdecline); return; }
+  const gc = e.target.closest('[data-gcopy]');
+  if (gc) { copyText(gc.dataset.gcopy, { classList: { remove() {}, add() {} }, set textContent(v) {} }, null).then(ok => toast(ok ? 'ルームURLをコピーしました。' : 'コピーできませんでした。')); return; }
   const gm = e.target.closest('[data-gm-user]');
   if (gm) { openMemberChar(gm.dataset.gmUser, gm.dataset.gmChar); return; }
   if (e.target.closest('#sel-addfriend')) { openFriends(); setTimeout(() => $('ol-name')?.focus(), 60); return; }

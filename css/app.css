@@ -1312,6 +1312,38 @@ label.btn { display: inline-block; }
 .bk-ribbon { background: linear-gradient(90deg, rgb(0 0 0 / .35), transparent 30%, transparent 70%, rgb(0 0 0 / .4)), #1d1a22; }
 .bk-clasp { filter: saturate(.4); }
 
+/* ===== grimoire v5: seen from slightly below, thicker 3D page turns ===== */
+@media (min-width: 901px) {
+  .sheet.is-book { perspective: 2600px; perspective-origin: 50% 120%; }
+  .book { transform: rotateX(7deg) rotateY(-1.5deg); transform-origin: 50% 100%; transform-style: preserve-3d; }
+  .book::after { content: ""; position: absolute; left: 6%; right: 6%; bottom: -6px; height: 40px; z-index: -1; pointer-events: none; border-radius: 50%;
+    background: radial-gradient(ellipse at 50% 50%, rgb(0 0 0 / .65), transparent 70%); filter: blur(10px); }
+}
+/* the underside of the page block, visible from below */
+.bk-edge { position: absolute; z-index: 0; left: 20px; right: 26px; bottom: 5px; height: 15px; pointer-events: none; border-radius: 0 0 6px 3px;
+  background: linear-gradient(to bottom, rgb(0 0 0 / .45), transparent 45%), repeating-linear-gradient(to bottom, #cdbf9f 0 1px, #9a8c70 1px 2px, #bfb08f 2px 3px);
+  box-shadow: 0 3px 6px rgb(0 0 0 / .55); filter: saturate(.45); }
+.bk-sound { position: absolute; z-index: 5; top: 14px; right: 26px; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+  border: 1px solid rgb(201 162 78 / .55); background: rgb(10 8 14 / .55); color: #d8cfa8; transition: transform .25s cubic-bezier(.3, 1.6, .5, 1); }
+.bk-sound:hover { transform: scale(1.08); }
+.bk-sound svg { width: 17px; height: 17px; fill: currentColor; }
+.bk-sound svg .w { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+.bk-sound.off { color: #8a8378; }
+/* page turn: two-sided leaves with thickness, lift and a sweeping shadow */
+.bk-pages { perspective: 2000px; perspective-origin: 30% 60%; }
+.bk-flip { transform-style: preserve-3d; }
+.bk-flip .leaf { background: none !important; box-shadow: none !important; clip-path: none !important; transform-style: preserve-3d; }
+.bk-flip .lf { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 0 8px 8px 0; background-color: #d7cbb0;
+  background-image: repeating-linear-gradient(transparent 0 26px, rgb(40 32 30 / .16) 26px 27px), linear-gradient(to right, rgb(40 25 10 / .5), transparent 46px), linear-gradient(to left, rgb(255 250 235 / .35), transparent 22px),
+    radial-gradient(ellipse at 100% 0%, rgb(70 40 15 / .45), transparent 26%), radial-gradient(ellipse at 100% 100%, rgb(70 40 15 / .45), transparent 26%);
+  background-size: 100% 100%; background-position: 0 70px, 0 0, 0 0, 0 0, 0 0;
+  box-shadow: inset 0 0 50px rgb(80 50 20 / .4), 2px 0 0 #b8aa8c, 3px 0 0 #9f9275, -6px 0 22px rgb(0 0 0 / .35); }
+.bk-flip .lf.back { transform: rotateY(180deg); border-radius: 8px 0 0 8px; background-color: #cdbf9f;
+  background-image: repeating-linear-gradient(transparent 0 26px, rgb(40 32 30 / .1) 26px 27px), linear-gradient(to left, rgb(40 25 10 / .5), transparent 46px); }
+.bk-flip .flip-shade { position: absolute; inset: 0; pointer-events: none; transform: translateZ(1px);
+  background: linear-gradient(to right, rgb(0 0 0 / .42), rgb(0 0 0 / .14) 38%, transparent 70%); border-radius: 0 8px 8px 0; opacity: 0; }
+@media (max-width: 900px) { .bk-sound { top: auto; bottom: 22px; right: 18px; } .bk-edge { left: 12px; right: 12px; } }
+
 /* ===== groups ===== */
 .grp-list { display: flex; flex-direction: column; gap: 10px; }
 .grp-h { margin: 18px 0 2px; font-size: 14px; font-family: var(--f-display); color: var(--muted); letter-spacing: .1em; }
@@ -1376,6 +1408,11 @@ label.btn { display: inline-block; }
 .gm-mem small { color: var(--muted); font-size: 11px; }
 .gm-mem .icon-btn { padding: 2px 6px; min-width: 0; min-height: 0; }
 .gm-row.ex { grid-template-columns: 7em minmax(0, 1fr) minmax(0, 1fr) 36px; }
+.gc-room { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.gc-room-go { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.gc-room-go svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.gc-room-n { font-size: 12px; color: var(--muted); }
+#grp-body .field .hint { font-size: 11.5px; color: var(--muted); }
 #modal-join .hint { margin: 0; font-size: 12px; color: var(--muted); }
 #j-char { margin-top: -6px; }
 @media (max-width: 560px) { .gm-row.ex { grid-template-columns: minmax(0, 1fr) 36px; } }

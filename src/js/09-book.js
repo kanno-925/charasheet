@@ -1,3 +1,52 @@
+/* ================= 効果音（ページめくり・書き直し） ================= */
+const SFX = { ctx: null, noise: null };
+const sfxOn = () => state.sfx !== false && !state.bgmMuted;
+function actx() {
+  if (!SFX.ctx) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; SFX.ctx = new C(); }
+  if (SFX.ctx.state === 'suspended') SFX.ctx.resume();
+  if (!SFX.noise) {
+    const len = SFX.ctx.sampleRate * 2, buf = SFX.ctx.createBuffer(1, len, SFX.ctx.sampleRate), d = buf.getChannelData(0);
+    let b = 0;
+    for (let i = 0; i < len; i++) { const w = Math.random() * 2 - 1; b = .97 * b + .03 * w; d[i] = w * .6 + b * 2.2; }
+    SFX.noise = buf;
+  }
+  return SFX.ctx;
+}
+function noiseBurst(ctx, at, dur, { f0, f1, q = 1, vol = .3, attack = .01, hp = 300, offset = Math.random() * 1.5 }) {
+  const src = ctx.createBufferSource(); src.buffer = SFX.noise;
+  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = q;
+  bp.frequency.setValueAtTime(f0, at); bp.frequency.exponentialRampToValueAtTime(Math.max(60, f1), at + dur);
+  const hpf = ctx.createBiquadFilter(); hpf.type = 'highpass'; hpf.frequency.value = hp;
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(vol, at + attack); g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+  src.connect(bp).connect(hpf).connect(g).connect(ctx.destination);
+  src.start(at, offset, dur + .05);
+}
+/* 紙が1枚めくれる音：ふわっとした擦れ＋最後のぱさっ */
+function sfxFlip(delayMs = 0, vol = 1) {
+  if (!sfxOn()) return; const ctx = actx(); if (!ctx) return;
+  const t = ctx.currentTime + delayMs / 1000, v = vol * (.85 + Math.random() * .3);
+  noiseBurst(ctx, t, .34, { f0: 1400, f1: 3600, q: .8, vol: .16 * v, attack: .12, hp: 500 });
+  noiseBurst(ctx, t + .26, .12, { f0: 2600, f1: 900, q: 1.2, vol: .28 * v, attack: .006, hp: 700 });
+  noiseBurst(ctx, t + .33, .05, { f0: 4200, f1: 2000, q: 2, vol: .12 * v, attack: .003, hp: 1500 });
+}
+/* 万年筆で書く音：かりかりとした短い筆跡の連続 */
+function sfxWrite(ms) {
+  if (!sfxOn()) return; const ctx = actx(); if (!ctx) return;
+  let t = ctx.currentTime + .02; const end = t + Math.min(ms, 6000) / 1000;
+  while (t < end) {
+    const d = .05 + Math.random() * .14;
+    noiseBurst(ctx, t, d, { f0: 3800 + Math.random() * 1800, f1: 2600 + Math.random() * 1600, q: 2.2, vol: .05 + Math.random() * .05, attack: .008, hp: 1800 });
+    t += d + (Math.random() < .25 ? .14 + Math.random() * .16 : .02 + Math.random() * .05);
+  }
+}
+/* 消す音：ゆっくり擦るこすれ */
+function sfxErase(ms) {
+  if (!sfxOn()) return; const ctx = actx(); if (!ctx) return;
+  let t = ctx.currentTime + .01; const end = t + ms / 1000;
+  while (t < end) { const d = .12 + Math.random() * .1; noiseBurst(ctx, t, d, { f0: 900, f1: 1400, q: .9, vol: .07, attack: .05, hp: 250 }); t += d * .8; }
+}
+
 /* ================= 本のテーマ（付箋で項目を切り替える） ================= */
 const BOOK_LABEL = { profile: '人物', abilities: '能力値', skills: '技能', weapons: '武器', items: '所持品', money: '財産', tomes: '神話', scenarios: '冒険記録', story: '経歴' };
 const isBook = () => (presetOf().look || '').split(' ').includes('book');
@@ -75,6 +124,8 @@ function bookHtml(c) {
     <div class="bk-cover">
       <span class="bk-corners" aria-hidden="true"><svg class="bk-corner" viewBox="0 0 60 60" aria-hidden="true"><path d="M4 56V14C4 8 8 4 14 4h42"/><path d="M10 50V18c0-5 3-8 8-8h32"/><path d="M18 18c8 0 12 4 12 12M18 18c0 8 4 12 12 12"/><circle cx="18" cy="18" r="3"/><path d="M4 34c6 0 9 3 9 9M34 4c0 6 3 9 9 9"/></svg><svg class="bk-corner" viewBox="0 0 60 60" aria-hidden="true"><path d="M4 56V14C4 8 8 4 14 4h42"/><path d="M10 50V18c0-5 3-8 8-8h32"/><path d="M18 18c8 0 12 4 12 12M18 18c0 8 4 12 12 12"/><circle cx="18" cy="18" r="3"/><path d="M4 34c6 0 9 3 9 9M34 4c0 6 3 9 9 9"/></svg><svg class="bk-corner" viewBox="0 0 60 60" aria-hidden="true"><path d="M4 56V14C4 8 8 4 14 4h42"/><path d="M10 50V18c0-5 3-8 8-8h32"/><path d="M18 18c8 0 12 4 12 12M18 18c0 8 4 12 12 12"/><circle cx="18" cy="18" r="3"/><path d="M4 34c6 0 9 3 9 9M34 4c0 6 3 9 9 9"/></svg><svg class="bk-corner" viewBox="0 0 60 60" aria-hidden="true"><path d="M4 56V14C4 8 8 4 14 4h42"/><path d="M10 50V18c0-5 3-8 8-8h32"/><path d="M18 18c8 0 12 4 12 12M18 18c0 8 4 12 12 12"/><circle cx="18" cy="18" r="3"/><path d="M4 34c6 0 9 3 9 9M34 4c0 6 3 9 9 9"/></svg></span>
       <span class="bk-clasp" aria-hidden="true"></span>
+      <span class="bk-edge" aria-hidden="true"></span>
+      <button class="bk-sound ${state.sfx === false ? 'off' : ''}" type="button" data-act="sfx" aria-pressed="${state.sfx !== false}" title="効果音（ページめくり・書き直し）">${state.sfx === false ? '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 7.5h3l4-3.5v12l-4-3.5h-3z"/><path class="w" d="M13.5 7.5l5 5M18.5 7.5l-5 5"/></svg>' : '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 7.5h3l4-3.5v12l-4-3.5h-3z"/><path class="w" d="M13.5 7a4 4 0 0 1 0 6M15.6 5a7 7 0 0 1 0 10"/></svg>'}</button>
       <nav class="bk-tabs" aria-label="章の付箋">${SECTIONS.map((x, i) => `<button class="bk-tab ${x.key === key ? 'on' : ''}" type="button" data-booktab="${x.key}" style="--bc:${x.color};--i:${i}" aria-current="${x.key === key}" aria-label="${x.jp}">${BOOK_LABEL[x.key]}</button>`).join('')}</nav>
       <div class="bk-pages">
         <div class="bk-page bk-left">
@@ -110,9 +161,11 @@ function writeIn(pg) {
   if (!pg || reduceMotion.matches) return;
   const els = [...pg.querySelectorAll('.bk-head .bk-en, .bk-head h3, .bk-note, .field, .sec-title, .points .pt, .tbl thead tr, .tbl tbody tr, .dv, .chart-fig, .sub-title, .scn-friends, .played-with, .bk-entry-act, .bk-manage, textarea, .bk-empty')]
     .filter(el => !el.closest('.field') || el.classList.contains('field')).slice(0, 44);
+  const dur = 900, step = 115;
   els.forEach((el, i) => el.animate(
-    [{ clipPath: 'inset(0 100% 0 0)', filter: 'blur(1.2px)', opacity: .4 }, { clipPath: 'inset(0 0% 0 0)', filter: 'blur(0)', opacity: 1 }],
-    { duration: 520, delay: i * 55, easing: 'cubic-bezier(.4, .1, .3, 1)', fill: 'backwards' }));
+    [{ clipPath: 'inset(0 100% 0 0)', filter: 'blur(1.2px)', opacity: .35 }, { clipPath: 'inset(0 0% 0 0)', filter: 'blur(0)', opacity: 1 }],
+    { duration: dur, delay: i * step, easing: 'cubic-bezier(.45, .1, .35, 1)', fill: 'backwards' }));
+  if (els.length) sfxWrite(dur + (els.length - 1) * step);
 }
 let bookBusy = false;
 function setBookSub(id) {
@@ -132,8 +185,9 @@ function setBookSub(id) {
   if (!changed || reduceMotion.matches || !old) { go(); return; }
   bookBusy = true;
   const erase = [{ opacity: 1, filter: 'blur(0) contrast(1)' }, { opacity: 0, filter: 'blur(2.5px) contrast(.6)' }];
-  oldHead?.animate(erase, { duration: 320, easing: 'ease-in', fill: 'forwards' });
-  old.animate(erase, { duration: 320, easing: 'ease-in', fill: 'forwards' }).finished.then(() => { bookBusy = false; go(); }, () => { bookBusy = false; go(); });
+  sfxErase(560);
+  oldHead?.animate(erase, { duration: 600, easing: 'ease-in', fill: 'forwards' });
+  old.animate(erase, { duration: 600, easing: 'ease-in', fill: 'forwards' }).finished.then(() => { bookBusy = false; go(); }, () => { bookBusy = false; go(); });
   return;
 }
 function flipLeaves(fromIdx, toIdx, count) {
@@ -147,18 +201,28 @@ function flipLeaves(fromIdx, toIdx, count) {
   wrap.className = 'bk-flip';
   Object.assign(wrap.style, { left: pg.offsetLeft + 'px', top: (pg.offsetTop + top) + 'px', width: pg.offsetWidth + 'px', height: Math.max(120, h) + 'px' });
   pages.appendChild(wrap);
-  const dur = count === 1 ? 560 : 950, gap = count === 1 ? 85 : 150;
+  const dur = count === 1 ? 760 : 1050, gap = count === 1 ? 85 : 170;
   const anims = [];
+  const shade = document.createElement('i'); shade.className = 'flip-shade'; wrap.appendChild(shade);
+  anims.push(shade.animate([{ opacity: 0 }, { opacity: 1, offset: .3 }, { opacity: 1, offset: .75 }, { opacity: 0 }], { duration: dur + (n - 1) * gap, easing: 'ease-in-out', fill: 'both' }));
+  const end = narrow ? -100 : -180;
+  const path = [
+    { t: 0, ry: 0, rz: 0, tz: 0, b: 1 },
+    { t: .18, ry: -24, rz: -1.6, tz: 18, b: .97 },
+    { t: .5, ry: -90, rz: -2.2, tz: 46, b: .62 },
+    { t: .82, ry: end * .88, rz: -1, tz: 16, b: .82 },
+    { t: 1, ry: end, rz: 0, tz: 0, b: .9 },
+  ];
+  const seq = forward ? path : path.map(x => ({ ...x, t: 1 - x.t })).reverse();
   for (let i = 0; i < n; i++) {
     const leaf = document.createElement('i');
     leaf.className = 'leaf' + (i === n - 1 ? ' last' : '');
+    leaf.innerHTML = '<b class="lf front"></b><b class="lf back"></b>';
     wrap.appendChild(leaf);
-    const k = narrow
-      ? (forward ? [{ transform: 'rotateY(0deg)', filter: 'brightness(1)' }, { transform: 'rotateY(-100deg)', filter: 'brightness(.55)', opacity: 0 }]
-                 : [{ transform: 'rotateY(-100deg)', filter: 'brightness(.55)', opacity: 0 }, { transform: 'rotateY(0deg)', filter: 'brightness(1)', opacity: 1 }])
-      : (forward ? [{ transform: 'rotateY(0deg)', filter: 'brightness(1)', opacity: 1 }, { transform: 'rotateY(-90deg)', filter: 'brightness(.5)', opacity: 1, offset: .5 }, { transform: 'rotateY(-180deg)', filter: 'brightness(.85)', opacity: 0 }]
-                 : [{ transform: 'rotateY(-180deg)', filter: 'brightness(.85)', opacity: 0 }, { transform: 'rotateY(-90deg)', filter: 'brightness(.5)', opacity: 1, offset: .5 }, { transform: 'rotateY(0deg)', filter: 'brightness(1)', opacity: 1 }]);
-    anims.push(leaf.animate(k, { duration: dur, delay: i * gap, easing: 'cubic-bezier(.45, .05, .35, 1)', fill: 'both' }));
+    const k = seq.map(x => ({ offset: x.t, transform: `rotateY(${x.ry}deg) rotateZ(${x.rz}deg) translateZ(${x.tz}px)`, opacity: narrow && Math.abs(x.ry) > 95 ? 0 : 1 }));
+    anims.push(leaf.animate(k, { duration: dur, delay: i * gap, easing: 'cubic-bezier(.42, .02, .3, 1)', fill: 'both' }));
+    leaf.querySelectorAll('.lf').forEach(f => anims.push(f.animate(seq.map(x => ({ offset: x.t, filter: `brightness(${x.b})` })), { duration: dur, delay: i * gap, easing: 'cubic-bezier(.42, .02, .3, 1)', fill: 'both' })));
+    sfxFlip(i * gap + dur * .12, i === n - 1 ? 1 : .8);
   }
   pg.querySelector('.bk-head')?.animate([{ opacity: 0 }, { opacity: 0, offset: .55 }, { opacity: 1 }], { duration: dur + n * gap, easing: 'ease-out' });
   pg.querySelector('.bk-body')?.animate([{ opacity: 0, filter: 'blur(3px)' }, { opacity: 0, offset: .55 }, { opacity: 1, filter: 'blur(0)' }], { duration: dur + n * gap + 120, easing: 'ease-out' });
