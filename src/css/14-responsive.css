@@ -80,3 +80,35 @@
 }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ===== touch devices: phones and tablets ===== */
+@media (pointer: coarse) {
+  /* iPhone zooms into any field whose text is under 16px and stays zoomed: keep fields at 16px or more */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]), select, textarea { font-size: max(16px, 1em) !important; }
+  /* Safari on iPad mishandles scrolling and taps inside a 3D-tilted element: keep the book flat on touch screens */
+  .sheet.is-book { perspective: none !important; }
+  .book { transform: none !important; }
+  .bk-pages .bk-page > .bk-scroll { -webkit-mask-image: none; mask-image: none; }
+}
+/* no mouse: a tapped element would keep its hover pose until you tap elsewhere */
+@media (hover: none) {
+  .btn:hover, .btn.copy-btn:hover, .preset:hover, .sel-row:hover, .fv-card:hover, .tp:hover, .gc-pl:hover:not(:disabled), .role-btn:hover, .sao-item:hover,
+  .bk-toc:hover, .bk-portrait:hover, .bk-sound:hover, .die-btn:hover { transform: none; }
+  .hub-core:hover .token, .bubble:hover, .sel-new:hover, .sel-char:hover .token { scale: 1; }
+  .bk-tab:not(.on):hover { transform: translateY(16px) rotate(var(--rot, 0deg)); }
+  .bk-toc:hover { background: transparent; }
+  .die-btn:hover { background: transparent; color: inherit; }
+}
+@media (hover: none) and (max-width: 900px) { .bk-tab:not(.on):hover { transform: translateY(10px); } }
+/* small phones (iPhone SE and the like) */
+@media (max-width: 420px) {
+  .sel-head { max-width: 100%; }
+  .sel-head .eyebrow { letter-spacing: .18em; font-size: 10px; }
+  .sel-tabs { width: 100%; }
+  .sel-tabs button { padding-inline: 6px; font-size: 13px; white-space: nowrap; }
+  .bk-tocs { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  .bk-head h3 .bk-ht { white-space: normal; max-width: none; text-align: center; }
+  .bk-head h3::before, .bk-head h3::after { display: none; }
+}

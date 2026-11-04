@@ -682,7 +682,7 @@ label.btn { display: inline-block; }
 @media (pointer: coarse) { .sl-track { scroll-snap-type: x mandatory; } .sl-track.free { scroll-snap-type: none; } }
 .sl-track.dragging { cursor: grabbing; }
 .sel-stage .sl-card { --d: 0; --ad: 0; position: relative; translate: none; animation: none; display: block; gap: 0; flex: none; width: var(--cw); margin-inline: calc(var(--cw) * -.07); padding: 0; border: 0; background: none; color: inherit; font: inherit;
-  scroll-snap-align: center; cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: pan-x; }
+  scroll-snap-align: center; cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: pan-x pan-y; }
 .sl-track.dragging .sl-card { cursor: grabbing; }
 /* a curved carousel: the chosen one stands in front, the others swing round behind it */
 .sel-stage .sl-card { transform-style: preserve-3d; }
@@ -1019,7 +1019,7 @@ label.btn { display: inline-block; }
 .book { position: relative; padding: 66px 34px 64px; }
 /* give the book more room: slimmer side columns while the book theme is on */
 /* the book takes the whole width: the investigator list moves above it, the CCFOLIA output below it */
-@media (min-width: 901px) {
+@media (min-width: 761px) {
   .layout:has(> .sheet.is-book) { grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .layout:has(> .sheet.is-book) > .shelf { flex-direction: row; align-items: center; gap: 14px; min-width: 0; }
   .layout:has(> .sheet.is-book) > .shelf .panel-label { flex: none; margin: 0; }
@@ -1027,7 +1027,7 @@ label.btn { display: inline-block; }
   .layout:has(> .sheet.is-book) .char-item { flex: none; width: auto; min-width: 180px; max-width: 260px; }
   .layout:has(> .sheet.is-book) > .tray { grid-column: auto; position: static; max-width: 760px; width: 100%; justify-self: center; }
   /* keep the pages taller than wide: the book is never wider than the screen height allows */
-  .sheet.is-book .book { max-width: calc((100vh - 150px) * 1.6 + 130px); margin-inline: auto; }
+  .sheet.is-book .book { max-width: calc((100svh - 150px) * 1.6 + 130px); margin-inline: auto; }
 }
 .book::before { content: ""; position: absolute; inset: 20px 0 -10px; z-index: -1; pointer-events: none; border-radius: 40px;
   background: radial-gradient(ellipse at 50% 45%, rgb(255 170 80 / .18), transparent 65%); filter: blur(34px); animation: grim-glow 7s ease-in-out infinite; }
@@ -1094,7 +1094,7 @@ label.btn { display: inline-block; }
 /* wide screens: each page is one sheet tall (the paper image's proportion); long entries scroll inside the page */
 @media (min-width: 901px) {
   /* height only (never the width): a 4:5 sheet, but no taller than the screen. 100cqi = cover width */
-  .bk-page { height: max(460px, min(100vh - 150px, (100cqi - 40px) * .625)); }
+  .bk-page { height: max(460px, min(100svh - 150px, (100cqi - 40px) * .625)); }
   .bk-left, .bk-right { padding: 0; min-height: 0; }
   .bk-pages .bk-page > .bk-scroll { position: absolute; inset: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
     scrollbar-width: thin; scrollbar-color: rgb(90 50 20 / .55) transparent;
@@ -1511,6 +1511,38 @@ label.btn { display: inline-block; }
 }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ===== touch devices: phones and tablets ===== */
+@media (pointer: coarse) {
+  /* iPhone zooms into any field whose text is under 16px and stays zoomed: keep fields at 16px or more */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]), select, textarea { font-size: max(16px, 1em) !important; }
+  /* Safari on iPad mishandles scrolling and taps inside a 3D-tilted element: keep the book flat on touch screens */
+  .sheet.is-book { perspective: none !important; }
+  .book { transform: none !important; }
+  .bk-pages .bk-page > .bk-scroll { -webkit-mask-image: none; mask-image: none; }
+}
+/* no mouse: a tapped element would keep its hover pose until you tap elsewhere */
+@media (hover: none) {
+  .btn:hover, .btn.copy-btn:hover, .preset:hover, .sel-row:hover, .fv-card:hover, .tp:hover, .gc-pl:hover:not(:disabled), .role-btn:hover, .sao-item:hover,
+  .bk-toc:hover, .bk-portrait:hover, .bk-sound:hover, .die-btn:hover { transform: none; }
+  .hub-core:hover .token, .bubble:hover, .sel-new:hover, .sel-char:hover .token { scale: 1; }
+  .bk-tab:not(.on):hover { transform: translateY(16px) rotate(var(--rot, 0deg)); }
+  .bk-toc:hover { background: transparent; }
+  .die-btn:hover { background: transparent; color: inherit; }
+}
+@media (hover: none) and (max-width: 900px) { .bk-tab:not(.on):hover { transform: translateY(10px); } }
+/* small phones (iPhone SE and the like) */
+@media (max-width: 420px) {
+  .sel-head { max-width: 100%; }
+  .sel-head .eyebrow { letter-spacing: .18em; font-size: 10px; }
+  .sel-tabs { width: 100%; }
+  .sel-tabs button { padding-inline: 6px; font-size: 13px; white-space: nowrap; }
+  .bk-tocs { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  .bk-head h3 .bk-ht { white-space: normal; max-width: none; text-align: center; }
+  .bk-head h3::before, .bk-head h3::after { display: none; }
+}
 
 /* ================= 画面の編集モード ================= */
 /* どのテーマでも読みやすいよう、パネルは固定の色にしている */

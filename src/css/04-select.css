@@ -109,7 +109,7 @@
 @media (pointer: coarse) { .sl-track { scroll-snap-type: x mandatory; } .sl-track.free { scroll-snap-type: none; } }
 .sl-track.dragging { cursor: grabbing; }
 .sel-stage .sl-card { --d: 0; --ad: 0; position: relative; translate: none; animation: none; display: block; gap: 0; flex: none; width: var(--cw); margin-inline: calc(var(--cw) * -.07); padding: 0; border: 0; background: none; color: inherit; font: inherit;
-  scroll-snap-align: center; cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: pan-x; }
+  scroll-snap-align: center; cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: pan-x pan-y; }
 .sl-track.dragging .sl-card { cursor: grabbing; }
 /* a curved carousel: the chosen one stands in front, the others swing round behind it */
 .sel-stage .sl-card { transform-style: preserve-3d; }

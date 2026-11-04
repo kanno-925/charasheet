@@ -26,7 +26,7 @@
 .book { position: relative; padding: 66px 34px 64px; }
 /* give the book more room: slimmer side columns while the book theme is on */
 /* the book takes the whole width: the investigator list moves above it, the CCFOLIA output below it */
-@media (min-width: 901px) {
+@media (min-width: 761px) {
   .layout:has(> .sheet.is-book) { grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .layout:has(> .sheet.is-book) > .shelf { flex-direction: row; align-items: center; gap: 14px; min-width: 0; }
   .layout:has(> .sheet.is-book) > .shelf .panel-label { flex: none; margin: 0; }
@@ -34,7 +34,7 @@
   .layout:has(> .sheet.is-book) .char-item { flex: none; width: auto; min-width: 180px; max-width: 260px; }
   .layout:has(> .sheet.is-book) > .tray { grid-column: auto; position: static; max-width: 760px; width: 100%; justify-self: center; }
   /* keep the pages taller than wide: the book is never wider than the screen height allows */
-  .sheet.is-book .book { max-width: calc((100vh - 150px) * 1.6 + 130px); margin-inline: auto; }
+  .sheet.is-book .book { max-width: calc((100svh - 150px) * 1.6 + 130px); margin-inline: auto; }
 }
 .book::before { content: ""; position: absolute; inset: 20px 0 -10px; z-index: -1; pointer-events: none; border-radius: 40px;
   background: radial-gradient(ellipse at 50% 45%, rgb(255 170 80 / .18), transparent 65%); filter: blur(34px); animation: grim-glow 7s ease-in-out infinite; }
@@ -101,7 +101,7 @@
 /* wide screens: each page is one sheet tall (the paper image's proportion); long entries scroll inside the page */
 @media (min-width: 901px) {
   /* height only (never the width): a 4:5 sheet, but no taller than the screen. 100cqi = cover width */
-  .bk-page { height: max(460px, min(100vh - 150px, (100cqi - 40px) * .625)); }
+  .bk-page { height: max(460px, min(100svh - 150px, (100cqi - 40px) * .625)); }
   .bk-left, .bk-right { padding: 0; min-height: 0; }
   .bk-pages .bk-page > .bk-scroll { position: absolute; inset: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
     scrollbar-width: thin; scrollbar-color: rgb(90 50 20 / .55) transparent;
