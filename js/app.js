@@ -3453,7 +3453,7 @@ const UE_EMPTY = () => ({ v: 1, items: {} });
 const UE = {
   on: false, pause: false, sel: null, el: null, data: UE_EMPTY(), pub: UE_EMPTY(), admin: false, role: null,
   tab: 'look', users: null, userQ: '', drafts: null, saved: null, busy: false, drag: null, noClick: false,
-  secOpen: { '文字': true },
+  secOpen: { '文字': true }, sheet: 'half',
 };
 const UE_STATE_CLS = /^(on|off|open|land|listv|slidev|free|warn|pulse|playing|over|out|enter|leave|drag|changed|center|armed|grid|hidden|active|show|in|is-.*|has-.*|sel-has-bg|res-.*|ue-.*)$/;
 const UE_SKIP_DATA = /^data-(i|id|uid|fid|u|row|p|del|ch|tk|gjoin|fv|final|max|sum|open|ring|sides|close|close-panel)$/;
@@ -3649,7 +3649,7 @@ const ueOpts = opts => [['', '元のまま'], ...opts];
 const UE_SECS = [
   ['文字', [
     { k: 'text', special: 'text' },
-    { k: 'font', label: 'フォント', type: 'select', opts: UE_FONTS.map(f => [f[0], f[1]]), css: v => `font-family:${ueFontStack(v)}` },
+    { k: 'font', label: 'フォント', type: 'select', opts: UE_FONTS.map(f => [f[0], f[1]]) },
     { k: 'fs', label: '文字サイズ', type: 'num', min: 6, max: 96, cur: 'font-size', css: v => `font-size:${v}px` },
     { k: 'fw', label: '太さ', type: 'select', opts: ueOpts([['300', '細い'], ['400', '普通'], ['700', '太い'], ['900', '極太']]), css: v => `font-weight:${v}` },
     { k: 'ls', label: '文字の間隔', type: 'num', min: -5, max: 30, step: .5, css: v => `letter-spacing:${v}px` },
@@ -3705,6 +3705,8 @@ function ueCss() {
       d.push(`translate:calc(${tx} + ${o.x || 0}px) calc(${ty || '0px'} + ${o.y || 0}px)`);
     }
     if (d.length) css += `${s}{${d.map(x => x + ' !important').join(';')}}\n`;
+    // フォントは、アプリが中の部品ごとに決めているので、中の部品にもまとめて効かせる
+    if (o.font) css += `${s}, ${s} *:not(svg):not(svg *){font-family:${ueFontStack(o.font)} !important}\n`;
     if (o.hide) css += `body:not(.ue-on) ${s}{display:none !important}\nbody.ue-on ${s}{opacity:.3 !important;outline:2px dashed #e2483d !important}\n`;
   });
   return css;
@@ -3778,7 +3780,8 @@ async function ueUpload(file) {
 
 /* ===== パネル ===== */
 function uePanelHtml() {
-  return `<div class="ue-head"><b>画面の編集</b>
+  return `<div class="ue-grip" id="ue-grip" role="button" aria-label="パネルの高さを変える"><i></i></div>
+    <div class="ue-head"><b>画面の編集</b>
       <button type="button" class="ue-b" id="ue-pause"></button>
       <button type="button" class="ue-b" id="ue-exit" aria-label="編集モードを終える">終了</button></div>
     <div class="ue-tabs" id="ue-tabs" hidden>
@@ -3786,15 +3789,17 @@ function uePanelHtml() {
     </div>
     <div class="ue-body" id="ue-body"></div>
     <div class="ue-foot">
-      <details id="ue-list-wrap"><summary>変更した部品 <span id="ue-count"></span></summary><div id="ue-list"></div></details>
       <div class="ue-pub" id="ue-pub"></div>
-      <div class="ue-row">
-        <button type="button" class="ue-b" id="ue-export">書き出し</button>
-        <button type="button" class="ue-b" id="ue-import">読み込み</button>
-        <button type="button" class="ue-b danger" id="ue-reset-all">すべて元に戻す</button>
-      </div>
-      <textarea id="ue-io" hidden placeholder="書き出した内容をここに貼り付けて「読み込む」を押してください"></textarea>
-      <button type="button" class="ue-b" id="ue-io-go" hidden>読み込む</button>
+      <details class="ue-more"><summary>変更した部品 <span id="ue-count"></span>・その他</summary>
+        <div id="ue-list"></div>
+        <div class="ue-row">
+          <button type="button" class="ue-b" id="ue-export">書き出し</button>
+          <button type="button" class="ue-b" id="ue-import">読み込み</button>
+          <button type="button" class="ue-b danger" id="ue-reset-all">すべて元に戻す</button>
+        </div>
+        <textarea id="ue-io" hidden placeholder="書き出した内容をここに貼り付けて「読み込む」を押してください"></textarea>
+        <button type="button" class="ue-b" id="ue-io-go" hidden>読み込む</button>
+      </details>
     </div>`;
 }
 function ueRenderFoot() {
@@ -3844,7 +3849,7 @@ function ueSpecial(p, o, el) {
   if (p.special === 'text') {
     const leaf = !el.children.length && el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA' && !(el instanceof SVGElement);
     return leaf ? `<label class="ue-f ue-col"><span>文言</span><textarea data-ue-k="text" rows="2">${esc(o.text != null ? o.text : el.textContent)}</textarea></label>`
-      : '<p class="ue-hint">文言は、中に別の部品がない一番内側の部品で変えられます（「ひとつ外側を選ぶ」の逆で、文字そのものを押してください）。</p>';
+      : '<p class="ue-hint">文言は、中に別の部品がない一番内側の部品で変えられます（「内側へ」で選び直してください）。</p>';
   }
   if (p.special === 'img') {
     const isImg = el.tagName === 'IMG';
@@ -3884,7 +3889,7 @@ function ueRenderBody() {
   const scroll = body.scrollTop;
   body.innerHTML = `
     <div class="ue-sel"><b>${esc(ueLabel(el))}</b><small>${esc(el.tagName.toLowerCase())}</small>
-      <button type="button" class="ue-b" id="ue-parent" ${el.parentElement && el.parentElement !== document.body ? '' : 'disabled'}>ひとつ外側を選ぶ</button></div>
+      <span class="ue-nav"><button type="button" class="ue-b" id="ue-parent" ${el.parentElement && el.parentElement !== document.body ? '' : 'disabled'}>外側へ</button><button type="button" class="ue-b" id="ue-child" ${el.firstElementChild && !(el instanceof SVGElement) ? '' : 'disabled'}>内側へ</button></span></div>
     ${UE_SECS.map(([name, rows]) => `<details class="ue-sec" data-ue-sec="${name}" ${UE.secOpen[name] ? 'open' : ''}><summary>${name}${rows.some(p => ueHas(o, p.k) || (p.k === 'pos' && (o.x || o.y))) ? ' <i class="ue-dot">●</i>' : ''}</summary>
       ${rows.map(p => p.special ? ueSpecial(p, o, el) : ueField(p, o, cs)).join('')}</details>`).join('')}
     <button type="button" class="ue-b danger wide" id="ue-reset" ${UE.data.items[UE.sel] ? '' : 'disabled'}>この部品を元に戻す</button>`;
@@ -3904,7 +3909,26 @@ function ueSelect(el) {
   UE.el?.classList.remove('ue-picked');
   UE.el = el; UE.sel = ueSelector(el);
   el.classList.add('ue-picked');
+  if (ueMobile() && UE.sheet === 'min') ueSheet('half');
   ueRenderBody(); uePlaceBox();
+  ueReveal(el);
+}
+const ueMobile = () => matchMedia('(max-width: 720px)').matches;
+function ueSheet(k) {
+  UE.sheet = k;
+  const p = $('ue-panel'); if (p) p.dataset.sheet = k;
+  setTimeout(() => { if (UE.el) ueReveal(UE.el); uePlaceBox(); }, 220);
+}
+/* 選んだ部品がパネルの下に隠れていたら、見える位置までスクロールする */
+function ueReveal(el) {
+  const p = $('ue-panel'); if (!p || !ueMobile() || !el.isConnected) return;
+  const top = p.getBoundingClientRect().top, r = el.getBoundingClientRect();
+  if (r.bottom > top - 8) {
+    const sc = (function find(n) { for (; n && n !== document.body; n = n.parentElement) { const st = getComputedStyle(n); if (/(auto|scroll)/.test(st.overflowY) && n.scrollHeight > n.clientHeight) return n; } return null; })(el.parentElement);
+    const dy = r.bottom - top + 24;
+    if (sc) sc.scrollBy({ top: dy, behavior: 'smooth' }); else window.scrollBy({ top: dy, behavior: 'smooth' });
+    setTimeout(uePlaceBox, 400);
+  }
 }
 function uePlaceBox() {
   const box = $('ue-box'); if (!box) return;
@@ -3973,7 +3997,7 @@ function ueStart() {
   UE.on = true; UE.pause = false; UE.tab = 'look';
   document.body.classList.add('ue-on');
   const p = document.createElement('aside');
-  p.id = 'ue-panel'; p.className = 'ue-panel'; p.setAttribute('aria-label', '画面の編集');
+  p.id = 'ue-panel'; p.className = 'ue-panel'; p.setAttribute('aria-label', '画面の編集'); p.dataset.sheet = UE.sheet;
   p.innerHTML = uePanelHtml();
   document.body.appendChild(p);
   ['ue-box', 'ue-hover'].forEach(id => { const b = document.createElement('div'); b.id = id; b.className = id; b.hidden = true; document.body.appendChild(b); });
@@ -4003,6 +4027,22 @@ document.addEventListener('keydown', e => {
     e.stopPropagation();
     if (UE.el) { UE.el.classList.remove('ue-picked'); UE.el = null; UE.sel = null; ueRenderBody(); uePlaceBox(); } else ueStop();
   }
+}, true);
+/* スマホ：つまみを押すと 小→中→大 と切りかえ、上下にドラッグしても変えられる */
+let ueGrip = null;
+document.addEventListener('pointerdown', e => { if (e.target.closest && e.target.closest('#ue-grip')) ueGrip = { y: e.clientY, moved: false }; }, true);
+document.addEventListener('pointermove', e => {
+  if (!ueGrip) return;
+  const dy = e.clientY - ueGrip.y; if (Math.abs(dy) < 30) return;
+  const order = ['min', 'half', 'full'], i = order.indexOf(UE.sheet);
+  const j = Math.max(0, Math.min(2, i + (dy < 0 ? 1 : -1)));
+  ueGrip = { y: e.clientY, moved: true };
+  if (j !== i) ueSheet(order[j]);
+}, true);
+document.addEventListener('pointerup', e => {
+  if (!ueGrip) return;
+  const g = ueGrip; ueGrip = null;
+  if (!g.moved) ueSheet({ min: 'half', half: 'full', full: 'min' }[UE.sheet]);
 }, true);
 document.addEventListener('toggle', e => { const d = e.target; if (d.dataset && d.dataset.ueSec) UE.secOpen[d.dataset.ueSec] = d.open; }, true);
 
@@ -4062,6 +4102,7 @@ document.addEventListener('click', e => {
   }
   if (b.id === 'ue-pause') { UE.pause = !UE.pause; ueHover(null); ueRenderBody(); uePlaceBox(); return; }
   if (b.id === 'ue-parent') return ueSelect(UE.el.parentElement);
+  if (b.id === 'ue-child') return ueSelect(UE.el.firstElementChild);
   if (b.id === 'ue-publish') return uePublish();
   if (b.id === 'ue-draft-save') return ueSaveDraft();
   if (b.id === 'ue-discard') return ueArm(b, '公開中の状態に戻す', () => { UE.data = ueClone(UE.pub); ueSave(); ueRenderBody(); toast('公開中の状態に戻しました（文言や画像は画面を開き直すと戻ります）'); });

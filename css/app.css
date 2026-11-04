@@ -1555,8 +1555,42 @@ label.btn { display: inline-block; }
 body.ue-on { cursor: crosshair; }
 body.ue-on .ue-picked { cursor: move; touch-action: none; }
 body.ue-on .ue-panel { cursor: auto; }
+
+.ue-grip { display: none; }
+.ue-nav { margin-left: auto; display: flex; gap: 4px; }
+.ue-sel .ue-nav .ue-b { margin-left: 0; }
+.ue-more > summary { cursor: pointer; font-weight: 600; color: #33465e; }
+.ue-more[open] { display: flex; flex-direction: column; gap: 8px; }
+/* スマホ：下から出るパネル（つまみで 小・中・大） */
 @media (max-width: 720px) {
-  .ue-panel { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; height: 50vh; }
+  .ue-panel { top: auto; left: 0; right: 0; bottom: 0; width: auto; height: 52vh; border-radius: 16px 16px 0 0; border-bottom: 0;
+    transition: height .2s ease; padding-bottom: env(safe-area-inset-bottom); }
+  .ue-panel[data-sheet="min"] { height: 112px; }
+  .ue-panel[data-sheet="full"] { height: calc(100dvh - 48px); }
+  .ue-panel[data-sheet="min"] .ue-body, .ue-panel[data-sheet="min"] .ue-tabs, .ue-panel[data-sheet="min"] .ue-more { display: none; }
+  .ue-grip { display: flex; justify-content: center; padding: 8px 0 2px; cursor: grab; touch-action: none; }
+  .ue-grip i { width: 44px; height: 5px; border-radius: 3px; background: #c7d3e3; }
+  .ue-head { padding-top: 4px; }
+  .ue-f { grid-template-columns: 78px 1fr 64px 30px; }
+  .ue-f.ue-f2 { grid-template-columns: 78px 1fr 30px; }
+  .ue-panel { height: 60vh; }
+  .ue-head { padding: 2px 12px 6px; }
+  .ue-tabs { padding-top: 0; }
+  .ue-tabs button { padding: 4px 4px 6px; }
+  .ue-body { padding: 8px 12px; }
+  .ue-sel { padding: 6px 8px; }
+  .ue-foot { padding: 6px 12px; gap: 4px; flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .ue-pub { padding: 0; background: none; flex: 1 1 auto; }
+  .ue-pub .ue-hint { display: none; }
+  .ue-more { flex: 1 1 100%; font-size: 12px; }
+}
+/* 指で操作する端末：押しやすく、入力欄を押しても画面が拡大されないように */
+@media (pointer: coarse) {
+  .ue-panel input, .ue-panel select, .ue-panel textarea { font-size: 16px; }
+  .ue-b { padding: 8px 12px; }
+  .ue-x { font-size: 20px; }
+  .ue-f input[type="range"] { height: 28px; }
+  #ue-handle { width: 26px; height: 26px; right: -13px; bottom: -13px; border-radius: 50%; }
 }
 .ue-pub { display: flex; flex-direction: column; gap: 6px; padding: 8px; background: #f3f7fc; border-radius: 8px; }
 .ue-dirty { color: #c8372d; font-weight: 600; }
