@@ -40,8 +40,8 @@ create policy "layout update admin" on public.ui_layout for update to authentica
 insert into public.ui_layout (id) values ('main') on conflict (id) do nothing;
 
 -- ===== マスターの登録 =====
--- 下の「ここにユーザー名」を、キャラシ工房での自分のユーザー名に書き換えてから実行してください。
+-- 下の「ここにユーザー名」を、キャラシ工房での自分のユーザー名に書き換えてから実行してください（$$ は消さない）。
 -- （書き換えずに実行しても何も起きないので大丈夫です）
 insert into public.app_admins (user_id)
-  select id from public.profiles where lower(username) = lower('ここにユーザー名')
+  select id from public.profiles where lower(username) = lower($$ここにユーザー名$$)
   on conflict (user_id) do nothing;
