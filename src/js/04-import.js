@@ -106,8 +106,11 @@ function fromCcfolia(obj) {
   const memo = String(d.memo || '');
   const extra = commands.split('\n').map(x => x.trim()).filter(x => x && !/<=/.test(x) && !/^[\/／]/.test(x)).join('\n');
   const kana = (memo.match(/^[\s]*([ぁ-んァ-ヶー・\s]+)\s*$/m) || [])[1] || pickField(memo, ['読み', 'ふりがな', 'フリガナ']);
+  let name = d.name || '', kana2 = kana.trim();
+  const nk = name.match(/^(.+?)\s*[(（]([^()（）]+)[)）]\s*$/);
+  if (nk && /^[ぁ-んァ-ヶー・\s]+$/.test(nk[2])) { name = nk[1].trim(); kana2 = kana2 || nk[2].trim(); }
   return buildImported({
-    name: d.name || '', kana: kana.trim(), color: d.color, iconUrl: d.iconUrl || '', externalUrl: d.externalUrl || '',
+    name, kana: kana2, color: d.color, iconUrl: d.iconUrl || '', externalUrl: d.externalUrl || '',
     params, status, luck, skills: parseSkillLines(commands), profile: parseProfile(memo),
     memo, extra, allText: commands + '\n' + d.params?.map(p => `${p.label} ${p.value}`).join('\n'),
   });
@@ -129,6 +132,186 @@ function fromText(text) {
     name, kana: pickField(t, ['ふりがな', 'フリガナ', '読み']), params, status, luck: num(/幸運\s*[:：=]?\s*(\d+)/), skills,
     profile: parseProfile(t), memo: '', extra, allText: t,
   });
+}
+
+/* ---------- いあきゃらの「テキスト出力」（いあきゃらテキスト 6版／7版）----------
+   いあきゃらのキャラ画面の「テキスト出力」（.txt）には、技能の内訳・武器・所持品・財産・経歴・
+   通過シナリオ・メモまで全部入っている。（「ココフォリア駒出力」には合計値しか入っていない） */
+const iaWidth = ch => /^[^\x01-\x7E\xA1-\xDF]$/.test(ch) ? 2 : 1; // いあきゃらと同じ数え方（全角は2）
+/* 決まった幅で並んだ1行を、列の幅（全角=2で数える）ごとに切り分ける */
+function iaCols(line, widths) {
+  const out = []; let i = 0;
+  for (const w of widths) {
+    let acc = 0, cell = '';
+    while (i < line.length && acc < w) { cell += line[i]; acc += iaWidth(line[i]); i++; }
+    out.push(cell.trim());
+  }
+  out.push(line.slice(i).trim());
+  return out;
+}
+/* 「[見出し]\n本文」が空行で並ぶ部分を取り出す */
+function iaEntries(body) {
+  const out = []; let cur = null;
+  body.split('\n').forEach(l => {
+    const m = l.match(/^\[(.*)\]\s*$/);
+    if (m) { cur = { name: m[1], lines: [] }; out.push(cur); }
+    else if (cur) cur.lines.push(l);
+    else if (l.trim()) { cur = { name: '', lines: [l] }; out.push(cur); }
+  });
+  return out.map(e => ({ name: e.name.trim(), value: e.lines.join('\n').trim() }));
+}
+function fromIachara(text) {
+  const t = String(text).replace(/\r\n?/g, '\n');
+  const head = t.match(/いあきゃらテキスト\s*([67])版/);
+  if (!head) return null;
+  const sys = head[1] === '7' ? 'coc7' : 'coc6';
+  const c = blank(sys);
+  // 【見出し】ごとに分ける
+  const sec = {}; let cur = '_';
+  t.split('\n').forEach(l => {
+    const m = l.match(/^【(.+?)】\s*$/);
+    if (m) { cur = m[1]; sec[cur] = []; } else (sec[cur] = sec[cur] || []).push(l);
+  });
+  const body = k => (sec[k] || []).join('\n');
+  const field = (src, label) => { const m = src.match(new RegExp(`(?:^|\\n|/ )${label}:[ \\t]*([^\\n/]*?)\\s*(?=$|\\n| / )`)); return m ? m[1].trim() : ''; };
+  const notes = []; // 入れる欄がないものはメモの最後にまとめる
+
+  /* 基本情報 */
+  const b = body('基本情報'), P = c.profile;
+  const nm = b.match(/名前:[ \t]*(.*?)\s*\((.*)\)\s*$/m) || b.match(/名前:[ \t]*(.*)$/m);
+  if (nm) { P.name = (nm[1] || '').trim(); P.kana = (nm[2] || '').trim(); }
+  const line = label => ((b.match(new RegExp(`^${label}:[ \\t]*(.*)$`, 'm')) || [])[1] || '').trim();
+  P.tags = line('タグ'); P.occupation = line('職業');
+  P.age = field(b, '年齢').replace(/歳$/, ''); P.sex = field(b, '性別'); P.height = field(b, '身長');
+  P.weight = field(b, '体重'); P.origin = field(b, '出身');
+  P.hair = field(b, '髪の色'); P.eyes = field(b, '瞳の色'); P.skin = field(b, '肌の色');
+  // 自分で足したプロフィール項目（「名前:値」の行）
+  const known = /^(名前|タグ|職業|年齢|体重|髪の色)[:：]/;
+  b.split('\n').filter(l => l.trim() && !known.test(l) && /^[^:]{1,30}:/.test(l)).forEach(l => {
+    const i = l.indexOf(':'), k = l.slice(0, i).trim(), v = l.slice(i + 1).trim();
+    if (!v) return;
+    if (/誕生日|生年月日/.test(k) && !P.birthday) P.birthday = v;
+    else if (/プレイヤー|PL/.test(k) && !P.player) P.player = v;
+    else notes.push(`${k}：${v}`);
+  });
+  const icon = (body('アイコン').match(/https?:\/\/\S+/) || [])[0];
+  if (icon) P.iconUrl = icon;
+  const url = t.match(/https:\/\/iachara\.com\/view\/[\w-]+/);
+  if (url) P.externalUrl = url[0];
+
+  /* 能力値（現在値・能力値・増加分・一時的） */
+  const ab = {};
+  body('能力値').split('\n').forEach(l => {
+    const m = l.trim().match(/^(\S+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)$/);
+    if (m) ab[m[1]] = { sum: +m[2], value: +m[3], fixed: +m[4], tmp: +m[5] };
+  });
+  ABIL_KEYS.forEach(k => {
+    const r = ab[k]; if (!r || !c.abilities[k]) return;
+    c.abilities[k].base = String(r.value);
+    c.abilities[k].adj = r.fixed ? String(r.fixed) : '';
+    c.abilities[k].tmp = r.tmp ? String(r.tmp) : '';
+  });
+  if (sys === 'coc7' && ab['幸運'] && c.abilities.LUCK) { c.abilities.LUCK.base = String(ab['幸運'].value); if (ab['幸運'].fixed) c.abilities.LUCK.adj = String(ab['幸運'].fixed); }
+  if (ab.HP) c.hp = String(ab.HP.sum);
+  if (ab.MP) c.mp = String(ab.MP.sum);
+  const san = body('能力値').match(/正気度\s+(-?\d+)\s*\/\s*(-?\d+)/);
+  if (san) c.san = san[1]; else if (ab['正気度']) c.san = String(ab['正気度'].sum);
+
+  /* 技能値（合計・初期値・職業P・興味P・成長分・その他） */
+  const a = abilities(c);
+  let matched = 0, added = 0;
+  const num = v => v ? String(v) : '';
+  body('技能値').split('\n').forEach(l => {
+    const m = l.trim().match(/^(.+?)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)$/);
+    if (!m || m[1] === '技能名') return;
+    const [, rawName, sum, def, job, hobby, grow, other] = m;
+    const name = rawName.trim(), n = normName(name);
+    const sub = (name.match(/^(.+?)[(（](.*)[)）]$/) || []);
+    let t2 = c.skills.find(s => normName(skillLabel(s)) === n && !s._ia);
+    if (!t2 && sub[1]) {
+      const base = c.skills.find(s => s.hasSub && normName(s.name) === normName(sub[1]) && !s._ia);
+      if (base) {
+        if (!base.sub) { base.sub = sub[2].trim(); t2 = base; }
+        else { t2 = { ...base, sub: sub[2].trim(), job: '', hobby: '', grow: '', other: '', isJob: false, dup: true }; c.skills.splice(c.skills.indexOf(base) + 1, 0, t2); }
+      }
+    }
+    if (!t2) t2 = c.skills.find(s => !s.hasSub && !s._ia && normName(s.name).replace(/（.*）$/, '') === n.replace(/（.*）$/, ''));
+    if (t2) {
+      t2._ia = true;
+      t2.job = num(+job); t2.hobby = num(+hobby); t2.grow = num(+grow); t2.isJob = +job > 0;
+      // 初期値がこのアプリの計算とちがうときは、差を「その他」に入れて合計をいあきゃらと同じにする
+      const diff = +def - skillInit(t2, a);
+      t2.other = num(+other + diff);
+      matched++;
+    } else {
+      c.skills.push({ cat: 'k', name, hasSub: false, sub: '', init: String(def), job: num(+job), hobby: num(+hobby), grow: num(+grow), other: num(+other), isJob: +job > 0, custom: true, _ia: true });
+      added++;
+    }
+  });
+  c.skills.forEach(s => { delete s._ia; });
+
+  /* 武器（名前20・成功率〜故障は14ずつ・最後にその他） */
+  const wl = body('武器').split('\n').filter(l => l.trim());
+  const weapons = wl.filter(l => !/^名前\s/.test(l.trim())).map(l => {
+    const [name, rate, damage, range, attacks, ammo, durability, broken, note] = iaCols(l, [20, 14, 14, 14, 14, 14, 14, 14]);
+    return { name, rate, damage, range, attacks, ammo, durability, note: [broken && broken !== '-' ? '故障 ' + broken : '', note].filter(Boolean).join(' / ') };
+  }).filter(w => w.name);
+  if (weapons.length) c.weapons = weapons;
+
+  /* 装備と所持品（名称20・単価・個数・価格は14ずつ・最後に備考） */
+  const il = (body('装備と所持品') || body('冒険の装備とその他の所持品')).split('\n').filter(l => l.trim());  // 7版／6版で見出しがちがう
+  const items = il.filter(l => !/^名称\s/.test(l.trim())).map(l => {
+    const [name, unit, count, price, note] = iaCols(l, [20, 14, 14, 14]);
+    return { name, count, price: price || unit, note };
+  }).filter(x => x.name);
+  if (items.length) c.items = items;
+
+  /* 収入と財産 */
+  const money = {}, rest = [];
+  body('収入と財産').split('\n').forEach(l => {
+    const i = l.indexOf(':'); if (i < 0) return;
+    const k = l.slice(0, i).trim(), v = l.slice(i + 1).trim(); if (!v) return;
+    if (k === '収入') money.income = v;
+    else if (k === '支出レベル') money.income = '支出レベル：' + v;
+    else if (k === '手持ち現金' || k === '現金') money.cash = v;
+    else if (k === '預金') money.deposit = v;
+    else if (k === '個人資産' || k === '資産') money.assets = v;
+    else rest.push(`${k}：${v}`);
+  });
+  if (rest.length) money.assets = [money.assets, ...rest].filter(Boolean).join(' / ');
+  Object.assign(c.money, money);
+
+  /* バックストーリー：魔導書・遭遇した存在は専用の欄へ、ほかは経歴にまとめる */
+  const story = [];
+  iaEntries(body('バックストーリー')).forEach(({ name, value }) => {
+    if (!value) return;
+    const label = name.replace(/^★/, '');
+    if (/魔導書|呪文|アーティファクト/.test(label)) c.tomes = [c.tomes, value].filter(Boolean).join('\n');
+    else if (/超自然|遭遇/.test(label)) c.entities = [c.entities, value].filter(Boolean).join('\n');
+    else story.push(label ? `【${label}】\n${value}` : value);
+  });
+  c.backstory = story.join('\n\n');
+
+  /* 6版：「新たに得た知識・経験」の中が〈魔導書…〉〈遭遇した…〉〈通過したシナリオ名〉に分かれている */
+  const exp = {}; let ek = '';
+  body('新たに得た知識・経験').split('\n').forEach(l => { const m = l.match(/^〈(.+?)〉\s*$/); if (m) { ek = m[1]; exp[ek] = []; } else if (ek) exp[ek].push(l); });
+  const asList = arr => iaEntries(arr.join('\n')).filter(e => e.name || e.value).map(e => e.name && e.value ? (e.value.includes('\n') ? `${e.name}\n${e.value}` : `${e.name}：${e.value}`) : (e.name || e.value)).join('\n');
+  Object.entries(exp).forEach(([k, arr]) => {
+    if (/魔導書|呪文|アーティファクト/.test(k)) c.tomes = [c.tomes, asList(arr)].filter(Boolean).join('\n');
+    else if (/超自然|遭遇/.test(k)) c.entities = [c.entities, asList(arr)].filter(Boolean).join('\n');
+  });
+
+  /* 通過したシナリオ */
+  c.scenarios = iaEntries(body('通過したシナリオ名') || (Object.entries(exp).find(([k]) => /シナリオ/.test(k)) || [, []])[1].join('\n')).filter(e => e.name || e.value).map(e => ({ name: e.name || e.value.split('\n')[0], date: '', note: e.name ? e.value : '', friends: [] }));
+
+  /* メモ（追加のメモは見出しつきで続ける） */
+  const mb = body('メモ'), firstBr = mb.search(/^\[.*\]\s*$/m);
+  const memoMain = (firstBr < 0 ? mb : mb.slice(0, firstBr)).trim();
+  const extraMemo = firstBr < 0 ? [] : iaEntries(mb.slice(firstBr));
+  c.memo = [memoMain, ...extraMemo.filter(e => e.value || e.name).map(e => `【${e.name}】\n${e.value}`), notes.length ? '【プロフィールの追加項目】\n' + notes.join('\n') : ''].filter(Boolean).join('\n\n');
+
+  c.importInfo = { matched, added, full: true };
+  return c;
 }
 
 function load() {

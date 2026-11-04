@@ -368,10 +368,10 @@ img { max-width: 100%; }
 <div class="overlay" id="modal-import" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="import-title">
     <h2 id="import-title">読み込み</h2>
-    <p><b>いあきゃらから写す</b>：いあきゃらのキャラクターページで「ココフォリア」用の出力ボタンを押してコピーし、下にそのまま貼り付けてください。能力値・技能・HP/MP/SAN・プロフィールが入ります。</p>
-    <p>ほかに、ココフォリアのコマ（右クリック→コピー）、チャットパレットなどのテキスト、このアプリのバックアップも読み込めます。ファイルからも読み込めます。</p>
+    <p><b>いあきゃらから全部写す（おすすめ）</b>：いあきゃらのキャラクターページで「テキスト出力」を押してダウンロードした <b>.txt ファイル</b>を下の「ファイルを選択」から選ぶか、中身を貼り付けてください。技能の内訳（職業P・興味P・成長）、武器、所持品、財産、経歴、通過シナリオ、メモまで全部入ります。</p>
+    <p>いあきゃらの「ココフォリア駒出力」も読めますが、こちらには能力値・技能の合計・HP/MP/SANしか入っていません。ほかに、ココフォリアのコマ、チャットパレットなどのテキスト、このアプリのバックアップも読み込めます。</p>
     <textarea class="inp" id="import-text" placeholder="ここに貼り付け（例：{&quot;kind&quot;:&quot;character&quot;,&quot;data&quot;:{…}} や チャットパレットのテキスト）"></textarea>
-    <input type="file" id="import-file" accept=".json,application/json,text/plain">
+    <input type="file" id="import-file" accept=".txt,.json,application/json,text/plain">
     <div class="err" id="import-err" role="alert"></div>
     <div class="modal-actions">
       <button class="btn ghost" type="button" data-close>キャンセル</button>

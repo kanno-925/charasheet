@@ -52,7 +52,7 @@ $('import-run').addEventListener('click', () => {
   let obj = null;
   try { obj = JSON.parse(raw); } catch (e) { obj = null; }
   if (obj === null) {
-    const c = fromText(raw);
+    const c = fromIachara(raw) || fromText(raw);
     if (!c) { err.textContent = '探索者のデータが見つかりませんでした。いあきゃらの「ココフォリア」出力でコピーしたデータを、途中で切らずにそのまま貼り付けてください。'; return; }
     obj = [c];
   }
@@ -80,6 +80,7 @@ $('import-run').addEventListener('click', () => {
   const info = list[0].importInfo;
   list.forEach(c => { delete c.importInfo; });
   if (cut > 0) toast(`探索者は${MAX_CHARS}人までなので、先頭の${room}人だけ読み込みました（${cut}人は読み込んでいません）。`);
+  else if (info && info.full) toast(`「${list[0].profile.name || '名無し'}」をいあきゃらのテキストから読み込みました。技能${info.matched}個${info.added ? `（うち${info.added}個は新しく追加）` : ''}の内訳、武器・所持品・財産・経歴・通過シナリオ・メモも入っています。`);
   else if (info) toast(`「${list[0].profile.name || '名無し'}」を読み込みました。技能${info.matched}個を反映${info.added ? `、${info.added}個を新しく追加` : ''}しました。技能の値は「その他」欄に入っています。`);
   else toast(`${list.length}人の探索者を読み込みました。`);
 });
