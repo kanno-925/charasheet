@@ -922,6 +922,18 @@ label.btn { display: inline-block; }
 .sv-text { margin: 0; white-space: pre-wrap; font-size: 13px; line-height: 1.7; }
 @media (max-width: 700px) { .sv-top, .sv-grid { grid-template-columns: minmax(0, 1fr); } .sv-art { min-height: 200px; } }
 
+/* ユーザーのアイコン画像 */
+.fav img, .fdot img, .sel-friend .token img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.fav, .fdot { position: relative; overflow: hidden; }
+.fchip .fdot:has(img) { opacity: 1; }
+.acct-av { width: 64px; height: 64px; font-size: 26px; cursor: pointer; flex: none; overflow: visible; }
+.acct-av img { border-radius: 50%; }
+.acct-av-cam { position: absolute; right: -2px; bottom: -2px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-style: normal;
+  background: var(--solid); color: var(--ink); border: 1px solid var(--line-strong); box-shadow: var(--shadow); }
+.acct-av:hover .acct-av-cam { background: var(--sky); color: #fff; }
+.acct-av-act { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.acct-av-note { display: block; margin-top: 3px; font-size: 11px; color: var(--muted); }
+
 /* ===== theme looks ===== */
 :root[data-look~="dark"] { color-scheme: dark; --shadow: 0 12px 34px -14px rgb(0 0 0 / .75), 0 2px 6px -2px rgb(0 0 0 / .45); --gloss: rgb(255 255 255 / .12); }
 :root[data-look~="mincho"] { --f-display: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif; }

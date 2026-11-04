@@ -25,7 +25,7 @@ async function loadGroups() {
       mem = r.data || [];
     }
     const uids = [...new Set([...mem.map(m => m.user_id), ...(data || []).map(r => r.owner)])].filter(u => u !== me.id && !G.names[u]);
-    if (uids.length) { const r = await sb.from('profiles').select('id,username').in('id', uids); (r.data || []).forEach(x => { G.names[x.id] = x.username; }); }
+    if (uids.length) { const r = await selectProfiles(c => sb.from('profiles').select(c).in('id', uids)); (r.data || []).forEach(x => { G.names[x.id] = x.username; }); }
     G.list = (data || []).map(r => ({ id: r.id, owner: r.owner, locked: !!r.locked, data: r.data || {}, updated: r.updated_at, members: mem.filter(m => m.group_id === r.id) }));
     G.loaded = true; G.err = '';
     if (await migrateLegacyGroups()) return loadGroups();
@@ -71,7 +71,7 @@ function charDot(x) {
   const av = c ? (c.avatar || '') : (((online && online.chars && online.chars[x.user]) || []).find(ch => ch.id === x.charId) || {}).avatar;
   return av ? `<span class="gc-dot img"><img src="${esc(av)}" alt=""></span>` : '';
 }
-const dot = (name, uid) => `<span class="gc-dot" style="--c:${esc(personColor(uid))}">${esc((name || '？').charAt(0))}</span>`;
+const dot = (name, uid) => `<span class="gc-dot ${AVATARS[uid] ? 'img' : ''}" style="--c:${esc(personColor(uid))}">${avImg(uid) || esc((name || '？').charAt(0))}</span>`;
 const safeRoom = u => /^https:\/\/[^\s"'<>]+$/.test(u || '') ? u : '';
 function roomRow(g, member) {
   const url = safeRoom((g.data || {}).roomUrl);
@@ -142,7 +142,7 @@ function renderGroupEditor() {
       <div class="gm-friends">${friends.length ? friends.map(u => {
         const m = memberById[u.id], on = d.invite.includes(u.id), removed = d.remove.includes(u.id);
         if (m && !removed) return `<span class="gm-mem">${dot(u.username, u.id)}<b>${esc(u.username)}</b><small>${m.status === 'joined' ? (m.role ? ROLE[m.role] + 'で参加中' : '参加中') : '招待中'}</small><button class="icon-btn" type="button" data-gact="remove" data-u="${u.id}" aria-label="${esc(u.username)}をグループから外す">×</button></span>`;
-        return `<button type="button" class="fchip ${on ? 'on' : ''}" style="--fc:${esc(personColor(u.id))}" data-gact="invite" data-u="${u.id}" aria-pressed="${on}"><span class="fdot">${esc((u.username || '？').charAt(0))}</span>${esc(u.username)}${removed ? '（外す）' : ''}</button>`;
+        return `<button type="button" class="fchip ${on ? 'on' : ''}" style="--fc:${esc(personColor(u.id))}" data-gact="invite" data-u="${u.id}" aria-pressed="${on}"><span class="fdot">${avImg(u.id) || esc((u.username || '？').charAt(0))}</span>${esc(u.username)}${removed ? '（外す）' : ''}</button>`;
       }).join('') : '<span class="empty">オンラインのフレンドがいません。「フレンド」タブでフレンドを追加すると招待できます。</span>'}
       ${(d.members || []).filter(m => m.user_id !== me.id && !friends.some(u => u.id === m.user_id)).map(m => `<span class="gm-mem">${dot(gUser(m.user_id), m.user_id)}<b>${esc(gUser(m.user_id))}</b><small>${m.status === 'joined' ? ROLE[m.role] || '参加中' : '招待中'}</small></span>`).join('')}</div></div>
     <div class="gm-sec"><b>アプリを使っていない参加者</b><span class="hint">アカウントのない人は、ここに名前を書いておけます。</span>

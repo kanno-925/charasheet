@@ -1763,7 +1763,7 @@ function peekHtml(c) {
       <div class="pbars">${bars.map(([l, v, m, g]) => `<div class="pbar"><b>${l}</b><span class="tr"><i style="width:${m > 0 ? Math.max(0, Math.min(100, v / m * 100)) : 0}%;background:linear-gradient(90deg, ${g})"></i></span><span>${v}/${m}</span></div>`).join('')}</div>
       <div class="peek-radar">${radarSvg(c, a, 230, false)}</div>
       <div class="peek-der"><span>アイデア <b>${d.idea}</b></span><span>幸運 <b>${d.luck}</b></span><span>知識 <b>${d.know}</b></span><span>DB <b>${esc(d.db)}</b></span>${c.system === 'coc7' ? `<span>MOV <b>${d.mov}</b></span>` : ''}</div>
-      ${playedWith(c).length ? `<div class="peek-friends"><small>一緒に遊んだ</small>${playedWith(c).map(({ f, n }) => `<span class="fchip on static" style="--fc:${esc(f.color)}"><span class="fdot">${esc((f.name || '？').charAt(0))}</span>${esc(f.name)}${n > 1 ? `<b>×${n}</b>` : ''}</span>`).join('')}</div>` : ''}
+      ${playedWith(c).length ? `<div class="peek-friends"><small>一緒に遊んだ</small>${playedWith(c).map(({ f, n }) => `<span class="fchip on static" style="--fc:${esc(f.color)}"><span class="fdot">${fInit(f)}</span>${esc(f.name)}${n > 1 ? `<b>×${n}</b>` : ''}</span>`).join('')}</div>` : ''}
       <div class="peek-skills">${skills.length ? skills.map(([n, v]) => `<span>${esc(n)}<b>${v}</b></span>`).join('') : '<span class="none">ポイントを振った技能はまだありません</span>'}</div>
     </div>`;
 }
@@ -2068,13 +2068,15 @@ function playedWith(c) {
   (c.scenarios || []).forEach(sc => (sc.friends || []).forEach(id => count.set(id, (count.get(id) || 0) + 1)));
   return friendsOf().filter(f => count.has(f.id)).map(f => ({ f, n: count.get(f.id) })).sort((x, y) => y.n - x.n);
 }
-const fchip = (f, attrs, on) => `<button type="button" class="fchip ${on ? 'on' : ''}" style="--fc:${esc(f.color)}" ${attrs}><span class="fdot">${esc((f.name || '？').charAt(0))}</span>${esc(f.name)}</button>`;
+/* フレンドの丸：キャラシ工房のフレンドでアイコン画像があれば画像、なければ名前の1文字目 */
+const fInit = f => (f.uid && avImg(f.uid)) || esc((f.name || '？').charAt(0));
+const fchip = (f, attrs, on) => `<button type="button" class="fchip ${on ? 'on' : ''}" style="--fc:${esc(f.color)}" ${attrs}><span class="fdot">${fInit(f)}</span>${esc(f.name)}</button>`;
 function scenariosHtml(c) {
   const fr = friendsOf(), pw = playedWith(c);
   return `<section class="sec">
     <div class="played-with">
       <span class="lbl">この探索者と冒険したフレンド</span>
-      <div class="pw-chips">${pw.length ? pw.map(({ f, n }) => `<span class="fchip on static" style="--fc:${esc(f.color)}"><span class="fdot">${esc((f.name || '？').charAt(0))}</span>${esc(f.name)}<b>×${n}</b></span>`).join('') : '<span class="empty">シナリオに「一緒に遊んだフレンド」を付けると、ここに並びます。</span>'}</div>
+      <div class="pw-chips">${pw.length ? pw.map(({ f, n }) => `<span class="fchip on static" style="--fc:${esc(f.color)}"><span class="fdot">${fInit(f)}</span>${esc(f.name)}<b>×${n}</b></span>`).join('') : '<span class="empty">シナリオに「一緒に遊んだフレンド」を付けると、ここに並びます。</span>'}</div>
     </div>
     <div class="sec-title"><span class="hint">シナリオごとに、一緒に遊んだフレンドを押して選べます</span><div class="tools"><button class="btn small" type="button" data-act="open-friends">フレンドを管理</button><button class="btn small" type="button" data-act="add-scenario">＋ シナリオを追加</button></div></div>
     ${c.scenarios.length ? `<div class="scn-list">${c.scenarios.map((sc, i) => `
@@ -2102,7 +2104,7 @@ function renderFriends() {
   $('friend-list').innerHTML = list.length ? list.map(f => {
     const st = friendStats(f.id);
     return `<div class="friend" data-fid="${f.id}">
-      <span class="fav" style="--fc:${esc(f.color)}">${esc((f.name || '？').charAt(0))}${f.uid ? '<i class="ol-badge" title="キャラシ工房のフレンド"></i>' : ''}</span>
+      <span class="fav" style="--fc:${esc(f.color)}">${fInit(f)}${f.uid ? '<i class="ol-badge" title="キャラシ工房のフレンド"></i>' : ''}</span>
       <div class="fbody">
         <div class="frow">
           <input class="inp" id="fr-name-${f.id}" data-fp="name" value="${esc(f.name)}" aria-label="フレンドの名前">
@@ -2157,6 +2159,54 @@ const CLOUD = Object.assign({
 const cloudReady = () => /^https:\/\/[\w-]+\.supabase\.co\/?$/.test(CLOUD.url) && CLOUD.key.length > 20 && !!(window.supabase && window.supabase.createClient);
 let sb = null, me = null, online = null, syncTimer = null, syncing = false, syncAgain = false, syncState = 'off', syncMsg = '', acctTab = 'login';
 const lastSynced = new Map();
+
+/* ---- ユーザーのアイコン画像（profiles.avatar に小さな正方形の画像を data URL で入れる） ---- */
+const AVATARS = {};    // ユーザーID → 画像
+let avatarCol = true;  // サーバーに avatar 欄がまだ無い（SQL 07 を実行していない）ときは false にして、名前だけ読む
+const okAvatar = v => typeof v === 'string' && /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(v) ? v : '';
+const avImg = uid => AVATARS[uid] ? `<img src="${esc(AVATARS[uid])}" alt="" loading="lazy" draggable="false">` : '';
+/* profiles を読む。q は列の名前を受け取ってクエリを返す関数。avatar 欄があればいっしょに読んで覚えておく */
+async function selectProfiles(q) {
+  if (avatarCol) {
+    const r = await q('id,username,avatar');
+    if (!r.error) {
+      [].concat(r.data || []).forEach(p => { if (p && p.id) { if (okAvatar(p.avatar)) AVATARS[p.id] = p.avatar; else delete AVATARS[p.id]; } });
+      return r;
+    }
+    if (!/avatar/i.test(r.error.message || '')) return r;
+    avatarCol = false;
+  }
+  return q('id,username');
+}
+/* 画像ファイル → 真ん中を正方形に切りぬいた 160px の画像（data URL） */
+function avatarFromFile(file) {
+  return new Promise((resolve, reject) => {
+    if (!file || !/^image\//.test(file.type)) { reject(new Error('画像ファイル（PNG・JPGなど）を選んでください。')); return; }
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('画像を読み込めませんでした。別の画像で試してください。')); };
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const s = Math.min(img.width, img.height), sx = (img.width - s) / 2, sy = (img.height - s) * .3; // 縦長の画像は少し上（顔のあたり）を使う
+      const cv = document.createElement('canvas'); cv.width = cv.height = 160;
+      const g = cv.getContext('2d'); g.fillStyle = '#ffffff'; g.fillRect(0, 0, 160, 160);
+      g.drawImage(img, sx, sy, s, s, 0, 0, 160, 160);
+      let out = '';
+      for (const q of [.85, .72, .6, .45]) { out = cv.toDataURL('image/jpeg', q); if (out.length <= 60000) break; }
+      resolve(out);
+    };
+    img.src = url;
+  });
+}
+async function saveAvatar(v) {
+  if (!sbClient() || !me) return;
+  const { error } = await sb.from('profiles').update({ avatar: v || null }).eq('id', me.id);
+  if (error) { toast(/avatar/i.test(error.message || '') ? 'サーバーの準備がまだです。Supabase で supabase/07-avatars.sql を実行してください。' : 'アイコンを保存できませんでした：' + jaErr(error)); return; }
+  avatarCol = true;
+  if (v) AVATARS[me.id] = v; else delete AVATARS[me.id];
+  renderAccount(); renderAccountBtn(); renderOnline(); renderFriends();
+  if (!$('select').hidden) renderSelect();
+  toast(v ? 'アイコンを変えました。フレンドやグループの人にも見えます。' : 'アイコンを外しました。');
+}
 function sbClient() {
   if (!sb && cloudReady()) sb = window.supabase.createClient(CLOUD.url.replace(/\/$/, ''), CLOUD.key, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
   return sb;
@@ -2226,7 +2276,7 @@ async function loadFriendships() {
   if (error) throw error;
   const ids = [...new Set((data || []).flatMap(r => [r.requester, r.addressee]).filter(id => id !== me.id))];
   let profs = [];
-  if (ids.length) { const r = await sb.from('profiles').select('id,username').in('id', ids); if (r.error) throw r.error; profs = r.data || []; }
+  if (ids.length) { const r = await selectProfiles(c => sb.from('profiles').select(c).in('id', ids)); if (r.error) throw r.error; profs = r.data || []; }
   const nm = id => (profs.find(p => p.id === id) || {}).username || '（退会したユーザー）';
   online = { friends: [], incoming: [], outgoing: [], chars: (online && online.chars) || {}, groups: (online && online.groups) || [] };
   (data || []).forEach(r => {
@@ -2255,7 +2305,7 @@ async function handleSession(session) {
   me = { id: uid, email: session.user.email, username: (session.user.user_metadata || {}).username || '' };
   renderAccountBtn(); renderAccount();
   try {
-    const { data: prof } = await sb.from('profiles').select('username').eq('id', uid).maybeSingle();
+    const { data: prof } = await selectProfiles(c => sb.from('profiles').select(c).eq('id', uid).maybeSingle());
     if (prof && prof.username) me.username = prof.username;
     renderAccountBtn(); renderAccount();
     ueCheckAdmin();
@@ -2310,8 +2360,10 @@ function renderAccount() {
   if (me && acctTab !== 'recover') {
     const st = { ok: '同期済み', pending: '同期中…', error: '同期できませんでした', off: '—' }[syncState];
     el.innerHTML = `<div class="acct-card">
-        <span class="fav" style="--fc:var(--sky)">${esc((me.username || '？').charAt(0))}</span>
-        <div><b class="acct-name">${esc(me.username)}</b><span class="acct-mail">${esc(me.email || '')}</span></div>
+        <label class="fav acct-av ${AVATARS[me.id] ? 'has' : ''}" style="--fc:var(--sky)" title="アイコン画像を選ぶ">${avImg(me.id) || esc((me.username || '？').charAt(0))}<input type="file" id="ac-avatar" accept="image/*" hidden><i class="acct-av-cam" aria-hidden="true">✎</i></label>
+        <div><b class="acct-name">${esc(me.username)}</b><span class="acct-mail">${esc(me.email || '')}</span>
+          <span class="acct-av-act"><label class="btn small" for="ac-avatar">アイコン画像を${AVATARS[me.id] ? '変える' : '選ぶ'}</label>${AVATARS[me.id] ? '<button class="btn small ghost" type="button" data-acct="avatar-off">外す</button>' : ''}</span>
+          <small class="acct-av-note">フレンドやグループの人にも見えます。</small></div>
       </div>
       <form class="acct-rename" data-form="rename">
         <label for="ac-newname">ユーザー名（フレンドに見える名前・2〜20文字）</label>
@@ -2364,9 +2416,16 @@ $('acct-body').addEventListener('click', async e => {
   const t = e.target.closest('[data-tab]');
   if (t) { acctTab = t.dataset.tab; renderAccount(); $('ac-email')?.focus(); return; }
   const a = e.target.closest('[data-acct]'); if (!a) return;
+  if (a.dataset.acct === 'avatar-off') { if (!arm(a, 'もう一度押すと外す')) return; saveAvatar(''); return; }
   if (a.dataset.acct === 'sync') { try { await pullAndMerge(); await loadFriendships(); toast('同期しました。'); } catch (er) { setSync('error', jaErr(er)); } }
   if (a.dataset.acct === 'friends') { closeModals(); openFriends(); }
   if (a.dataset.acct === 'logout') { if (!arm(a, 'もう一度押すとログアウト')) return; closeModals(); logout(); }
+});
+$('acct-body').addEventListener('change', async e => {
+  if (e.target.id !== 'ac-avatar') return;
+  const f = e.target.files && e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  try { await saveAvatar(await avatarFromFile(f)); } catch (er) { toast(er.message || 'アイコンを設定できませんでした。'); }
 });
 $('acct-body').addEventListener('submit', async e => {
   e.preventDefault();
@@ -2454,7 +2513,7 @@ function renderOnline() {
   if (!cloudReady()) { el.innerHTML = `<div class="ol-box">${head}<p class="empty">アカウント機能の準備ができると、ユーザー名でフレンドを追加して、お互いのキャラシを見られるようになります。</p></div>`; return; }
   if (!me) { el.innerHTML = `<div class="ol-box">${head}<p>ログインすると、相手のユーザー名でフレンド申請を送れます。相手が承認すると、お互いのキャラシ一覧が見られるようになります。</p><button class="btn primary small" type="button" data-ol="login">ログイン・新規登録</button></div>`; return; }
   const o = online || { friends: [], incoming: [], outgoing: [] };
-  const av = u => `<span class="fav sm" style="--fc:${esc((friendsOf().find(f => f.uid === u.id) || {}).color || 'var(--sky)')}">${esc((u.username || '？').charAt(0))}</span>`;
+  const av = u => `<span class="fav sm" style="--fc:${esc((friendsOf().find(f => f.uid === u.id) || {}).color || 'var(--sky)')}">${avImg(u.id) || esc((u.username || '？').charAt(0))}</span>`;
   el.innerHTML = `<div class="ol-box">${head}
     <p class="ol-me">あなたのユーザー名：<b>${esc(me.username)}</b>（これを友達に教えると申請してもらえます）</p>
     <form class="ol-search" id="ol-search"><input class="inp" id="ol-name" placeholder="相手のユーザー名" autocomplete="off" aria-label="相手のユーザー名"><button class="btn primary" type="submit">フレンド申請</button></form>
@@ -2471,7 +2530,7 @@ $('online-friends').addEventListener('submit', async e => {
   err.textContent = '';
   if (!name) return;
   try {
-    const { data: p, error } = await sb.from('profiles').select('id,username').ilike('username', name.replace(/[%_\\]/g, '\\$&')).maybeSingle();
+    const { data: p, error } = await selectProfiles(c => sb.from('profiles').select(c).ilike('username', name.replace(/[%_\\]/g, '\\$&')).maybeSingle());
     if (error) throw error;
     if (!p) { err.textContent = `「${name}」というユーザーは見つかりませんでした。つづりを確かめてください。`; return; }
     if (p.id === me.id) { err.textContent = '自分自身はフレンドに追加できません。'; return; }
@@ -2858,7 +2917,7 @@ function renderFriendSelect(stage) {
     const sub = kind === 'fr' ? (o.chars && o.chars[u.id] !== undefined ? `公開キャラ ${chars.length}人` : '公開キャラ …') : kind === 'in' ? '申請が届いています' : '承認待ち';
     const minis = kind === 'fr' && chars.length ? `<span class="sel-minis">${chars.slice(0, 4).map(ch => `<i style="--tc:${esc(ch.color)}">${ch.avatar ? `<img src="${esc(ch.avatar)}" alt="">` : esc((ch.name || '？').charAt(0))}</i>`).join('')}${chars.length > 4 ? `<i class="more">+${chars.length - 4}</i>` : ''}</span>` : '';
     return `<button class="sel-char sel-friend ${kind}" type="button" data-fuid="${u.id}" data-fname="${esc(u.username)}" data-kind="${kind}" style="--i:${i};--B:${B}px${xy ? `;left:calc(50% + ${xy[0].toFixed(1)}px);top:calc(50% + ${xy[1].toFixed(1)}px)` : ''}" aria-label="${esc(u.username)}${kind === 'fr' ? 'さんのキャラシを見る' : kind === 'in' ? 'さんからの申請を確認する' : 'さん（承認待ち）'}">
-      <span class="token" style="--tc:${esc(colorOf(u))}">${esc((u.username || '？').charAt(0))}</span>${kind === 'in' ? '<span class="sel-reqmark">申請</span>' : ''}
+      <span class="token" style="--tc:${esc(colorOf(u))}">${avImg(u.id) || esc((u.username || '？').charAt(0))}</span>${kind === 'in' ? '<span class="sel-reqmark">申請</span>' : ''}
       <span class="sel-name">${esc(u.username)}</span><span class="sel-sys">${sub}</span>${minis}
     </button>`;
   };
@@ -2921,7 +2980,7 @@ async function loadGroups() {
       mem = r.data || [];
     }
     const uids = [...new Set([...mem.map(m => m.user_id), ...(data || []).map(r => r.owner)])].filter(u => u !== me.id && !G.names[u]);
-    if (uids.length) { const r = await sb.from('profiles').select('id,username').in('id', uids); (r.data || []).forEach(x => { G.names[x.id] = x.username; }); }
+    if (uids.length) { const r = await selectProfiles(c => sb.from('profiles').select(c).in('id', uids)); (r.data || []).forEach(x => { G.names[x.id] = x.username; }); }
     G.list = (data || []).map(r => ({ id: r.id, owner: r.owner, locked: !!r.locked, data: r.data || {}, updated: r.updated_at, members: mem.filter(m => m.group_id === r.id) }));
     G.loaded = true; G.err = '';
     if (await migrateLegacyGroups()) return loadGroups();
@@ -2967,7 +3026,7 @@ function charDot(x) {
   const av = c ? (c.avatar || '') : (((online && online.chars && online.chars[x.user]) || []).find(ch => ch.id === x.charId) || {}).avatar;
   return av ? `<span class="gc-dot img"><img src="${esc(av)}" alt=""></span>` : '';
 }
-const dot = (name, uid) => `<span class="gc-dot" style="--c:${esc(personColor(uid))}">${esc((name || '？').charAt(0))}</span>`;
+const dot = (name, uid) => `<span class="gc-dot ${AVATARS[uid] ? 'img' : ''}" style="--c:${esc(personColor(uid))}">${avImg(uid) || esc((name || '？').charAt(0))}</span>`;
 const safeRoom = u => /^https:\/\/[^\s"'<>]+$/.test(u || '') ? u : '';
 function roomRow(g, member) {
   const url = safeRoom((g.data || {}).roomUrl);
@@ -3038,7 +3097,7 @@ function renderGroupEditor() {
       <div class="gm-friends">${friends.length ? friends.map(u => {
         const m = memberById[u.id], on = d.invite.includes(u.id), removed = d.remove.includes(u.id);
         if (m && !removed) return `<span class="gm-mem">${dot(u.username, u.id)}<b>${esc(u.username)}</b><small>${m.status === 'joined' ? (m.role ? ROLE[m.role] + 'で参加中' : '参加中') : '招待中'}</small><button class="icon-btn" type="button" data-gact="remove" data-u="${u.id}" aria-label="${esc(u.username)}をグループから外す">×</button></span>`;
-        return `<button type="button" class="fchip ${on ? 'on' : ''}" style="--fc:${esc(personColor(u.id))}" data-gact="invite" data-u="${u.id}" aria-pressed="${on}"><span class="fdot">${esc((u.username || '？').charAt(0))}</span>${esc(u.username)}${removed ? '（外す）' : ''}</button>`;
+        return `<button type="button" class="fchip ${on ? 'on' : ''}" style="--fc:${esc(personColor(u.id))}" data-gact="invite" data-u="${u.id}" aria-pressed="${on}"><span class="fdot">${avImg(u.id) || esc((u.username || '？').charAt(0))}</span>${esc(u.username)}${removed ? '（外す）' : ''}</button>`;
       }).join('') : '<span class="empty">オンラインのフレンドがいません。「フレンド」タブでフレンドを追加すると招待できます。</span>'}
       ${(d.members || []).filter(m => m.user_id !== me.id && !friends.some(u => u.id === m.user_id)).map(m => `<span class="gm-mem">${dot(gUser(m.user_id), m.user_id)}<b>${esc(gUser(m.user_id))}</b><small>${m.status === 'joined' ? ROLE[m.role] || '参加中' : '招待中'}</small></span>`).join('')}</div></div>
     <div class="gm-sec"><b>アプリを使っていない参加者</b><span class="hint">アカウントのない人は、ここに名前を書いておけます。</span>

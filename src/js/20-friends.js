@@ -5,13 +5,15 @@ function playedWith(c) {
   (c.scenarios || []).forEach(sc => (sc.friends || []).forEach(id => count.set(id, (count.get(id) || 0) + 1)));
   return friendsOf().filter(f => count.has(f.id)).map(f => ({ f, n: count.get(f.id) })).sort((x, y) => y.n - x.n);
 }
-const fchip = (f, attrs, on) => `<button type="button" class="fchip ${on ? 'on' : ''}" style="--fc:${esc(f.color)}" ${attrs}><span class="fdot">${esc((f.name || '？').charAt(0))}</span>${esc(f.name)}</button>`;
+/* フレンドの丸：キャラシ工房のフレンドでアイコン画像があれば画像、なければ名前の1文字目 */
+const fInit = f => (f.uid && avImg(f.uid)) || esc((f.name || '？').charAt(0));
+const fchip = (f, attrs, on) => `<button type="button" class="fchip ${on ? 'on' : ''}" style="--fc:${esc(f.color)}" ${attrs}><span class="fdot">${fInit(f)}</span>${esc(f.name)}</button>`;
 function scenariosHtml(c) {
   const fr = friendsOf(), pw = playedWith(c);
   return `<section class="sec">
     <div class="played-with">
       <span class="lbl">この探索者と冒険したフレンド</span>
-      <div class="pw-chips">${pw.length ? pw.map(({ f, n }) => `<span class="fchip on static" style="--fc:${esc(f.color)}"><span class="fdot">${esc((f.name || '？').charAt(0))}</span>${esc(f.name)}<b>×${n}</b></span>`).join('') : '<span class="empty">シナリオに「一緒に遊んだフレンド」を付けると、ここに並びます。</span>'}</div>
+      <div class="pw-chips">${pw.length ? pw.map(({ f, n }) => `<span class="fchip on static" style="--fc:${esc(f.color)}"><span class="fdot">${fInit(f)}</span>${esc(f.name)}<b>×${n}</b></span>`).join('') : '<span class="empty">シナリオに「一緒に遊んだフレンド」を付けると、ここに並びます。</span>'}</div>
     </div>
     <div class="sec-title"><span class="hint">シナリオごとに、一緒に遊んだフレンドを押して選べます</span><div class="tools"><button class="btn small" type="button" data-act="open-friends">フレンドを管理</button><button class="btn small" type="button" data-act="add-scenario">＋ シナリオを追加</button></div></div>
     ${c.scenarios.length ? `<div class="scn-list">${c.scenarios.map((sc, i) => `
@@ -39,7 +41,7 @@ function renderFriends() {
   $('friend-list').innerHTML = list.length ? list.map(f => {
     const st = friendStats(f.id);
     return `<div class="friend" data-fid="${f.id}">
-      <span class="fav" style="--fc:${esc(f.color)}">${esc((f.name || '？').charAt(0))}${f.uid ? '<i class="ol-badge" title="キャラシ工房のフレンド"></i>' : ''}</span>
+      <span class="fav" style="--fc:${esc(f.color)}">${fInit(f)}${f.uid ? '<i class="ol-badge" title="キャラシ工房のフレンド"></i>' : ''}</span>
       <div class="fbody">
         <div class="frow">
           <input class="inp" id="fr-name-${f.id}" data-fp="name" value="${esc(f.name)}" aria-label="フレンドの名前">

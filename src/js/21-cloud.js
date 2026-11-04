@@ -6,6 +6,54 @@ const CLOUD = Object.assign({
 const cloudReady = () => /^https:\/\/[\w-]+\.supabase\.co\/?$/.test(CLOUD.url) && CLOUD.key.length > 20 && !!(window.supabase && window.supabase.createClient);
 let sb = null, me = null, online = null, syncTimer = null, syncing = false, syncAgain = false, syncState = 'off', syncMsg = '', acctTab = 'login';
 const lastSynced = new Map();
+
+/* ---- ユーザーのアイコン画像（profiles.avatar に小さな正方形の画像を data URL で入れる） ---- */
+const AVATARS = {};    // ユーザーID → 画像
+let avatarCol = true;  // サーバーに avatar 欄がまだ無い（SQL 07 を実行していない）ときは false にして、名前だけ読む
+const okAvatar = v => typeof v === 'string' && /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(v) ? v : '';
+const avImg = uid => AVATARS[uid] ? `<img src="${esc(AVATARS[uid])}" alt="" loading="lazy" draggable="false">` : '';
+/* profiles を読む。q は列の名前を受け取ってクエリを返す関数。avatar 欄があればいっしょに読んで覚えておく */
+async function selectProfiles(q) {
+  if (avatarCol) {
+    const r = await q('id,username,avatar');
+    if (!r.error) {
+      [].concat(r.data || []).forEach(p => { if (p && p.id) { if (okAvatar(p.avatar)) AVATARS[p.id] = p.avatar; else delete AVATARS[p.id]; } });
+      return r;
+    }
+    if (!/avatar/i.test(r.error.message || '')) return r;
+    avatarCol = false;
+  }
+  return q('id,username');
+}
+/* 画像ファイル → 真ん中を正方形に切りぬいた 160px の画像（data URL） */
+function avatarFromFile(file) {
+  return new Promise((resolve, reject) => {
+    if (!file || !/^image\//.test(file.type)) { reject(new Error('画像ファイル（PNG・JPGなど）を選んでください。')); return; }
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('画像を読み込めませんでした。別の画像で試してください。')); };
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const s = Math.min(img.width, img.height), sx = (img.width - s) / 2, sy = (img.height - s) * .3; // 縦長の画像は少し上（顔のあたり）を使う
+      const cv = document.createElement('canvas'); cv.width = cv.height = 160;
+      const g = cv.getContext('2d'); g.fillStyle = '#ffffff'; g.fillRect(0, 0, 160, 160);
+      g.drawImage(img, sx, sy, s, s, 0, 0, 160, 160);
+      let out = '';
+      for (const q of [.85, .72, .6, .45]) { out = cv.toDataURL('image/jpeg', q); if (out.length <= 60000) break; }
+      resolve(out);
+    };
+    img.src = url;
+  });
+}
+async function saveAvatar(v) {
+  if (!sbClient() || !me) return;
+  const { error } = await sb.from('profiles').update({ avatar: v || null }).eq('id', me.id);
+  if (error) { toast(/avatar/i.test(error.message || '') ? 'サーバーの準備がまだです。Supabase で supabase/07-avatars.sql を実行してください。' : 'アイコンを保存できませんでした：' + jaErr(error)); return; }
+  avatarCol = true;
+  if (v) AVATARS[me.id] = v; else delete AVATARS[me.id];
+  renderAccount(); renderAccountBtn(); renderOnline(); renderFriends();
+  if (!$('select').hidden) renderSelect();
+  toast(v ? 'アイコンを変えました。フレンドやグループの人にも見えます。' : 'アイコンを外しました。');
+}
 function sbClient() {
   if (!sb && cloudReady()) sb = window.supabase.createClient(CLOUD.url.replace(/\/$/, ''), CLOUD.key, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
   return sb;
@@ -75,7 +123,7 @@ async function loadFriendships() {
   if (error) throw error;
   const ids = [...new Set((data || []).flatMap(r => [r.requester, r.addressee]).filter(id => id !== me.id))];
   let profs = [];
-  if (ids.length) { const r = await sb.from('profiles').select('id,username').in('id', ids); if (r.error) throw r.error; profs = r.data || []; }
+  if (ids.length) { const r = await selectProfiles(c => sb.from('profiles').select(c).in('id', ids)); if (r.error) throw r.error; profs = r.data || []; }
   const nm = id => (profs.find(p => p.id === id) || {}).username || '（退会したユーザー）';
   online = { friends: [], incoming: [], outgoing: [], chars: (online && online.chars) || {}, groups: (online && online.groups) || [] };
   (data || []).forEach(r => {
@@ -104,7 +152,7 @@ async function handleSession(session) {
   me = { id: uid, email: session.user.email, username: (session.user.user_metadata || {}).username || '' };
   renderAccountBtn(); renderAccount();
   try {
-    const { data: prof } = await sb.from('profiles').select('username').eq('id', uid).maybeSingle();
+    const { data: prof } = await selectProfiles(c => sb.from('profiles').select(c).eq('id', uid).maybeSingle());
     if (prof && prof.username) me.username = prof.username;
     renderAccountBtn(); renderAccount();
     ueCheckAdmin();
@@ -159,8 +207,10 @@ function renderAccount() {
   if (me && acctTab !== 'recover') {
     const st = { ok: '同期済み', pending: '同期中…', error: '同期できませんでした', off: '—' }[syncState];
     el.innerHTML = `<div class="acct-card">
-        <span class="fav" style="--fc:var(--sky)">${esc((me.username || '？').charAt(0))}</span>
-        <div><b class="acct-name">${esc(me.username)}</b><span class="acct-mail">${esc(me.email || '')}</span></div>
+        <label class="fav acct-av ${AVATARS[me.id] ? 'has' : ''}" style="--fc:var(--sky)" title="アイコン画像を選ぶ">${avImg(me.id) || esc((me.username || '？').charAt(0))}<input type="file" id="ac-avatar" accept="image/*" hidden><i class="acct-av-cam" aria-hidden="true">✎</i></label>
+        <div><b class="acct-name">${esc(me.username)}</b><span class="acct-mail">${esc(me.email || '')}</span>
+          <span class="acct-av-act"><label class="btn small" for="ac-avatar">アイコン画像を${AVATARS[me.id] ? '変える' : '選ぶ'}</label>${AVATARS[me.id] ? '<button class="btn small ghost" type="button" data-acct="avatar-off">外す</button>' : ''}</span>
+          <small class="acct-av-note">フレンドやグループの人にも見えます。</small></div>
       </div>
       <form class="acct-rename" data-form="rename">
         <label for="ac-newname">ユーザー名（フレンドに見える名前・2〜20文字）</label>
@@ -213,9 +263,16 @@ $('acct-body').addEventListener('click', async e => {
   const t = e.target.closest('[data-tab]');
   if (t) { acctTab = t.dataset.tab; renderAccount(); $('ac-email')?.focus(); return; }
   const a = e.target.closest('[data-acct]'); if (!a) return;
+  if (a.dataset.acct === 'avatar-off') { if (!arm(a, 'もう一度押すと外す')) return; saveAvatar(''); return; }
   if (a.dataset.acct === 'sync') { try { await pullAndMerge(); await loadFriendships(); toast('同期しました。'); } catch (er) { setSync('error', jaErr(er)); } }
   if (a.dataset.acct === 'friends') { closeModals(); openFriends(); }
   if (a.dataset.acct === 'logout') { if (!arm(a, 'もう一度押すとログアウト')) return; closeModals(); logout(); }
+});
+$('acct-body').addEventListener('change', async e => {
+  if (e.target.id !== 'ac-avatar') return;
+  const f = e.target.files && e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  try { await saveAvatar(await avatarFromFile(f)); } catch (er) { toast(er.message || 'アイコンを設定できませんでした。'); }
 });
 $('acct-body').addEventListener('submit', async e => {
   e.preventDefault();
@@ -303,7 +360,7 @@ function renderOnline() {
   if (!cloudReady()) { el.innerHTML = `<div class="ol-box">${head}<p class="empty">アカウント機能の準備ができると、ユーザー名でフレンドを追加して、お互いのキャラシを見られるようになります。</p></div>`; return; }
   if (!me) { el.innerHTML = `<div class="ol-box">${head}<p>ログインすると、相手のユーザー名でフレンド申請を送れます。相手が承認すると、お互いのキャラシ一覧が見られるようになります。</p><button class="btn primary small" type="button" data-ol="login">ログイン・新規登録</button></div>`; return; }
   const o = online || { friends: [], incoming: [], outgoing: [] };
-  const av = u => `<span class="fav sm" style="--fc:${esc((friendsOf().find(f => f.uid === u.id) || {}).color || 'var(--sky)')}">${esc((u.username || '？').charAt(0))}</span>`;
+  const av = u => `<span class="fav sm" style="--fc:${esc((friendsOf().find(f => f.uid === u.id) || {}).color || 'var(--sky)')}">${avImg(u.id) || esc((u.username || '？').charAt(0))}</span>`;
   el.innerHTML = `<div class="ol-box">${head}
     <p class="ol-me">あなたのユーザー名：<b>${esc(me.username)}</b>（これを友達に教えると申請してもらえます）</p>
     <form class="ol-search" id="ol-search"><input class="inp" id="ol-name" placeholder="相手のユーザー名" autocomplete="off" aria-label="相手のユーザー名"><button class="btn primary" type="submit">フレンド申請</button></form>
@@ -320,7 +377,7 @@ $('online-friends').addEventListener('submit', async e => {
   err.textContent = '';
   if (!name) return;
   try {
-    const { data: p, error } = await sb.from('profiles').select('id,username').ilike('username', name.replace(/[%_\\]/g, '\\$&')).maybeSingle();
+    const { data: p, error } = await selectProfiles(c => sb.from('profiles').select(c).ilike('username', name.replace(/[%_\\]/g, '\\$&')).maybeSingle());
     if (error) throw error;
     if (!p) { err.textContent = `「${name}」というユーザーは見つかりませんでした。つづりを確かめてください。`; return; }
     if (p.id === me.id) { err.textContent = '自分自身はフレンドに追加できません。'; return; }
