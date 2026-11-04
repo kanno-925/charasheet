@@ -1046,7 +1046,8 @@ label.btn { display: inline-block; }
 .bk-left > .bk-scroll { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
 /* wide screens: each page is one sheet tall (the paper image's proportion); long entries scroll inside the page */
 @media (min-width: 901px) {
-  .bk-page { aspect-ratio: 4 / 5; max-height: calc(100vh - 150px); min-height: 460px; }
+  /* height only (never the width): a 4:5 sheet, but no taller than the screen. 100cqi = cover width */
+  .bk-page { height: max(460px, min(100vh - 150px, (100cqi - 40px) * .625)); }
   .bk-left, .bk-right { padding: 0; min-height: 0; }
   .bk-pages .bk-page > .bk-scroll { position: absolute; inset: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
     scrollbar-width: thin; scrollbar-color: rgb(90 50 20 / .55) transparent;
@@ -1239,7 +1240,7 @@ label.btn { display: inline-block; }
 @media (min-width: 901px) {
   .bk-cover { container: bkcover / inline-size; }
   @container bkcover (max-width: 500px) {
-    .bk-page { aspect-ratio: auto; max-height: none; min-height: 0; }
+    .bk-page { height: auto; }
     .bk-pages .bk-page > .bk-scroll { position: relative; inset: auto; right: auto; overflow: visible; padding: 0; -webkit-mask-image: none; mask-image: none; }
     .bk-left > .bk-scroll { align-items: stretch; text-align: left; }
     .bk-pages { grid-template-columns: minmax(0, 1fr); }
