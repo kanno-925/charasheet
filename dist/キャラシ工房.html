@@ -695,16 +695,21 @@ label.btn { display: inline-block; }
 .sel-stage.slidev { height: auto; display: block; }
 .sl-track { --cw: clamp(210px, 23vw, 300px); position: relative; display: flex; align-items: flex-end; overflow-x: auto; overflow-y: hidden;
   padding: 26px calc(50% - var(--cw) / 2) 30px; scrollbar-width: none; overscroll-behavior-x: contain;
-  perspective: 1300px; cursor: grab; -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); }
+  perspective: 1100px; cursor: grab; -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); }
 .sl-track::-webkit-scrollbar { display: none; }
 @media (pointer: coarse) { .sl-track { scroll-snap-type: x mandatory; } .sl-track.free { scroll-snap-type: none; } }
 .sl-track.dragging { cursor: grabbing; }
 .sel-stage .sl-card { --d: 0; --ad: 0; position: relative; translate: none; animation: none; display: block; gap: 0; flex: none; width: var(--cw); margin-inline: calc(var(--cw) * -.07); padding: 0; border: 0; background: none; color: inherit; font: inherit;
   scroll-snap-align: center; cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: pan-x; }
 .sl-track.dragging .sl-card { cursor: grabbing; }
-.sl-body { display: flex; flex-direction: column; align-items: center; transform-origin: 50% 100%;
-  transform: translateY(calc(var(--ad) * 34px)) scale(calc(1 - var(--ad) * .17)) rotateY(calc(var(--d) * -16deg));
-  opacity: calc(1 - var(--ad) * .3); filter: saturate(calc(1 - var(--ad) * .25)) brightness(calc(1 - var(--ad) * .12)); transition: transform .14s ease-out, opacity .14s, filter .14s; }
+/* a curved carousel: the chosen one stands in front, the others swing round behind it */
+.sel-stage .sl-card { transform-style: preserve-3d; }
+.sl-body { display: flex; flex-direction: column; align-items: center; transform-origin: 50% 60%;
+  transform: translateX(calc(var(--d) * var(--cw) * -.36)) translateZ(calc(var(--ad) * -260px)) rotateY(calc(var(--d) * -34deg));
+  opacity: calc(1 - var(--ad) * .22); filter: saturate(calc(1 - var(--ad) * .3)) brightness(calc(1 - var(--ad) * .22)); transition: transform .14s ease-out, opacity .14s, filter .14s; }
+.sl-card:not(.center) .sl-name { background: color-mix(in srgb, var(--solid) 70%, transparent); }
+.sl-card:not(.center) .sl-sys { opacity: 0; }
+.sl-card.center .sl-art { filter: drop-shadow(0 0 26px color-mix(in srgb, var(--sky) 35%, transparent)); }
 .sl-art { position: relative; width: 100%; height: clamp(240px, calc(100svh - 390px), 540px); display: grid; place-items: end center; animation: sl-float 4.8s ease-in-out infinite; animation-delay: calc(var(--i) * -.83s); }
 .sl-art img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; pointer-events: none;
   filter: drop-shadow(0 14px 18px rgb(0 0 0 / .25)); }
@@ -5244,11 +5249,14 @@ $('select').addEventListener('click', e => {
   if (e.target.closest('#sel-login')) { acctTab = 'login'; openAccount(); return; }
   const fb = e.target.closest('.sel-friend');
   if (fb) { if (selLong) { selLong = false; return; } if (fb.dataset.kind === 'fr') viewFriend(fb.dataset.fuid, fb.dataset.fname); else openFriends(); return; }
-  if (e.target.closest('#sel-new')) { openNewChar(); return; }
+  const nw = e.target.closest('#sel-new');
+  if (nw) { if (nw.classList.contains('sl-card') && !nw.classList.contains('center')) slideTo($('sl-track'), nw, true); else openNewChar(); return; }
   if (e.target.closest('#sel-import')) { $('btn-import').click(); return; }
   if (e.target.closest('#sel-theme')) { $('btn-theme').click(); return; }
   const ch = e.target.closest('.sel-char, .sel-row'); if (!ch) return;
   if (selLong) { selLong = false; return; }
+  // スライド：奥にいるキャラを押したら、まず真ん中まで回してくる
+  if (ch.classList.contains('sl-card') && !ch.classList.contains('center')) { slideTo($('sl-track'), ch, true); return; }
   state.activeId = ch.dataset.id; save();
   renderShelf(); renderSheet(); renderOutput();
   leaveSelect(ch);

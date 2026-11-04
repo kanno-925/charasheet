@@ -3340,11 +3340,14 @@ $('select').addEventListener('click', e => {
   if (e.target.closest('#sel-login')) { acctTab = 'login'; openAccount(); return; }
   const fb = e.target.closest('.sel-friend');
   if (fb) { if (selLong) { selLong = false; return; } if (fb.dataset.kind === 'fr') viewFriend(fb.dataset.fuid, fb.dataset.fname); else openFriends(); return; }
-  if (e.target.closest('#sel-new')) { openNewChar(); return; }
+  const nw = e.target.closest('#sel-new');
+  if (nw) { if (nw.classList.contains('sl-card') && !nw.classList.contains('center')) slideTo($('sl-track'), nw, true); else openNewChar(); return; }
   if (e.target.closest('#sel-import')) { $('btn-import').click(); return; }
   if (e.target.closest('#sel-theme')) { $('btn-theme').click(); return; }
   const ch = e.target.closest('.sel-char, .sel-row'); if (!ch) return;
   if (selLong) { selLong = false; return; }
+  // スライド：奥にいるキャラを押したら、まず真ん中まで回してくる
+  if (ch.classList.contains('sl-card') && !ch.classList.contains('center')) { slideTo($('sl-track'), ch, true); return; }
   state.activeId = ch.dataset.id; save();
   renderShelf(); renderSheet(); renderOutput();
   leaveSelect(ch);
