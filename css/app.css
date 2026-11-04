@@ -971,12 +971,17 @@ label.btn { display: inline-block; }
 .sheet.is-book, .has-bg .sheet.is-book { background: transparent; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 .book { position: relative; padding: 66px 34px 64px; }
 /* give the book more room: slimmer side columns while the book theme is on */
-/* the book takes the whole width; the CCFOLIA output moves below it */
+/* the book takes the whole width: the investigator list moves above it, the CCFOLIA output below it */
 @media (min-width: 901px) {
-  .layout:has(> .sheet.is-book) { grid-template-columns: 180px minmax(0, 1fr); gap: 14px; }
-  .layout:has(> .sheet.is-book) > .tray { grid-column: 2; position: static; max-width: 760px; width: 100%; justify-self: center; }
+  .layout:has(> .sheet.is-book) { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .layout:has(> .sheet.is-book) > .shelf { flex-direction: row; align-items: center; gap: 14px; min-width: 0; }
+  .layout:has(> .sheet.is-book) > .shelf .panel-label { flex: none; margin: 0; }
+  .layout:has(> .sheet.is-book) .shelf-list { flex: 1; min-width: 0; flex-direction: row; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+  .layout:has(> .sheet.is-book) .char-item { flex: none; width: auto; min-width: 180px; max-width: 260px; }
+  .layout:has(> .sheet.is-book) > .tray { grid-column: auto; position: static; max-width: 760px; width: 100%; justify-self: center; }
+  /* keep the pages taller than wide: the book is never wider than the screen height allows */
+  .sheet.is-book .book { max-width: calc((100vh - 150px) * 1.6 + 130px); margin-inline: auto; }
 }
-@media (min-width: 901px) and (max-width: 1180px) { .layout:has(> .sheet.is-book) { grid-template-columns: 160px minmax(0, 1fr); } }
 .book::before { content: ""; position: absolute; inset: 20px 0 -10px; z-index: -1; pointer-events: none; border-radius: 40px;
   background: radial-gradient(ellipse at 50% 45%, rgb(255 170 80 / .18), transparent 65%); filter: blur(34px); animation: grim-glow 7s ease-in-out infinite; }
 @keyframes grim-glow { 50% { opacity: .6; } }
