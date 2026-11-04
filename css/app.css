@@ -1566,3 +1566,17 @@ body.ue-on .ue-panel { cursor: auto; }
 .ue-user span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ue-user small { color: #5a6b80; margin-left: 4px; }
 .ue-user select { border: 1px solid #c7d3e3; border-radius: 6px; padding: 3px 4px; background: #fff; }
+.ue-tabs { display: flex; gap: 4px; padding: 6px 12px 0; border-bottom: 1px solid #e1e8f1; }
+.ue-tabs button { flex: 1; border: 0; background: none; padding: 6px 4px 8px; cursor: pointer; color: #5a6b80; border-bottom: 2px solid transparent; }
+.ue-tabs button.on { color: #1f6fe0; border-bottom-color: #1f6fe0; font-weight: 700; }
+.ue-sec { border: 1px solid #e1e8f1; border-radius: 8px; padding: 0 8px; }
+.ue-sec[open] { padding-bottom: 8px; }
+.ue-sec > summary { cursor: pointer; font-weight: 700; padding: 7px 0; }
+.ue-sec > .ue-f, .ue-sec > .ue-hint, .ue-sec > div { margin-top: 6px; }
+.ue-dot { color: #1f6fe0; font-style: normal; font-size: 10px; }
+.ue-f.ue-f2 { grid-template-columns: 84px 1fr 26px; }
+.ue-f select { width: 100%; border: 1px solid #c7d3e3; border-radius: 6px; padding: 4px; background: #fff; }
+.ue-thumb { height: 64px; border-radius: 6px; border: 1px solid #c7d3e3; background: #eef3f9 center / contain no-repeat; }
+.ue-draft { display: flex; flex-direction: column; gap: 4px; padding: 8px; background: #eef3f9; border-radius: 8px; }
+.ue-draft small, .ue-draft span { color: #5a6b80; }
+#ue-handle { position: absolute; right: -7px; bottom: -7px; width: 14px; height: 14px; background: #fff; border: 2px solid #1f6fe0; border-radius: 3px; pointer-events: auto; cursor: nwse-resize; touch-action: none; }
