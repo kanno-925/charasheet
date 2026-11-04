@@ -73,7 +73,7 @@ function closeStage() {
 }
 $('stage-ov').addEventListener('click', e => {
   if (e.target.closest('#stage-close')) { closeStage(); return; }
-  if (e.target.closest('#stage-profile')) { closeStage(); openPanel('profile', document.querySelector('#sheet .bubble[data-open="profile"]')); return; }
+  if (e.target.closest('#stage-profile')) { closeStage(); openPanel('profile', document.querySelector('#sheet [data-open="profile"]')); return; }
   if (e.target.closest('#stage-remove')) { const c = active(); c.portrait = ''; touch(); renderSheet(); renderStage(); return; }
   if (!e.target.closest('.stage-tools, .stage-plate, .stage-empty')) closeStage();
 });

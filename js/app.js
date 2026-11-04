@@ -670,6 +670,52 @@ function hubHtml(c) {
     </div>`;
 }
 
+/* ---- 和風テーマのキャラシ：掛け軸に立ち絵、名前は縦書き、項目は「お知らせ」のような目次 ---- */
+const isWa = () => (presetOf().look || '').split(' ').includes('wa');
+const WA_NUM = ['壱', '弐', '参', '肆', '伍', '陸', '漆', '捌', '玖', '拾'];
+const WA_EN = { profile: 'Profile', abilities: 'Abilities', skills: 'Skills', weapons: 'Weapons', items: 'Items', money: 'Assets', tomes: 'Mythos', scenarios: 'Scenarios', story: 'Story' };
+function waHtml(c) {
+  const src = portraitSrc(c);
+  return `
+    <div class="hub-top wa-tools">${toolsHtml(c)}</div>
+    <div class="wa-sheet">
+      <div class="wa-left">
+        <button class="wa-kake" type="button" data-stage aria-label="立ち絵を表示">
+          <i class="wa-rod" aria-hidden="true"></i>
+          <span class="wa-kake-in">${src ? `<img src="${esc(imgSrc(src))}" alt="" draggable="false" onerror="this.remove()">` : ''}<span class="wa-kake-token">${tokenHtml(c)}</span></span>
+          <i class="wa-rod bot" aria-hidden="true"></i><i class="wa-cord" aria-hidden="true"></i>
+        </button>
+        <div class="wa-tate"><b data-hub="name"></b><span data-hub="kana"></span></div>
+      </div>
+      <div class="wa-right">
+        <p class="wa-sub" data-hub="sub"></p>
+        <div class="wa-stats">${[['hp', '体力', 'HP'], ['mp', '魔力', 'MP'], ['san', '正気', 'SAN']].map(([k, jp, en]) => `<div class="wa-stat ${k}"><span class="wa-st-l"><b>${jp}</b><small>${en}</small></span><span class="wa-st-tr"><i data-bar="${k}"></i></span><span class="wa-st-v" data-out="${k}Cur"></span></div>`).join('')}</div>
+        <div class="wa-head"><span class="wa-head-jp">目録</span><span class="wa-head-en">Contents</span></div>
+        <ol class="wa-list">${SECTIONS.map((s, i) => `<li><button class="wa-row" type="button" data-open="${s.key}" style="--i:${i}">
+          <span class="wa-no">${WA_NUM[i]}</span><span class="wa-jp">${s.jp}<small>${WA_EN[s.key] || s.en}</small></span><span class="wa-sum" data-sum="${s.key}"></span><span class="wa-go" aria-hidden="true">›</span></button></li>`).join('')}</ol>
+      </div>
+    </div>`;
+}
+
+/* 襖（ふすま）がしまって、ひらく画面の切りかえ。しまった瞬間に mid() を呼ぶ */
+function waDoors(mid) {
+  if (reduceMotion.matches) { mid(); return; }
+  const ov = document.createElement('div'); ov.className = 'wa-doors'; ov.setAttribute('aria-hidden', 'true');
+  ov.innerHTML = '<i class="wa-door l"><b></b></i><i class="wa-door r"><b></b></i>';
+  document.body.appendChild(ov);
+  const [l, r] = ov.children, ease = 'cubic-bezier(.7, 0, .3, 1)';
+  const shut = [l.animate([{ transform: 'translateX(-100%)' }, { transform: 'translateX(0)' }], { duration: 420, easing: ease, fill: 'forwards' }),
+    r.animate([{ transform: 'translateX(100%)' }, { transform: 'translateX(0)' }], { duration: 420, easing: ease, fill: 'forwards' })];
+  shut[0].finished.then(() => {
+    try { mid(); } catch (e) { console.error(e); }
+    setTimeout(() => {
+      const open = [l.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-102%)' }], { duration: 620, easing: ease, fill: 'forwards' }),
+        r.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(102%)' }], { duration: 620, easing: ease, fill: 'forwards' })];
+      open[0].finished.then(() => ov.remove(), () => ov.remove());
+    }, 140);
+  }, () => { ov.remove(); mid(); });
+}
+
 function skillTableHtml(c, cat) {
   const rows = c.skills.map((s, i) => [s, i]).filter(([s]) => s.cat === cat).map(([s, i]) => {
     const lbl = esc(skillLabel(s));
@@ -1171,7 +1217,8 @@ function renderSheet() {
   // 書き直しても、同じ頁なら読んでいた位置（頁の中のスクロール）を保つ
   const pageAt = () => ['.bk-chapter h3', '#bk-right .bk-head h3'].map(q => document.querySelector(q)?.textContent);
   const was = book ? pageAt() : [], kept = book ? [...document.querySelectorAll('#book .bk-scroll')].map(e => e.scrollTop) : [];
-  $('sheet').innerHTML = book ? bookHtml(c) : hubHtml(c);
+  $('sheet').classList.toggle('is-wa', !book && isWa());
+  $('sheet').innerHTML = book ? bookHtml(c) : isWa() ? waHtml(c) : hubHtml(c);
   if (book) { const now = pageAt(); document.querySelectorAll('#book .bk-scroll').forEach((e, i) => { if (now[i] === was[i]) e.scrollTop = kept[i] || 0; }); }
   if (panelKey && !$('panel-ov').hidden) {
     const body = $('panel-body'), st = body.scrollTop;
@@ -1233,7 +1280,14 @@ function openPanel(key, fromEl) {
   fillPanel(key);
   ov.hidden = false;
   scrollMenu(true);
-  if (!reduceMotion.matches) {
+  if (!reduceMotion.matches && isWa()) {
+    // 巻物がひらくように、上から下へ広がる
+    ov.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: 'ease-out' });
+    $('sao-win').animate([{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)' }], { duration: 760, easing: 'cubic-bezier(.55, 0, .2, 1)' });
+    $('sao-win').animate([{ transform: 'translateY(-10px)' }, { transform: 'none' }], { duration: 760, easing: 'cubic-bezier(.55, 0, .2, 1)' });
+    $('sao-line').animate([{ top: '0%', opacity: 1 }, { top: '100%', opacity: 1, offset: .97 }, { top: '100%', opacity: 0 }], { duration: 780, easing: 'cubic-bezier(.55, 0, .2, 1)' }); // 下の軸が紙といっしょに下りる
+    stagger(380);
+  } else if (!reduceMotion.matches) {
     ov.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'ease-out' });
     $('sao-win').animate([
       { clipPath: 'inset(49.6% 50% 49.6% 50% round 16px)' },
@@ -1254,7 +1308,7 @@ function openPanel(key, fromEl) {
 }
 function closePanel() {
   const ov = $('panel-ov'); if (ov.hidden) return;
-  const target = document.querySelector(`#sheet .bubble[data-open="${panelKey}"]`) || document.querySelector('#sheet .hub-core');
+  const target = document.querySelector(`#sheet [data-open="${panelKey}"]`) || document.querySelector('#sheet .hub-core, #sheet .wa-kake');
   const done = anims => {
     ov.hidden = true; panelKey = null;
     anims.forEach(a => a.cancel());
@@ -1264,6 +1318,12 @@ function closePanel() {
     }
   };
   if (reduceMotion.matches) return done([]);
+  if (isWa()) { // 巻物を下から巻きあげてしまう
+    const anims = [$('sao-win').animate([{ clipPath: 'inset(0 0 0% 0)' }, { clipPath: 'inset(0 0 100% 0)' }], { duration: 520, easing: 'cubic-bezier(.6, 0, .4, 1)', fill: 'forwards' }),
+      ov.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 240, delay: 320, fill: 'forwards' })];
+    Promise.all(anims.map(a => a.finished)).then(() => done(anims));
+    return;
+  }
   const ease = 'cubic-bezier(.6, 0, .4, 1)';
   const items = [...document.querySelectorAll('.sao-item')];
   const anims = [
@@ -1286,6 +1346,10 @@ function closePanel() {
 function gotoPanel(key) {
   if (key === panelKey) return;
   fillPanel(key);
+  if (!reduceMotion.matches && isWa()) { // 筆でさっと書いたように、左から現れる
+    $('panel-body').animate([{ clipPath: 'inset(0 100% 0 0)', opacity: .4 }, { clipPath: 'inset(0 0% 0 0)', opacity: 1 }], { duration: 560, easing: 'cubic-bezier(.5, 0, .2, 1)' });
+    return;
+  }
   if (!reduceMotion.matches) {
     $('sao-line').animate([{ transform: 'scaleX(0)', opacity: 1 }, { transform: 'scaleX(1)', opacity: 0 }], { duration: 420, easing: 'ease-out' });
     stagger(40);
@@ -1961,7 +2025,7 @@ function closeStage() {
 }
 $('stage-ov').addEventListener('click', e => {
   if (e.target.closest('#stage-close')) { closeStage(); return; }
-  if (e.target.closest('#stage-profile')) { closeStage(); openPanel('profile', document.querySelector('#sheet .bubble[data-open="profile"]')); return; }
+  if (e.target.closest('#stage-profile')) { closeStage(); openPanel('profile', document.querySelector('#sheet [data-open="profile"]')); return; }
   if (e.target.closest('#stage-remove')) { const c = active(); c.portrait = ''; touch(); renderSheet(); renderStage(); return; }
   if (!e.target.closest('.stage-tools, .stage-plate, .stage-empty')) closeStage();
 });
@@ -3600,6 +3664,7 @@ function popSelect() {
   document.querySelector('.sel-head')?.animate([{ opacity: 0, transform: 'translateY(-12px)' }, { opacity: 1, transform: 'none' }], { duration: 600, easing: 'ease-out' });
 }
 function showSelect() {
+  if (isWa() && !showSelect.inner && !reduceMotion.matches && $('select').hidden) { waDoors(() => { showSelect.inner = true; try { showSelect(); } finally { showSelect.inner = false; } }); return; }
   hidePeek();
   if (selTab === 'friends') setTimeout(refreshFriendView, 0);
   stopBgm(); $('bgm').hidden = true;
@@ -3615,6 +3680,7 @@ function leaveSelect(fromEl, quick) {
   const sel = $('select');
   const done = () => { sel.hidden = true; document.documentElement.style.overflow = ''; scrollTo(0, 0); renderPlayer(); };
   if (reduceMotion.matches || quick) { done(); return; }
+  if (isWa()) { waDoors(done); return; } // 和風：襖がしまって、ひらくとシート
   if (fromEl) {
     fxAt(fromEl, true);
     fromEl.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.5)', opacity: 0 }], { duration: 520, easing: 'cubic-bezier(.5, 0, .3, 1)', fill: 'forwards' });

@@ -1809,3 +1809,123 @@ body.ue-on .ue-panel { cursor: auto; }
 :root[data-look~="wa"] .panel-label > .touch-hint { order: -1; font-family: var(--f-body); font-size: 11px; font-weight: 400; letter-spacing: .05em; color: rgb(220 193 136 / .75); }
 :root[data-look~="wa"] .panel-label > .touch-hint::after { display: none; }
 :root[data-look~="wa"] .char-item.active .sys { color: rgb(43 35 31 / .75); }
+
+/* ================= 和風テーマ：フォント ================= */
+:root[data-look~="wa"] { --f-body: "Zen Old Mincho", "Shippori Mincho B1", "Yu Mincho", serif; --f-brush: "Yuji Syuku", "Shippori Mincho B1", serif; }
+:root[data-look~="wa"] body { font-family: var(--f-body); }
+:root[data-look~="wa"] .hero-title, :root[data-look~="wa"] .brand h1, :root[data-look~="wa"] .sel-head h2, :root[data-look~="wa"] .wa-tate b,
+:root[data-look~="wa"] .wa-head-jp, :root[data-look~="wa"] #panel-title, :root[data-look~="wa"] .modal h2 { font-family: var(--f-brush); font-weight: 400; }
+:root[data-look~="wa"] .panel-label > span:first-child { font-family: var(--f-brush); font-weight: 400; }
+:root[data-look~="wa"] .hero-title { letter-spacing: .1em; }
+
+/* ================= 和風テーマ：キャラシ本体（掛け軸＋目録） ================= */
+.sheet.is-wa { padding: 22px 26px 28px; }
+.wa-tools { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; align-items: center; }
+.wa-sheet { display: grid; grid-template-columns: minmax(200px, 270px) minmax(0, 1fr); gap: 34px; align-items: start; margin-top: 10px; }
+.wa-left { display: flex; gap: 14px; align-items: flex-start; justify-content: center; }
+/* 掛け軸：上下に軸、まわりは金茶の表装、中に立ち絵 */
+.wa-kake { position: relative; flex: none; width: 190px; padding: 18px 14px 26px; border: 0; cursor: pointer; border-radius: 2px;
+  background: radial-gradient(ellipse at 50% 0, rgb(255 240 200 / .25), transparent 60%), repeating-linear-gradient(45deg, rgb(255 255 255 / .05) 0 2px, transparent 2px 6px), linear-gradient(180deg, #6b4b2f, #4a3220);
+  box-shadow: 0 22px 34px -18px rgb(30 15 5 / .8), inset 0 0 0 1px rgb(201 165 96 / .55), inset 0 0 0 5px rgb(60 40 25 / .4), inset 0 0 0 6px rgb(201 165 96 / .35);
+  transform-origin: 50% 0; animation: wa-hang 6s ease-in-out infinite; }
+@keyframes wa-hang { 50% { transform: rotate(.6deg); } }
+.wa-kake:hover { animation-play-state: paused; }
+.wa-kake-in { position: relative; display: grid; place-items: end center; width: 100%; aspect-ratio: 3 / 5; overflow: hidden;
+  background: var(--wa-washi), linear-gradient(180deg, #f6ecd6, #eadbbb); box-shadow: inset 0 0 0 1px rgb(120 90 50 / .4), inset 0 0 26px rgb(120 90 50 / .25); }
+.wa-kake-in img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; filter: sepia(.15) saturate(.95); }
+.wa-kake-token { position: absolute; inset: 0; display: grid; place-items: center; }
+.wa-kake-in img + .wa-kake-token { display: none; }
+.wa-kake-token .token { width: 120px; height: 120px; font-size: 48px; border-width: 4px; }
+.wa-rod { position: absolute; left: -12px; right: -12px; top: -7px; height: 13px; border-radius: 7px; background: linear-gradient(180deg, #8b5e34, #3b2414 70%, #2a180c);
+  box-shadow: 0 3px 6px rgb(0 0 0 / .45); }
+.wa-rod::before, .wa-rod::after { content: ""; position: absolute; top: -2px; width: 14px; height: 17px; border-radius: 4px; background: linear-gradient(180deg, #f0d79a, #a8823c); }
+.wa-rod::before { left: -4px; } .wa-rod::after { right: -4px; }
+.wa-rod.bot { top: auto; bottom: -6px; height: 16px; }
+.wa-cord { position: absolute; left: 50%; top: -40px; width: 70px; height: 36px; translate: -50% 0; border: 2px solid #8a2d2d; border-bottom: 0; border-radius: 50% 50% 0 0; }
+.wa-tate { writing-mode: vertical-rl; display: flex; gap: 10px; padding-top: 6px; min-height: 260px; }
+.wa-tate b { font-size: 34px; letter-spacing: .14em; color: var(--ink); line-height: 1.1; text-shadow: 0 1px 0 rgb(255 250 240 / .7); }
+.wa-tate span { font-size: 14px; letter-spacing: .3em; color: color-mix(in srgb, var(--ink) 65%, transparent); }
+.wa-right { min-width: 0; }
+.wa-sub { margin: 4px 0 14px; font-size: 14px; letter-spacing: .12em; color: color-mix(in srgb, var(--ink) 72%, transparent); border-bottom: 1px solid rgb(120 90 50 / .3); padding-bottom: 10px; }
+/* 体力・魔力・正気：墨の帯 */
+.wa-stats { display: grid; gap: 8px; margin-bottom: 22px; }
+.wa-stat { display: grid; grid-template-columns: 74px minmax(0, 1fr) 70px; gap: 12px; align-items: center; }
+.wa-st-l b { font-size: 16px; letter-spacing: .2em; }
+.wa-st-l small { display: block; font-family: "Cinzel", serif; font-size: 9px; letter-spacing: .22em; color: #8a6d45; }
+.wa-st-tr { height: 12px; border-radius: 1px; background: rgb(120 90 50 / .14); box-shadow: inset 0 0 0 1px rgb(120 90 50 / .25); overflow: hidden; }
+.wa-st-tr i { display: block; height: 100%; transition: width .6s cubic-bezier(.2, .8, .2, 1);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / .18) 50%, transparent), var(--wa-c, #8e2c2c); -webkit-mask-image: linear-gradient(90deg, #000 85%, rgb(0 0 0 / .6)); mask-image: linear-gradient(90deg, #000 85%, rgb(0 0 0 / .6)); }
+.wa-stat.hp { --wa-c: linear-gradient(90deg, #6e1c1c, #a33a2c); }
+.wa-stat.mp { --wa-c: linear-gradient(90deg, #1f3557, #3d6290); }
+.wa-stat.san { --wa-c: linear-gradient(90deg, #3a2a54, #6f5794); }
+.wa-st-v { text-align: right; font-size: 17px; letter-spacing: .05em; }
+/* 目録（「お知らせ」の一覧のような行） */
+.wa-head { display: flex; align-items: baseline; gap: 14px; padding-left: 42px; position: relative; margin-bottom: 6px; }
+.wa-head::before { content: ""; position: absolute; left: 0; top: 50%; width: 34px; height: 34px; translate: 0 -50%; background: var(--wa-flower) center / contain no-repeat; }
+.wa-head-jp { font-size: 26px; letter-spacing: .14em; color: var(--ink); }
+.wa-head-en { font-family: "Cinzel", serif; font-size: 11px; letter-spacing: .2em; color: #7a6040; }
+.wa-head::after { content: ""; flex: 1; height: 1px; align-self: center; background: color-mix(in srgb, var(--ink) 45%, transparent); }
+.wa-list { list-style: none; margin: 0; padding: 0; }
+.wa-row { width: 100%; display: grid; grid-template-columns: 3.2em minmax(0, 1.2fr) minmax(0, 1fr) 1.6em; gap: 14px; align-items: center; text-align: left; padding: 12px 10px 12px 6px;
+  border: 0; border-bottom: 1px solid rgb(120 90 50 / .22); background: transparent; color: var(--ink); cursor: pointer; font: inherit; position: relative; transition: background .25s, padding .25s; }
+.wa-row::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, rgb(201 165 96 / .35), transparent); transition: width .35s cubic-bezier(.2, .8, .2, 1); }
+.wa-row > * { position: relative; }
+.wa-row:hover::before, .wa-row:focus-visible::before { width: 100%; }
+.wa-row:focus-visible { outline: 1.5px solid var(--wa-gold); outline-offset: -2px; }
+.wa-no { font-family: var(--f-brush); font-size: 20px; color: #8a5a36; text-align: center; border-right: 1px solid rgb(120 90 50 / .35); }
+.wa-jp { font-size: 17px; letter-spacing: .12em; display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.wa-jp small { font-family: "Cinzel", serif; font-size: 10px; letter-spacing: .14em; color: #8a6d45; white-space: nowrap; }
+.wa-sum { font-size: 13px; color: color-mix(in srgb, var(--ink) 70%, transparent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wa-go { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--wa-sumi); color: #f0e2c2; font-size: 15px; line-height: 1; transition: transform .3s; }
+.wa-row:hover .wa-go { transform: translateX(4px); }
+@media (hover: none) { .wa-row:hover::before { width: 0; } .wa-row:hover .wa-go { transform: none; } }
+@media (max-width: 760px) {
+  .sheet.is-wa { padding: 16px 14px 20px; }
+  .wa-sheet { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .wa-kake { width: 150px; }
+  .wa-tate { min-height: 0; }
+  .wa-tate b { font-size: 28px; }
+  .wa-row { grid-template-columns: 2.4em minmax(0, 1fr) auto 1.4em; gap: 10px; padding-block: 13px; }
+  .wa-jp small { display: none; }
+  .wa-stat { grid-template-columns: 56px minmax(0, 1fr) 62px; }
+}
+@media (prefers-reduced-motion: reduce) { .wa-kake { animation: none; } }
+
+/* ================= 和風テーマ：項目の窓は巻物、左の項目は短冊 ================= */
+:root[data-look~="wa"] .sao-win { border-radius: 2px; overflow: visible; }
+:root[data-look~="wa"] .sao-win::before, :root[data-look~="wa"] .sao-win::after { content: ""; left: -14px; right: -14px; width: auto; height: 14px; border: 0; border-radius: 7px; opacity: 1; z-index: 3;
+  background: linear-gradient(180deg, #8b5e34, #3b2414 70%, #2a180c); box-shadow: 0 3px 6px rgb(0 0 0 / .45); }
+:root[data-look~="wa"] .sao-win::before { top: -7px; }
+:root[data-look~="wa"] .sao-win::after { bottom: -7px; top: auto; }
+:root[data-look~="wa"] .sao-line { left: -14px; right: -14px; top: 100%; height: 14px; margin-top: -7px; border-radius: 7px; opacity: 0; z-index: 4; transform: none; background: linear-gradient(180deg, #8b5e34, #3b2414 70%, #2a180c); box-shadow: 0 3px 6px rgb(0 0 0 / .45); }
+:root[data-look~="wa"] .sao-head { background: transparent; border-bottom: 1px solid rgb(120 90 50 / .3); padding-top: 22px; }
+:root[data-look~="wa"] .sao-hic { background: var(--wa-flower) center / 80% no-repeat !important; border: 0 !important; color: transparent !important; box-shadow: none !important; }
+:root[data-look~="wa"] .sao-hic > * { visibility: hidden; }
+:root[data-look~="wa"] #panel-title { font-size: 26px; letter-spacing: .16em; }
+:root[data-look~="wa"] .panel-en { font-family: "Cinzel", serif; color: #8a6d45; }
+:root[data-look~="wa"] .sao-close { border-color: rgb(176 141 74 / .6); background: rgb(250 244 230 / .9); color: var(--ink); }
+:root[data-look~="wa"] .sao-item { border-radius: 2px; border: 1px solid rgb(176 141 74 / .45); background: var(--wa-washi), rgb(250 244 230 / .92); color: var(--ink); box-shadow: 0 6px 14px -10px rgb(60 40 20 / .6); }
+:root[data-look~="wa"] .sao-item .sao-ic { border-radius: 2px; background: transparent; border-color: transparent; color: #8a5a36; }
+:root[data-look~="wa"] .sao-item.on { color: #f0e2c2; border-color: var(--wa-gold); background: linear-gradient(90deg, var(--wa-sumi2), var(--wa-sumi)); }
+:root[data-look~="wa"] .sao-item.on .sao-ic { color: var(--wa-gold2); background: transparent; border-color: transparent; }
+:root[data-look~="wa"] .sao-item.on::after { border-left-color: var(--wa-sumi); }
+:root[data-look~="wa"] .panel-overlay { background: rgb(40 28 18 / .45); }
+
+/* ================= 和風テーマ：画面の切りかえ（襖） ================= */
+.wa-doors { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; }
+.wa-door { position: absolute; top: 0; bottom: 0; width: 50.5%; display: block;
+  background: var(--wa-washi), radial-gradient(ellipse at 50% 40%, #f7efdc, #e7d6b2);
+  box-shadow: inset 0 0 0 10px #3b2a1e, inset 0 0 0 12px #b08d4a, inset 0 0 0 13px #3b2a1e, 0 0 30px rgb(0 0 0 / .4); }
+.wa-door.l { left: 0; transform: translateX(-100%); }
+.wa-door.r { right: 0; transform: translateX(100%); }
+/* 襖の絵：金の霞と青海波、引き手 */
+.wa-door::before { content: ""; position: absolute; left: 13px; right: 13px; bottom: 13px; height: 36%; background: var(--wa-sg-gold) 0 100% / 48px 24px; opacity: .75;
+  -webkit-mask-image: linear-gradient(to top, #000 40%, transparent); mask-image: linear-gradient(to top, #000 40%, transparent); }
+.wa-door::after { content: ""; position: absolute; top: 50%; width: 22px; height: 46px; translate: 0 -50%; border-radius: 11px; background: radial-gradient(ellipse, #2b231f 45%, #b08d4a 50%, #6b5129 70%); box-shadow: 0 1px 2px rgb(0 0 0 / .5); }
+.wa-door.l::after { right: 34px; } .wa-door.r::after { left: 34px; }
+.wa-door b { position: absolute; left: 13px; right: 13px; top: 13px; height: 22%; background: var(--wa-mon) 50% 60% / 90px 90px no-repeat; opacity: .9; }
+.wa-jp { white-space: nowrap; overflow: hidden; }
+.wa-jp small { overflow: hidden; text-overflow: ellipsis; }
+.wa-row { grid-template-columns: 3.2em minmax(0, 1.5fr) minmax(0, 1fr) 1.6em; }
+@media (max-width: 760px) { .wa-row { grid-template-columns: 2.4em minmax(0, 1fr) auto 1.4em; } }
+:root[data-look~="wa"] .fx { display: none; } /* 近未来のふわっと光る輪は和風では出さない */

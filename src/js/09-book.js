@@ -315,7 +315,8 @@ function renderSheet() {
   // 書き直しても、同じ頁なら読んでいた位置（頁の中のスクロール）を保つ
   const pageAt = () => ['.bk-chapter h3', '#bk-right .bk-head h3'].map(q => document.querySelector(q)?.textContent);
   const was = book ? pageAt() : [], kept = book ? [...document.querySelectorAll('#book .bk-scroll')].map(e => e.scrollTop) : [];
-  $('sheet').innerHTML = book ? bookHtml(c) : hubHtml(c);
+  $('sheet').classList.toggle('is-wa', !book && isWa());
+  $('sheet').innerHTML = book ? bookHtml(c) : isWa() ? waHtml(c) : hubHtml(c);
   if (book) { const now = pageAt(); document.querySelectorAll('#book .bk-scroll').forEach((e, i) => { if (now[i] === was[i]) e.scrollTop = kept[i] || 0; }); }
   if (panelKey && !$('panel-ov').hidden) {
     const body = $('panel-body'), st = body.scrollTop;
@@ -377,7 +378,14 @@ function openPanel(key, fromEl) {
   fillPanel(key);
   ov.hidden = false;
   scrollMenu(true);
-  if (!reduceMotion.matches) {
+  if (!reduceMotion.matches && isWa()) {
+    // 巻物がひらくように、上から下へ広がる
+    ov.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: 'ease-out' });
+    $('sao-win').animate([{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)' }], { duration: 760, easing: 'cubic-bezier(.55, 0, .2, 1)' });
+    $('sao-win').animate([{ transform: 'translateY(-10px)' }, { transform: 'none' }], { duration: 760, easing: 'cubic-bezier(.55, 0, .2, 1)' });
+    $('sao-line').animate([{ top: '0%', opacity: 1 }, { top: '100%', opacity: 1, offset: .97 }, { top: '100%', opacity: 0 }], { duration: 780, easing: 'cubic-bezier(.55, 0, .2, 1)' }); // 下の軸が紙といっしょに下りる
+    stagger(380);
+  } else if (!reduceMotion.matches) {
     ov.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'ease-out' });
     $('sao-win').animate([
       { clipPath: 'inset(49.6% 50% 49.6% 50% round 16px)' },
@@ -398,7 +406,7 @@ function openPanel(key, fromEl) {
 }
 function closePanel() {
   const ov = $('panel-ov'); if (ov.hidden) return;
-  const target = document.querySelector(`#sheet .bubble[data-open="${panelKey}"]`) || document.querySelector('#sheet .hub-core');
+  const target = document.querySelector(`#sheet [data-open="${panelKey}"]`) || document.querySelector('#sheet .hub-core, #sheet .wa-kake');
   const done = anims => {
     ov.hidden = true; panelKey = null;
     anims.forEach(a => a.cancel());
@@ -408,6 +416,12 @@ function closePanel() {
     }
   };
   if (reduceMotion.matches) return done([]);
+  if (isWa()) { // 巻物を下から巻きあげてしまう
+    const anims = [$('sao-win').animate([{ clipPath: 'inset(0 0 0% 0)' }, { clipPath: 'inset(0 0 100% 0)' }], { duration: 520, easing: 'cubic-bezier(.6, 0, .4, 1)', fill: 'forwards' }),
+      ov.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 240, delay: 320, fill: 'forwards' })];
+    Promise.all(anims.map(a => a.finished)).then(() => done(anims));
+    return;
+  }
   const ease = 'cubic-bezier(.6, 0, .4, 1)';
   const items = [...document.querySelectorAll('.sao-item')];
   const anims = [
@@ -430,6 +444,10 @@ function closePanel() {
 function gotoPanel(key) {
   if (key === panelKey) return;
   fillPanel(key);
+  if (!reduceMotion.matches && isWa()) { // 筆でさっと書いたように、左から現れる
+    $('panel-body').animate([{ clipPath: 'inset(0 100% 0 0)', opacity: .4 }, { clipPath: 'inset(0 0% 0 0)', opacity: 1 }], { duration: 560, easing: 'cubic-bezier(.5, 0, .2, 1)' });
+    return;
+  }
   if (!reduceMotion.matches) {
     $('sao-line').animate([{ transform: 'scaleX(0)', opacity: 1 }, { transform: 'scaleX(1)', opacity: 0 }], { duration: 420, easing: 'ease-out' });
     stagger(40);

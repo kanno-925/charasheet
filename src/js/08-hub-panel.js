@@ -64,6 +64,52 @@ function hubHtml(c) {
     </div>`;
 }
 
+/* ---- 和風テーマのキャラシ：掛け軸に立ち絵、名前は縦書き、項目は「お知らせ」のような目次 ---- */
+const isWa = () => (presetOf().look || '').split(' ').includes('wa');
+const WA_NUM = ['壱', '弐', '参', '肆', '伍', '陸', '漆', '捌', '玖', '拾'];
+const WA_EN = { profile: 'Profile', abilities: 'Abilities', skills: 'Skills', weapons: 'Weapons', items: 'Items', money: 'Assets', tomes: 'Mythos', scenarios: 'Scenarios', story: 'Story' };
+function waHtml(c) {
+  const src = portraitSrc(c);
+  return `
+    <div class="hub-top wa-tools">${toolsHtml(c)}</div>
+    <div class="wa-sheet">
+      <div class="wa-left">
+        <button class="wa-kake" type="button" data-stage aria-label="立ち絵を表示">
+          <i class="wa-rod" aria-hidden="true"></i>
+          <span class="wa-kake-in">${src ? `<img src="${esc(imgSrc(src))}" alt="" draggable="false" onerror="this.remove()">` : ''}<span class="wa-kake-token">${tokenHtml(c)}</span></span>
+          <i class="wa-rod bot" aria-hidden="true"></i><i class="wa-cord" aria-hidden="true"></i>
+        </button>
+        <div class="wa-tate"><b data-hub="name"></b><span data-hub="kana"></span></div>
+      </div>
+      <div class="wa-right">
+        <p class="wa-sub" data-hub="sub"></p>
+        <div class="wa-stats">${[['hp', '体力', 'HP'], ['mp', '魔力', 'MP'], ['san', '正気', 'SAN']].map(([k, jp, en]) => `<div class="wa-stat ${k}"><span class="wa-st-l"><b>${jp}</b><small>${en}</small></span><span class="wa-st-tr"><i data-bar="${k}"></i></span><span class="wa-st-v" data-out="${k}Cur"></span></div>`).join('')}</div>
+        <div class="wa-head"><span class="wa-head-jp">目録</span><span class="wa-head-en">Contents</span></div>
+        <ol class="wa-list">${SECTIONS.map((s, i) => `<li><button class="wa-row" type="button" data-open="${s.key}" style="--i:${i}">
+          <span class="wa-no">${WA_NUM[i]}</span><span class="wa-jp">${s.jp}<small>${WA_EN[s.key] || s.en}</small></span><span class="wa-sum" data-sum="${s.key}"></span><span class="wa-go" aria-hidden="true">›</span></button></li>`).join('')}</ol>
+      </div>
+    </div>`;
+}
+
+/* 襖（ふすま）がしまって、ひらく画面の切りかえ。しまった瞬間に mid() を呼ぶ */
+function waDoors(mid) {
+  if (reduceMotion.matches) { mid(); return; }
+  const ov = document.createElement('div'); ov.className = 'wa-doors'; ov.setAttribute('aria-hidden', 'true');
+  ov.innerHTML = '<i class="wa-door l"><b></b></i><i class="wa-door r"><b></b></i>';
+  document.body.appendChild(ov);
+  const [l, r] = ov.children, ease = 'cubic-bezier(.7, 0, .3, 1)';
+  const shut = [l.animate([{ transform: 'translateX(-100%)' }, { transform: 'translateX(0)' }], { duration: 420, easing: ease, fill: 'forwards' }),
+    r.animate([{ transform: 'translateX(100%)' }, { transform: 'translateX(0)' }], { duration: 420, easing: ease, fill: 'forwards' })];
+  shut[0].finished.then(() => {
+    try { mid(); } catch (e) { console.error(e); }
+    setTimeout(() => {
+      const open = [l.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-102%)' }], { duration: 620, easing: ease, fill: 'forwards' }),
+        r.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(102%)' }], { duration: 620, easing: ease, fill: 'forwards' })];
+      open[0].finished.then(() => ov.remove(), () => ov.remove());
+    }, 140);
+  }, () => { ov.remove(); mid(); });
+}
+
 function skillTableHtml(c, cat) {
   const rows = c.skills.map((s, i) => [s, i]).filter(([s]) => s.cat === cat).map(([s, i]) => {
     const lbl = esc(skillLabel(s));
