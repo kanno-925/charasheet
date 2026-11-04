@@ -979,8 +979,8 @@ function noiseBurst(ctx, at, dur, { f0, f1, q = 1, vol = .3, attack = .01, hp = 
   src.connect(bp).connect(hpf).connect(g).connect(ctx.destination);
   src.start(at, offset, dur + .05);
 }
-/* 録音した効果音（assets/ の mp3）。読み込めないときは上の合成音で代わりに鳴らす */
-const SFX_SRC = { flip: 'assets/sfx-flip.mp3', write: 'assets/sfx-write.mp3' };
+/* 録音した効果音（assets/book/ の mp3）。読み込めないときは上の合成音で代わりに鳴らす */
+const SFX_SRC = { flip: 'assets/book/sfx-flip.mp3', write: 'assets/book/sfx-write.mp3' };
 const SFX_LEAD = { flip: 0, write: .8 }; // 頭の無音を飛ばす秒数
 function sfxPreload() {
   Object.keys(SFX_SRC).forEach(k => {
@@ -1240,7 +1240,7 @@ function flipLeaves(fromIdx, toIdx, count) {
 function bookOpening() {
   if (reduceMotion.matches || !isBook()) return false;
   const ov = document.createElement('div'); ov.className = 'bk-opening'; ov.setAttribute('aria-hidden', 'true');
-  ov.innerHTML = '<img src="assets/book-closed.webp" alt="">';
+  ov.innerHTML = '<img src="assets/book/closed.webp" alt="">';
   document.body.appendChild(ov);
   const img = ov.firstChild;
   sfxFlip(380, 1400, 3, 160);

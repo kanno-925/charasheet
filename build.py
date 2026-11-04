@@ -71,12 +71,14 @@ MIME = {'.svg': 'image/svg+xml', '.webp': 'image/webp', '.png': 'image/png', '.j
 
 def data_uri(name):
     f = ROOT / 'assets' / name
+    if not f.is_file():
+        raise SystemExit(f'assets/{name} が見つかりません（CSS・JS に書いた画像・音の場所を確かめてください）')
     return f'data:{MIME[f.suffix]};base64,' + base64.b64encode(f.read_bytes()).decode()
 
 
-# 1ファイル版は assets/ の画像・音も中に埋め込む
-css1 = re.sub(r'\.\./assets/([\w.-]+)', lambda m: data_uri(m.group(1)), css)
-js1 = re.sub(r'(?<=[\'"])assets/([\w.-]+)(?=[\'"])', lambda m: data_uri(m.group(1)), js)
+# 1ファイル版は assets/ の画像・音も中に埋め込む（assets/book/〜 のようにテーマごとのフォルダに分けてある）
+css1 = re.sub(r'\.\./assets/([\w./-]+)', lambda m: data_uri(m.group(1)), css)
+js1 = re.sub(r'(?<=[\'"])assets/([\w./-]+)(?=[\'"])', lambda m: data_uri(m.group(1)), js)
 inline_css, inline_js = f'<style>\n{css1}</style>', f'<script>\n{js1}</script>'
 (dist / 'キャラシ工房.html').write_text(page(inline_css, inline_js), encoding='utf-8')
 (dist / 'claude-artifact.html').write_text(f'{head}\n{inline_css}\n\n{markup}\n{inline_js}\n', encoding='utf-8')

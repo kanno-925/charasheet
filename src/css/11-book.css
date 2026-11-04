@@ -1,14 +1,14 @@
-/* ===== book theme: an old grimoire on a wooden desk (textures cut from reference photos in assets/) ===== */
+/* ===== book theme: an old grimoire on a wooden desk (textures cut from reference photos in assets/book/) ===== */
 
 :root {
-  --tx-clasp: url("../assets/book-clasp.webp");
-  --tx-cover: url("../assets/book-cover.webp");
-  --tx-desk: url("../assets/book-desk.webp");
-  --tx-edge: url("../assets/book-edge.webp");
-  --tx-page-left-tile: url("../assets/book-page-left-tile.webp");
-  --tx-page-right-tile: url("../assets/book-page-right-tile.webp");
-  --tx-ink-left: url("../assets/book-ink-left.svg");
-  --tx-ink-right: url("../assets/book-ink-right.svg");
+  --tx-clasp: url("../assets/book/clasp.webp");
+  --tx-cover: url("../assets/book/cover.webp");
+  --tx-desk: url("../assets/book/desk.webp");
+  --tx-edge: url("../assets/book/edge.webp");
+  --tx-page-left-tile: url("../assets/book/page-left-tile.webp");
+  --tx-page-right-tile: url("../assets/book/page-right-tile.webp");
+  --tx-ink-left: url("../assets/book/ink-left.svg");
+  --tx-ink-right: url("../assets/book/ink-right.svg");
   --tx-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .18 0 0 0 0 .07 0 0 0 .55 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
