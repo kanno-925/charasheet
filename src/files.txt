@@ -13,6 +13,7 @@ css/11-book.css
 css/12-groups.css
 css/13-icon-editor.css
 css/14-responsive.css
+css/15-ui-editor.css
 js/01-rules.js
 js/02-util.js
 js/03-state.js
@@ -40,4 +41,5 @@ js/24-sort.js
 js/25-groups.js
 js/26-select.js
 js/27-intro.js
-js/28-main.js
+js/28-ui-editor.js
+js/29-main.js

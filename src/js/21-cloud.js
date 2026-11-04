@@ -100,13 +100,14 @@ async function loadFriendships() {
 async function handleSession(session) {
   const uid = session && session.user ? session.user.id : null;
   if ((me ? me.id : null) === uid) return;
-  if (!uid) { me = null; online = null; lastSynced.clear(); setSync('off'); renderAccount(); renderOnline(); if (!$('select').hidden && selTab === 'friends') renderSelect(); return; }
+  if (!uid) { me = null; online = null; lastSynced.clear(); setSync('off'); renderAccount(); renderOnline(); ueCheckAdmin(); if (!$('select').hidden && selTab === 'friends') renderSelect(); return; }
   me = { id: uid, email: session.user.email, username: (session.user.user_metadata || {}).username || '' };
   renderAccountBtn(); renderAccount();
   try {
     const { data: prof } = await sb.from('profiles').select('username').eq('id', uid).maybeSingle();
     if (prof && prof.username) me.username = prof.username;
     renderAccountBtn(); renderAccount();
+    ueCheckAdmin();
     await pullAndMerge();
     await loadFriendships();
     await loadFriendChars();
