@@ -10,7 +10,7 @@ const THEME_PRESETS = {
   sky:    { name: '近未来', sub: '白と空色', look: '', vals: {} },
   abyss:  { name: '深淵', sub: 'ダーク・クトゥルフ', look: 'dark mincho', vals: { bg: '#0a1013', solid: '#141d21', ink: '#dbe7e2', sky: '#3fae94', cyan: '#71cfc0', amber: '#d4ae62' } },
   tome:   { name: '古書', sub: 'セピアの羊皮紙', look: 'mincho', vals: { bg: '#e6dac1', solid: '#f6efdd', ink: '#3a2817', sky: '#8a4a26', cyan: '#b07a3a', amber: '#c0562a' } },
-  sakura: { name: '和風', sub: '桜と墨', look: 'mincho', vals: { bg: '#efe3e4', solid: '#fcf7f6', ink: '#2a1c22', sky: '#b23f68', cyan: '#d98aa6', amber: '#c08a2a' } },
+  sakura: { name: '和風', sub: '和紙と墨と金、舞う桜', look: 'mincho wa', vals: { bg: '#ebdfc6', solid: '#f7efdd', ink: '#2e2520', sky: '#5a3c2c', cyan: '#b08d4a', amber: '#b08d4a' } },
   neon:   { name: 'ネオン', sub: '夜のサイバー', look: 'dark', vals: { bg: '#0b0918', solid: '#16122b', ink: '#ece8ff', sky: '#a159f5', cyan: '#22c8e8', amber: '#f2569e' } },
   book:   { name: '魔導書', sub: '古本に万年筆で書きこむ記録', look: 'dark mincho book', vals: { bg: '#140c07', solid: '#22160d', ink: '#efe0c4', sky: '#7a5a8c', cyan: '#c9a04e', amber: '#c9a04e' } },
   forest: { name: '森', sub: '深緑とランタン', look: '', vals: { bg: '#dfe7dc', solid: '#f5f8f1', ink: '#1c2a1f', sky: '#2f7d4f', cyan: '#5aa78a', amber: '#d98a1f' } },
@@ -33,6 +33,7 @@ function applyTheme() {
   Object.entries(t).forEach(([k, v]) => document.documentElement.style.setProperty('--' + k, v));
   document.documentElement.dataset.look = presetOf().look;
   applyBg();
+  waScene();
 }
 function applyBg() {
   const ac = state.chars && state.chars.find(c => c.id === state.activeId);
@@ -123,3 +124,62 @@ $('theme-reset').addEventListener('click', e => {
   state.theme = {}; applyTheme(); save(); renderThemeRows();
   fxAt(e.currentTarget, true);
 });
+
+/* ================= 和風テーマ：和紙の背景・景色・金の霞・青海波・舞い散る桜 ================= */
+const WA = { on: false, raf: 0, petals: [], sprites: null, last: 0, w: 0, h: 0, dpr: 1 };
+function waScene() {
+  const on = (presetOf().look || '').split(' ').includes('wa');
+  let el = $('wa-bg');
+  if (on && !el) {
+    el = document.createElement('div'); el.id = 'wa-bg'; el.className = 'wa-bg'; el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = '<i class="wa-sun"></i><div class="wa-scene"><i class="wa-branch"></i></div><i class="wa-cloud c1"></i><i class="wa-cloud c2"></i><i class="wa-cloud c3"></i><i class="wa-wave wl"></i><i class="wa-wave wr"></i><i class="wa-wave wg"></i><canvas class="wa-petals" id="wa-petals"></canvas>';
+    document.body.prepend(el);
+  }
+  if (el) el.hidden = !on;
+  if (on === WA.on) return;
+  WA.on = on;
+  if (on) waPetalsStart(); else cancelAnimationFrame(WA.raf);
+}
+/* 花びらの絵を3色ぶん先に描いておく（毎回描くより軽い） */
+function waSprites() {
+  const mk = (c1, c2) => {
+    const cv = document.createElement('canvas'), w = 28, h = 32; cv.width = w; cv.height = h;
+    const g = cv.getContext('2d'); g.translate(w / 2, h / 2);
+    const gr = g.createRadialGradient(0, 8, 1, 0, 0, 16); gr.addColorStop(0, c1); gr.addColorStop(1, c2);
+    g.fillStyle = gr; g.beginPath();
+    g.moveTo(0, 15); g.bezierCurveTo(13, 7, 13, -10, 4.5, -15); g.lineTo(0, -10.5); g.lineTo(-4.5, -15); g.bezierCurveTo(-13, -10, -13, 7, 0, 15);
+    g.fill(); g.strokeStyle = 'rgba(190,110,130,.35)'; g.lineWidth = .8; g.stroke();
+    return cv;
+  };
+  return [mk('#fff6f7', '#f2b8c6'), mk('#fde9ee', '#e89aae'), mk('#fffaf6', '#f6cdd3')];
+}
+function waPetalsStart() {
+  const cv = $('wa-petals'); if (!cv) return;
+  const g = cv.getContext('2d');
+  WA.sprites = WA.sprites || waSprites();
+  const size = () => { WA.dpr = Math.min(2, devicePixelRatio || 1); WA.w = innerWidth; WA.h = innerHeight; cv.width = WA.w * WA.dpr; cv.height = WA.h * WA.dpr; };
+  size(); if (!WA.sized) { WA.sized = true; addEventListener('resize', size); }
+  const n = reduceMotion.matches ? 0 : innerWidth < 760 ? 14 : 30;
+  const make = (fresh) => ({ x: Math.random() * WA.w * 1.2 - WA.w * .1, y: fresh ? Math.random() * WA.h : -30 - Math.random() * 200, s: .45 + Math.random() * .65,
+    vy: .35 + Math.random() * .55, vx: -.15 - Math.random() * .35, sw: 18 + Math.random() * 40, sp: .0006 + Math.random() * .0012, ph: Math.random() * 6.3,
+    r: Math.random() * 6.3, vr: (Math.random() - .5) * .03, fl: Math.random() * 6.3, vf: .02 + Math.random() * .04, k: Math.floor(Math.random() * 3) });
+  WA.petals = Array.from({ length: n }, () => make(true));
+  cancelAnimationFrame(WA.raf);
+  const tick = t => {
+    if (!WA.on) return;
+    WA.raf = requestAnimationFrame(tick);
+    if (document.hidden) return;
+    const dt = Math.min(50, t - (WA.last || t)) / 16.7; WA.last = t;
+    const wind = Math.sin(t * .00025) * .45 + Math.sin(t * .0011) * .15;
+    g.setTransform(WA.dpr, 0, 0, WA.dpr, 0, 0); g.clearRect(0, 0, WA.w, WA.h);
+    WA.petals.forEach((p, i) => {
+      p.y += p.vy * dt * p.s * 1.4; p.x += (p.vx + wind) * dt + Math.cos(t * p.sp + p.ph) * .35 * dt;
+      p.r += p.vr * dt; p.fl += p.vf * dt;
+      if (p.y > WA.h + 30 || p.x < -60 || p.x > WA.w + 60) WA.petals[i] = make(false);
+      const x = p.x + Math.sin(t * p.sp + p.ph) * p.sw;
+      g.save(); g.translate(x, p.y); g.rotate(p.r); g.scale(p.s * Math.max(.15, Math.abs(Math.cos(p.fl))), p.s);
+      g.globalAlpha = .85; g.drawImage(WA.sprites[p.k], -14, -16); g.restore();
+    });
+  };
+  if (n) WA.raf = requestAnimationFrame(tick); else g.clearRect(0, 0, cv.width, cv.height);
+}
