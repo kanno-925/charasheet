@@ -60,6 +60,24 @@ function listViewHtml(chars) {
     </button></li>`;
   }).join('')}</ol>`;
 }
+/* スライド表示：立ち絵を全身で横に並べ、真ん中のキャラを大きく見せる */
+function slideViewHtml(chars) {
+  const flags = c => `${c.bgm ? '<span class="sel-bgm" title="BGMあり">♪</span>' : ''}${c.locked ? '<span class="sel-lock" title="フレンドに非公開"><svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg></span>' : ''}`;
+  const card = (c, i) => {
+    const p = c.profile, src = portraitSrc(c);
+    return `<button class="sel-char sl-card" type="button" data-id="${c.id}" style="--i:${i}" aria-label="${esc(p.name || '名無し')}のシートを開く">
+      <span class="sl-body"><span class="sl-art ${src ? 'has' : ''}">${src ? `<img src="${esc(imgSrc(src))}" alt="" draggable="false" onerror="this.parentNode.classList.remove('has');this.remove()">` : ''}${tokenHtml(c)}</span>
+      <span class="sl-ground" aria-hidden="true"></span>
+      <span class="sl-name">${esc(p.name || '名無し')}${flags(c)}</span>
+      <span class="sl-sys">${esc(sortValueText(c) || [SYS[c.system].short, p.occupation].filter(Boolean).join(' ・ '))}</span></span>
+    </button>`;
+  };
+  return `<div class="sl-track" id="sl-track">
+    <button class="sl-card sl-new" type="button" id="sel-new" style="--i:0"><span class="sl-body"><span class="sl-art"><span class="sl-plus">＋</span></span><span class="sl-ground" aria-hidden="true"></span><span class="sl-name">新しい探索者</span><span class="sl-sys">NEW INVESTIGATOR</span></span></button>
+    ${chars.map((c, i) => card(c, i + 1)).join('')}
+  </div>
+  <p class="sl-hint">横にスクロールして選ぶ ・ 長押しで詳細 ・ ${canHover.matches ? 'クリック' : 'タップ'}で編集</p>`;
+}
 $('sel-sort').addEventListener('change', e => { if (e.target.id === 'sort-key') { state.sortKey = e.target.value; state.sortDesc = false; save(); renderSelect(); popSelect(); renderShelf(); } });
 $('sel-sort').addEventListener('click', e => {
   if (e.target.closest('#sort-dir')) { state.sortDesc = !state.sortDesc; save(); renderSelect(); popSelect(); renderShelf(); return; }

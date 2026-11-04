@@ -6,10 +6,17 @@ function renderSelect() {
   document.querySelectorAll('[data-seltab]').forEach(b => { const on = b.dataset.seltab === selTab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
   $('sel-eyebrow').textContent = { friends: 'FRIENDS', groups: 'GROUPS' }[selTab] || 'SELECT YOUR INVESTIGATOR';
   $('sel-title').textContent = { friends: 'フレンド一覧', groups: 'グループ' }[selTab] || '探索者をえらぶ';
-  $('sel-desc').textContent = { friends: 'フレンドを押すと、その人の公開キャラシが見られます。真ん中からフレンドを追加できます。', groups: '代表者がグループを作ってフレンドを招待し、招待された人はキーパーか探索者かを選んで参加します。キャラ名を押すとキャラシが開きます。' }[selTab] || 'キャラを押すとシートが開きます。真ん中から新しい探索者をつくれます。';
+  $('sel-desc').textContent = { friends: 'フレンドを押すと、その人の公開キャラシが見られます。真ん中からフレンドを追加できます。', groups: '代表者がグループを作ってフレンドを招待し、招待された人はキーパーか探索者かを選んで参加します。キャラ名を押すとキャラシが開きます。' }[selTab] || ((state.selView || 'orbit') === 'slide' ? 'キャラを押すとシートが開きます。いちばん左から新しい探索者をつくれます。' : 'キャラを押すとシートが開きます。真ん中から新しい探索者をつくれます。');
   renderSortBar();
   if (selTab === 'friends') { renderFriendSelect(stage); return; }
   if (selTab === 'groups') { renderGroupSelect(stage); return; }
+  if ((state.selView || 'orbit') === 'slide') {
+    stage.classList.remove('grid', 'listv'); stage.classList.add('slidev'); stage.style.height = '';
+    stage.innerHTML = slideViewHtml(sortedChars());
+    initSlide();
+    return;
+  }
+  stage.classList.remove('slidev');
   if ((state.selView || 'orbit') === 'list') {
     stage.classList.remove('grid'); stage.classList.add('listv'); stage.style.height = '';
     stage.innerHTML = listViewHtml(sortedChars());
@@ -54,6 +61,64 @@ function renderSelect() {
       ${chars.length ? '' : '<p class="sel-empty">まだ探索者がいません。真ん中を押して作りましょう。</p>'}`;
     if (rest.length) stage.insertAdjacentHTML('afterend', `<div class="sel-grid sel-rest" id="sel-rest">${rest.map((c, i) => charBtn(c, idx + i)).join('')}</div>`);
   }
+}
+/* ---- スライド表示の動き ---- */
+let slideRaf = 0;
+function slideUpdate() {
+  const tr = $('sl-track'); if (!tr) return;
+  const mid = tr.scrollLeft + tr.clientWidth / 2;
+  tr.querySelectorAll('.sl-card').forEach(el => {
+    const d = (el.offsetLeft + el.offsetWidth / 2 - mid) / el.offsetWidth, ad = Math.min(2.5, Math.abs(d));
+    el.style.setProperty('--d', Math.max(-2.5, Math.min(2.5, d)).toFixed(3));
+    el.style.setProperty('--ad', ad.toFixed(3));
+    el.style.zIndex = String(100 - Math.round(ad * 10));
+    el.classList.toggle('center', Math.abs(d) < .5);
+  });
+}
+function slideTo(tr, el, smooth) {
+  tr.scrollTo({ left: el.offsetLeft + el.offsetWidth / 2 - tr.clientWidth / 2, behavior: smooth && !reduceMotion.matches ? 'smooth' : 'auto' });
+}
+function initSlide() {
+  const tr = $('sl-track'); if (!tr) return;
+  const start = [...tr.querySelectorAll('.sel-char')].find(x => x.dataset.id === state.activeId) || tr.querySelector('.sel-char') || tr.querySelector('.sl-card');
+  if (start) slideTo(tr, start, false);
+  slideUpdate();
+  tr.addEventListener('scroll', () => { cancelAnimationFrame(slideRaf); slideRaf = requestAnimationFrame(slideUpdate); }, { passive: true });
+  // マウスのホイール・ドラッグでも横に流し、止まったら一番近いキャラを真ん中に寄せる
+  let snapT = null;
+  const settle = () => {
+    clearTimeout(snapT);
+    snapT = setTimeout(() => {
+      const mid = tr.scrollLeft + tr.clientWidth / 2;
+      let best = null, bd = Infinity;
+      tr.querySelectorAll('.sl-card').forEach(el => { const dd = Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid); if (dd < bd) { bd = dd; best = el; } });
+      if (best) slideTo(tr, best, true);
+      setTimeout(() => tr.classList.remove('free'), 600);
+    }, 160);
+  };
+  tr.addEventListener('wheel', e => {
+    const dl = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (!dl) return;
+    e.preventDefault(); hidePeek(); clearTimeout(selPress);
+    tr.classList.add('free'); tr.scrollLeft += dl; settle();
+  }, { passive: false });
+  let drag = null;
+  tr.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse' && e.button === 0) drag = { x: e.clientX, s: tr.scrollLeft, id: e.pointerId, moved: false }; });
+  tr.addEventListener('pointermove', e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x;
+    if (!drag.moved && Math.abs(dx) > 6) { drag.moved = true; clearTimeout(selPress); hidePeek(); tr.classList.add('free', 'dragging'); tr.setPointerCapture(e.pointerId); }
+    if (drag.moved) tr.scrollLeft = drag.s - dx;
+  });
+  const end = () => { if (drag && drag.moved) { selLong = true; tr.classList.remove('dragging'); settle(); } drag = null; };
+  tr.addEventListener('pointerup', end); tr.addEventListener('pointercancel', end);
+  tr.addEventListener('focusin', e => { const c = e.target.closest('.sl-card'); if (c && !c.classList.contains('center')) slideTo(tr, c, true); });
+  tr.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    const cards = [...tr.querySelectorAll('.sl-card')], i = cards.findIndex(c => c.classList.contains('center'));
+    const n = cards[Math.max(0, Math.min(cards.length - 1, i + (e.key === 'ArrowRight' ? 1 : -1)))];
+    if (n) { e.preventDefault(); n.focus({ preventScroll: true }); slideTo(tr, n, true); }
+  });
 }
 function popSelect() {
   if (reduceMotion.matches) return;
@@ -121,15 +186,15 @@ $('select').addEventListener('click', e => {
 });
 $('select').addEventListener('pointerover', e => {
   if (!canHover.matches) return;
-  const ch = e.target.closest('.sel-char:not(.sel-friend), .sel-row');
+  const ch = e.target.closest('.sel-char:not(.sel-friend):not(.sl-card), .sel-row');
   if (ch && ch.dataset.id !== peekId) showPeek(ch);
   if (!ch && peekId) hidePeek();
 });
 $('select').addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') hidePeek(); });
 $('select').addEventListener('scroll', hidePeek, { passive: true });
 $('select').addEventListener('pointerdown', e => {
-  if (e.pointerType === 'mouse') return;
   const ch = e.target.closest('.sel-char'); if (!ch) return;
+  if (e.pointerType === 'mouse' && (e.button !== 0 || !ch.classList.contains('sl-card'))) return; // スライドはマウスでも長押しで詳細
   selLong = false; clearTimeout(selPress);
   selPress = setTimeout(() => { selLong = true; showPeek(ch); if (navigator.vibrate) navigator.vibrate(10); }, 450);
 });
