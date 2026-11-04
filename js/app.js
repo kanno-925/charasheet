@@ -1340,62 +1340,72 @@ function flipLeaves(fromIdx, toIdx, count) {
    ② 閉じた表紙の魔法陣が金色に光り、行き先（探索者の名前／探索者名簿）が浮かぶ … この間に画面を入れかえる（mid）
    ③ 表紙がひらき、つづけて紙が数枚めくれて、新しい画面があらわれる */
 let bookCoverBusy = false;
+/* iPhone（Safari）でも乱れないための決まり：
+   ・明るさは filter ではなく、黒い板の濃さ（opacity）で変える（filter つきの3D回転はちらつく・カクつく）
+   ・魔法陣の光は SVG の filter や mix-blend-mode を使わず、太い線を重ねて描く（3Dの中で使うと黒い四角やにじみが出る）
+   ・題名は文字間隔やぼかしを動かさない（毎コマ文字の並べ直しが起きて、がたつく）
+   ・重い画面の入れかえ（mid）は表紙が閉じて止まっている間に先に済ませ、そのあとで光らせる
+   ・タッチの端末は紙を2枚にして、重ねる大きな層を減らす */
 function bookCover(mid) {
   if (reduceMotion.matches || bookCoverBusy) { mid(); return; }
   bookCoverBusy = true;
+  const nLeaf = canHover.matches ? 3 : 2;
   const ov = document.createElement('div'); ov.className = 'bk-trans'; ov.setAttribute('aria-hidden', 'true');
-  const ring = (r, cls = '') => `<circle class="${cls}" cx="100" cy="100" r="${r}"/>`;
-  ov.innerHTML = `<i class="bt-leaf"></i><i class="bt-leaf"></i><i class="bt-leaf"></i>
+  const shapes = '<circle cx="100" cy="100" r="96"/><circle class="th" cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="77"/><polygon points="100.0,24.0 144.7,161.5 27.7,76.5 172.3,76.5 55.3,161.5"/><circle class="th" cx="100" cy="100" r="21"/>';
+  ov.innerHTML = '<i class="bt-dim"></i>' + '<i class="bt-leaf"><b class="bt-ls"></b></i>'.repeat(nLeaf) + `
     <div class="bt-cover"><i class="bt-frame"></i><i class="bt-glow"></i>
-      <svg class="bt-seal" viewBox="0 0 200 200">${ring(96)}${ring(90, 'th')}${ring(77)}<polygon points="100.0,24.0 144.7,161.5 27.7,76.5 172.3,76.5 55.3,161.5"/>${ring(21, 'th')}</svg>
+      <svg class="bt-seal" viewBox="0 0 200 200"><g class="h2">${shapes}</g><g class="h1">${shapes}</g><g class="core">${shapes}</g></svg>
       <div class="bt-title"><span class="bt-kick"></span><b class="bt-name"></b></div><i class="bt-shade"></i></div>`;
   document.body.appendChild(ov);
-  const cover = ov.querySelector('.bt-cover'), shade = ov.querySelector('.bt-shade'), leaves = [...ov.querySelectorAll('.bt-leaf')].reverse(); // 上の紙からめくる
+  const cover = ov.querySelector('.bt-cover'), shade = ov.querySelector('.bt-shade'), dim = ov.querySelector('.bt-dim');
+  const leaves = [...ov.querySelectorAll('.bt-leaf')].reverse(); // 上の紙からめくる
   // 光る魔法陣を、表紙の絵に彫られた魔法陣に重ねる（表紙の絵は 760×980 で、魔法陣の半径はおよそ 255）
   ov.style.setProperty('--seal', Math.round(531 * Math.max(innerWidth / 760, innerHeight / 980)) + 'px');
-  ov.querySelectorAll('.bt-seal > *').forEach(el => { const len = el.getTotalLength ? el.getTotalLength() : 600; el.style.strokeDasharray = len; el.style.strokeDashoffset = len; el.dataset.len = len; });
+  const lines = [...ov.querySelectorAll('.bt-seal g > *')];
+  lines.forEach(el => { const len = Math.ceil(el.getTotalLength ? el.getTotalLength() : 620) + 2; el.style.strokeDasharray = `${len} ${len}`; el.style.strokeDashoffset = len; el.dataset.len = len; });
   const P = `perspective(${Math.round(Math.max(innerWidth, innerHeight) * 2.4)}px)`;
-  const turn = (deg, z = 0) => `${P} rotateY(${deg}deg) translateZ(${z}px)`;
+  const turn = deg => `${P} rotateY(${deg}deg)`;
   const finish = () => { ov.remove(); bookCoverBusy = false; };
+  const fail = () => { finish(); };
   // ① 閉じる
   sfxFlip(120, 420);
   sfxThud(430);
-  ov.animate([{ backgroundColor: 'rgb(8 4 2 / 0)' }, { backgroundColor: 'rgb(8 4 2 / .85)' }], { duration: 460, easing: 'ease-in', fill: 'forwards' });
-  shade.animate([{ opacity: .95 }, { opacity: 0 }], { duration: 470, easing: 'cubic-bezier(.6, 0, .9, .5)', fill: 'forwards' });
-  cover.animate([
-    { transform: turn(-89.5, 30) },
-    { transform: turn(-40, 18), offset: .55 },
-    { transform: turn(0) },
-  ], { duration: 470, easing: 'cubic-bezier(.55, 0, .85, .4)', fill: 'forwards' }).finished.then(() => {
+  dim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'ease-in', fill: 'forwards' });
+  shade.animate([{ opacity: .9 }, { opacity: 0 }], { duration: 470, easing: 'cubic-bezier(.6, 0, .9, .5)', fill: 'forwards' });
+  cover.animate([{ transform: turn(-89) }, { transform: turn(-40), offset: .55 }, { transform: turn(0) }],
+    { duration: 470, easing: 'cubic-bezier(.55, 0, .85, .4)', fill: 'forwards' }).finished.then(() => {
     // 閉じた衝撃で、表紙が少しだけ沈む
-    cover.animate([{ transform: turn(0) + ' scale(1)' }, { transform: turn(0) + ' scale(.985)' }, { transform: turn(0) + ' scale(1)' }], { duration: 260, easing: 'ease-out' });
+    cover.animate([{ transform: turn(0) + ' scale(1)' }, { transform: turn(0) + ' scale(.988)' }, { transform: turn(0) + ' scale(1)' }], { duration: 240, easing: 'ease-out' });
     try { mid(); } catch (e) { console.error(e); }
-    // ② 行き先の名前を浮かべ、魔法陣を光らせる
     const sel = !$('select').hidden, c = active();
     ov.querySelector('.bt-kick').textContent = sel ? 'Liber Investigatorum' : 'Grimoire of';
     ov.querySelector('.bt-name').textContent = sel ? '探索者名簿' : (c?.profile.name || '名無しの探索者');
     leaves.forEach(l => { l.style.visibility = 'visible'; });
-    ov.querySelectorAll('.bt-seal > *').forEach((el, i) => el.animate([{ strokeDashoffset: el.dataset.len, opacity: .3 }, { strokeDashoffset: 0, opacity: 1 }], { duration: 560, delay: i * 50, easing: 'cubic-bezier(.4, 0, .2, 1)', fill: 'both' }));
-    ov.querySelector('.bt-glow').animate([{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'scale(1)', offset: .5 }, { opacity: .55, transform: 'scale(1.08)' }], { duration: 760, easing: 'ease-out', fill: 'both' });
-    ov.querySelector('.bt-title').animate([{ opacity: 0, letterSpacing: '.5em', filter: 'blur(3px)' }, { opacity: 1, letterSpacing: '.18em', filter: 'blur(0)' }], { duration: 620, delay: 120, easing: 'cubic-bezier(.2, .7, .2, 1)', fill: 'both' });
-    setTimeout(() => {
-      // ③ 表紙をひらき、紙をめくる
-      ov.animate([{ backgroundColor: 'rgb(8 4 2 / .85)' }, { backgroundColor: 'rgb(8 4 2 / 0)' }], { duration: 900, delay: 300, easing: 'ease-out', fill: 'forwards' });
-      const dur = 760, gap = 120, wait = 240;
-      sfxFlip(0, dur + leaves.length * gap + wait, leaves.length + 1, gap);
-      const open = [cover.animate([
-        { transform: turn(0), filter: 'brightness(1)' },
-        { transform: turn(-28, 14), filter: 'brightness(1.08)', offset: .3 },
-        { transform: turn(-89.5, 30), filter: 'brightness(.55)' },
-      ], { duration: dur, easing: 'cubic-bezier(.45, .05, .55, .95)', fill: 'forwards' })];
-      leaves.forEach((l, i) => open.push(l.animate([
-        { transform: turn(0), filter: 'brightness(1)' },
-        { transform: turn(-35, 10), filter: 'brightness(.95)', offset: .35 },
-        { transform: turn(-89.5, 20), filter: 'brightness(.6)' },
-      ], { duration: dur - 120, delay: wait + i * gap, easing: 'cubic-bezier(.42, .02, .45, 1)', fill: 'both' })));
-      Promise.all(open.map(a => a.finished)).then(finish, finish);
-    }, 680);
-  }, finish);
+    // 画面の入れかえが描き終わってから光らせる（入れかえ中に光を動かすと、iPhone ではそこで止まって見える）
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      // ② 魔法陣が光り、行き先の名前が浮かぶ
+      lines.forEach((el, i) => el.animate([{ strokeDashoffset: el.dataset.len }, { strokeDashoffset: 0 }], { duration: 560, delay: (i % 5) * 50, easing: 'cubic-bezier(.4, 0, .2, 1)', fill: 'both' }));
+      ov.querySelector('.bt-seal').animate([{ opacity: .4 }, { opacity: 1 }], { duration: 400, fill: 'both' });
+      ov.querySelector('.bt-glow').animate([{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'scale(1)', offset: .5 }, { opacity: .6, transform: 'scale(1.06)' }], { duration: 760, easing: 'ease-out', fill: 'both' });
+      ov.querySelector('.bt-title').animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 520, delay: 140, easing: 'cubic-bezier(.2, .7, .2, 1)', fill: 'both' });
+      setTimeout(() => {
+        // ③ 表紙をひらき、紙をめくる
+        dim.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 800, delay: 300, easing: 'ease-out', fill: 'forwards' });
+        const dur = 760, gap = 130, wait = 240, ease = 'cubic-bezier(.45, .05, .55, .95)';
+        sfxFlip(0, dur + nLeaf * gap + wait, nLeaf + 1, gap);
+        const open = [
+          cover.animate([{ transform: turn(0) }, { transform: turn(-28), offset: .3 }, { transform: turn(-89) }], { duration: dur, easing: ease, fill: 'forwards' }),
+          shade.animate([{ opacity: 0 }, { opacity: 0, offset: .3 }, { opacity: .55 }], { duration: dur, easing: ease, fill: 'forwards' }),
+        ];
+        leaves.forEach((l, i) => {
+          const o = { duration: dur - 120, delay: wait + i * gap, easing: 'cubic-bezier(.42, .02, .45, 1)', fill: 'both' };
+          open.push(l.animate([{ transform: turn(0) }, { transform: turn(-35), offset: .35 }, { transform: turn(-89) }], o));
+          open.push(l.firstChild.animate([{ opacity: 0 }, { opacity: .1, offset: .35 }, { opacity: .5 }], o));
+        });
+        Promise.all(open.map(a => a.finished)).then(finish, fail);
+      }, 680);
+    }));
+  }, fail);
 }
 function setBookTab(key) {
   if (!SECTIONS.some(x => x.key === key)) key = 'profile';

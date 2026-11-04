@@ -267,33 +267,40 @@
   background: linear-gradient(to right, rgb(0 0 0 / .42), rgb(0 0 0 / .14) 38%, transparent 70%); border-radius: 0 8px 8px 0; opacity: 0; }
 
 /* --- 画面の切りかえ：革の表紙が閉じて、魔法陣が光り、表紙と紙がめくれてひらく（09-book.js の bookCover） --- */
-.bk-trans { position: fixed; inset: 0; z-index: 200; overflow: hidden; background-color: rgb(8 4 2 / 0); }
+.bk-trans { position: fixed; left: 0; top: 0; z-index: 200; width: 100vw; height: 100vh; height: 100lvh; overflow: hidden;
+  transform: translateZ(0); }   /* 1枚の層にまとめる：iPhone で、下の画面の3Dの部品が上に透けて出るのを防ぐ */
+.bt-dim { position: absolute; inset: 0; background: rgb(8 4 2 / .85); opacity: 0; }
 .bt-cover, .bt-leaf { position: absolute; transform-origin: left center; will-change: transform; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
-.bt-cover { inset: 0; transform: perspective(2400px) rotateY(-89.5deg); overflow: hidden;
+.bt-cover { inset: 0; transform: perspective(2400px) rotateY(-89deg); overflow: hidden;
   background: linear-gradient(to right, rgb(0 0 0 / .7), rgb(0 0 0 / .2) 3%, transparent 7%), radial-gradient(ellipse at 50% 50%, transparent 38%, rgb(0 0 0 / .6) 100%),
     var(--tx-cover) center / cover, #2a1c12;
   box-shadow: inset 0 0 0 1px rgb(214 168 92 / .3), inset 0 0 60px rgb(0 0 0 / .6); }
 .bt-frame { position: absolute; inset: 14px 14px 14px 26px; border: 1.5px solid rgb(201 160 84 / .6); border-radius: 4px 10px 10px 4px; pointer-events: none;
   box-shadow: inset 0 0 0 4px transparent, inset 0 0 0 5px rgb(201 160 84 / .25); }
-.bt-glow { position: absolute; left: 50%; top: 50%; width: var(--seal, 60vmin); aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; opacity: 0; pointer-events: none; mix-blend-mode: screen;
-  background: radial-gradient(circle, rgb(200 140 255 / .6), rgb(150 90 230 / .28) 22%, rgb(235 185 95 / .14) 46%, transparent 68%); }
-.bt-seal { position: absolute; left: 50%; top: 50%; width: var(--seal, 60vmin); translate: -50% -50%; overflow: visible; pointer-events: none;
-  fill: none; stroke: #f6d688; stroke-width: 1.1; stroke-linejoin: round;
-  filter: drop-shadow(0 0 2px rgb(255 214 130 / .95)) drop-shadow(0 0 10px rgb(255 190 90 / .6)) drop-shadow(0 0 22px rgb(180 110 255 / .55)); }
-.bt-seal > * { opacity: 0; }
-.bt-seal .th { stroke-width: .6; }
-.bt-title { position: absolute; left: 50%; bottom: 8%; translate: -50% 0; min-width: min(80vw, 420px); max-width: 90vw; padding: 10px 34px 14px; text-align: center; opacity: 0; letter-spacing: .18em;
-  background: linear-gradient(rgb(30 17 8 / .86), rgb(16 9 4 / .92)); border: 1px solid rgb(214 168 92 / .75); border-radius: 3px;
+.bt-glow { position: absolute; left: 50%; top: 50%; width: var(--seal, 60vmin); height: var(--seal, 60vmin); margin: calc(var(--seal, 60vmin) / -2) 0 0 calc(var(--seal, 60vmin) / -2);
+  border-radius: 50%; opacity: 0; pointer-events: none;
+  background: radial-gradient(circle, rgb(200 140 255 / .5), rgb(150 90 230 / .24) 22%, rgb(235 185 95 / .12) 46%, transparent 68%); }
+.bt-seal { position: absolute; left: 50%; top: 50%; width: var(--seal, 60vmin); height: var(--seal, 60vmin); margin: calc(var(--seal, 60vmin) / -2) 0 0 calc(var(--seal, 60vmin) / -2);
+  overflow: visible; pointer-events: none; opacity: 0; fill: none; stroke-linejoin: round; stroke-linecap: round; }
+/* 光は filter を使わず、太くて薄い線を下に重ねて表す */
+.bt-seal .h2 { stroke: rgb(185 120 255 / .22); stroke-width: 9; }
+.bt-seal .h1 { stroke: rgb(255 196 110 / .4); stroke-width: 3.6; }
+.bt-seal .core { stroke: #fff0c2; stroke-width: 1.1; }
+.bt-seal .h2 .th { stroke-width: 6; } .bt-seal .h1 .th { stroke-width: 2.4; } .bt-seal .core .th { stroke-width: .6; }
+.bt-title { position: absolute; left: 0; right: 0; bottom: 8%; margin: 0 auto; width: max-content; min-width: min(80vw, 420px); max-width: 90vw; box-sizing: border-box;
+  padding: 10px 34px 14px; text-align: center; opacity: 0; letter-spacing: .18em;
+  background: linear-gradient(rgb(30 17 8 / .9), rgb(16 9 4 / .94)); border: 1px solid rgb(214 168 92 / .75); border-radius: 3px;
   outline: 1px solid rgb(214 168 92 / .3); outline-offset: 4px; box-shadow: 0 14px 34px rgb(0 0 0 / .65); }
 .bt-kick { display: block; font-family: "Pinyon Script", "Shippori Mincho B1", cursive; font-size: 19px; color: #d9b46a; }
 .bt-name { display: block; margin-top: 2px; font-family: "Shippori Mincho B1", "Hiragino Mincho ProN", serif; font-weight: 700; font-size: clamp(22px, 4.6vw, 38px); line-height: 1.3; overflow-wrap: anywhere;
-  background: linear-gradient(#fff3cc, #e2b45a 55%, #93662a); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 1px 0 rgb(0 0 0 / .85)); }
+  color: #f0cf82; text-shadow: 0 1px 0 rgb(0 0 0 / .9), 0 0 12px rgb(240 190 100 / .35); }
 .bt-shade { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; }
 /* 表紙の下の紙：インクの書きこみがある古い頁 */
 .bt-leaf { top: 1.2%; bottom: 1.2%; left: 0; right: .8%; visibility: hidden; border-radius: 0 6px 6px 0; background-color: #d3b480;
   background-image: linear-gradient(rgb(232 210 168 / .35), rgb(232 210 168 / .35)), linear-gradient(to right, rgb(50 25 6 / .55), transparent 60px), var(--tx-ink-right), var(--tx-page-right-tile);
   background-size: auto, auto, 100% auto, 100% auto; background-repeat: no-repeat, no-repeat, repeat-y, repeat-y;
-  box-shadow: inset 0 0 80px rgb(80 38 8 / .5), 3px 0 0 #b89464, 5px 0 0 #8f6e44, -8px 0 26px rgb(0 0 0 / .35); }
+  box-shadow: inset 0 0 80px rgb(80 38 8 / .5), 3px 0 0 #b89464, 5px 0 0 #8f6e44; }
+.bt-ls { position: absolute; inset: 0; background: #1a0d04; opacity: 0; border-radius: inherit; }
 
 /* --- seen from slightly below on wide screens --- */
 @media (min-width: 901px) {
