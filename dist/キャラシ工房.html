@@ -1054,6 +1054,22 @@ label.btn { display: inline-block; }
 .bk-left::before, .bk-flip .lf.back::before { background: var(--tx-ink-left) 0 0 / 100% auto repeat-y, var(--tx-grain) 0 0 / 220px 220px; }
 .bk-right > * { position: relative; z-index: 1; }
 .bk-left > :not(.bk-circle) { position: relative; z-index: 1; }
+.bk-page > .bk-folio { position: absolute; z-index: 2; }
+.bk-scroll { position: relative; z-index: 1; min-width: 0; }
+.bk-left > .bk-scroll { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
+/* wide screens: each page is one sheet tall (the paper image's proportion); long entries scroll inside the page */
+@media (min-width: 901px) {
+  .bk-page { aspect-ratio: 4 / 5; max-height: calc(100vh - 150px); min-height: 460px; }
+  .bk-left, .bk-right { padding: 0; min-height: 0; }
+  .bk-pages .bk-page > .bk-scroll { position: absolute; inset: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+    scrollbar-width: thin; scrollbar-color: rgb(90 50 20 / .55) transparent;
+    -webkit-mask-image: linear-gradient(transparent, #000 22px, #000 calc(100% - 60px), transparent calc(100% - 30px)); mask-image: linear-gradient(transparent, #000 22px, #000 calc(100% - 60px), transparent calc(100% - 30px)); }
+  .bk-left > .bk-scroll { padding: 30px 30px 64px 34px; }
+  .bk-pages .bk-right > .bk-scroll { right: 12px; padding: 34px 26px 64px 38px; }
+  .bk-scroll::-webkit-scrollbar { width: 7px; }
+  .bk-scroll::-webkit-scrollbar-thumb { background: rgb(90 50 20 / .45); border-radius: 4px; }
+  .bk-scroll::-webkit-scrollbar-track { background: transparent; }
+}
 .bk-circle { display: none; }
 .bk-stain { position: absolute; z-index: 0; pointer-events: none; width: 210px; height: 150px; right: 6%; bottom: 9%; border-radius: 48% 52% 40% 60% / 55% 45% 55% 45%;
   background: radial-gradient(ellipse at 45% 50%, rgb(120 70 25 / .2), rgb(120 70 25 / .07) 60%, transparent 72%); box-shadow: inset 0 0 0 2px rgb(110 60 20 / .12); rotate: -14deg; }
@@ -1236,6 +1252,9 @@ label.btn { display: inline-block; }
 @media (min-width: 901px) {
   .bk-cover { container: bkcover / inline-size; }
   @container bkcover (max-width: 500px) {
+    .bk-page { aspect-ratio: auto; max-height: none; min-height: 0; }
+    .bk-pages .bk-page > .bk-scroll { position: relative; inset: auto; right: auto; overflow: visible; padding: 0; -webkit-mask-image: none; mask-image: none; }
+    .bk-left > .bk-scroll { align-items: stretch; text-align: left; }
     .bk-pages { grid-template-columns: minmax(0, 1fr); }
     .bk-pages::before, .bk-pages::after { display: none; }
     .bk-left, .bk-right { clip-path: polygon(0.00% 7.1px, 3.57% 8.2px, 7.14% 3.2px, 10.71% 6.2px, 14.29% 8.1px, 17.86% 7.8px, 21.43% 3.8px, 25.00% 7.1px, 28.57% 7.8px, 32.14% 5.2px, 35.71% 5.6px, 39.29% 3.4px, 42.86% 5.2px, 46.43% 5.5px, 50.00% 0.7px, 53.57% 5.8px, 57.14% 8.9px, 60.71% 7.9px, 64.29% 6.6px, 67.86% 3.5px, 71.43% 6.6px, 75.00% 5.2px, 78.57% 4.0px, 82.14% 7.5px, 85.71% 0.8px, 89.29% 6.8px, 92.86% 0.3px, 96.43% 5.4px, 100.00% 4.3px, calc(100% - 2.1px) 3.57%, calc(100% - 6.3px) 7.14%, calc(100% - 4.5px) 10.71%, calc(100% - 5.5px) 14.29%, calc(100% - 8.3px) 17.86%, calc(100% - 2.3px) 21.43%, calc(100% - 0.1px) 25.00%, calc(100% - 2.7px) 28.57%, calc(100% - 6.1px) 32.14%, calc(100% - 1.8px) 35.71%, calc(100% - 1.5px) 39.29%, calc(100% - 8.2px) 42.86%, calc(100% - 5.9px) 46.43%, calc(100% - 4.0px) 50.00%, calc(100% - 8.0px) 53.57%, calc(100% - 2.9px) 57.14%, calc(100% - 6.0px) 60.71%, calc(100% - 1.8px) 64.29%, calc(100% - 3.9px) 67.86%, calc(100% - 7.3px) 71.43%, calc(100% - 8.2px) 75.00%, calc(100% - 7.9px) 78.57%, calc(100% - 3.5px) 82.14%, calc(100% - 5.2px) 85.71%, calc(100% - 2.8px) 89.29%, calc(100% - 1.2px) 92.86%, calc(100% - 4.5px) 96.43%, 100.00% calc(100% - 7.5px), 96.43% calc(100% - 7.6px), 92.86% calc(100% - 6.4px), 89.29% calc(100% - 8.6px), 85.71% calc(100% - 2.5px), 82.14% calc(100% - 1.5px), 78.57% calc(100% - 4.1px), 75.00% calc(100% - 2.5px), 71.43% calc(100% - 1.9px), 67.86% calc(100% - 3.7px), 64.29% calc(100% - 5.6px), 60.71% calc(100% - 4.4px), 57.14% calc(100% - 2.8px), 53.57% calc(100% - 7.6px), 50.00% calc(100% - 8.8px), 46.43% calc(100% - 4.1px), 42.86% calc(100% - 0.7px), 39.29% calc(100% - 0.3px), 35.71% calc(100% - 7.9px), 32.14% calc(100% - 0.4px), 28.57% calc(100% - 6.4px), 25.00% calc(100% - 5.1px), 21.43% calc(100% - 2.8px), 17.86% calc(100% - 7.1px), 14.29% calc(100% - 0.2px), 10.71% calc(100% - 1.2px), 7.14% calc(100% - 4.1px), 3.57% calc(100% - 0.2px), 0.00% calc(100% - 7.5px), 2.1px 96.43%, 1.3px 92.86%, 0.4px 89.29%, 5.7px 85.71%, 4.0px 82.14%, 5.7px 78.57%, 5.9px 75.00%, 7.3px 71.43%, 8.6px 67.86%, 6.2px 64.29%, 1.8px 60.71%, 4.3px 57.14%, 1.6px 53.57%, 0.1px 50.00%, 4.2px 46.43%, 6.4px 42.86%, 1.6px 39.29%, 2.5px 35.71%, 3.1px 32.14%, 6.3px 28.57%, 4.7px 25.00%, 5.5px 21.43%, 6.8px 17.86%, 3.5px 14.29%, 7.1px 10.71%, 8.2px 7.14%, 0.8px 3.57%); }
@@ -1259,6 +1278,7 @@ label.btn { display: inline-block; }
   .bk-pages { grid-template-columns: minmax(0, 1fr); border-radius: 3px; }
   .bk-pages::before, .bk-pages::after { display: none; }
   .bk-left, .bk-right { clip-path: polygon(0.00% 7.1px, 3.57% 8.2px, 7.14% 3.2px, 10.71% 6.2px, 14.29% 8.1px, 17.86% 7.8px, 21.43% 3.8px, 25.00% 7.1px, 28.57% 7.8px, 32.14% 5.2px, 35.71% 5.6px, 39.29% 3.4px, 42.86% 5.2px, 46.43% 5.5px, 50.00% 0.7px, 53.57% 5.8px, 57.14% 8.9px, 60.71% 7.9px, 64.29% 6.6px, 67.86% 3.5px, 71.43% 6.6px, 75.00% 5.2px, 78.57% 4.0px, 82.14% 7.5px, 85.71% 0.8px, 89.29% 6.8px, 92.86% 0.3px, 96.43% 5.4px, 100.00% 4.3px, calc(100% - 2.1px) 3.57%, calc(100% - 6.3px) 7.14%, calc(100% - 4.5px) 10.71%, calc(100% - 5.5px) 14.29%, calc(100% - 8.3px) 17.86%, calc(100% - 2.3px) 21.43%, calc(100% - 0.1px) 25.00%, calc(100% - 2.7px) 28.57%, calc(100% - 6.1px) 32.14%, calc(100% - 1.8px) 35.71%, calc(100% - 1.5px) 39.29%, calc(100% - 8.2px) 42.86%, calc(100% - 5.9px) 46.43%, calc(100% - 4.0px) 50.00%, calc(100% - 8.0px) 53.57%, calc(100% - 2.9px) 57.14%, calc(100% - 6.0px) 60.71%, calc(100% - 1.8px) 64.29%, calc(100% - 3.9px) 67.86%, calc(100% - 7.3px) 71.43%, calc(100% - 8.2px) 75.00%, calc(100% - 7.9px) 78.57%, calc(100% - 3.5px) 82.14%, calc(100% - 5.2px) 85.71%, calc(100% - 2.8px) 89.29%, calc(100% - 1.2px) 92.86%, calc(100% - 4.5px) 96.43%, 100.00% calc(100% - 7.5px), 96.43% calc(100% - 7.6px), 92.86% calc(100% - 6.4px), 89.29% calc(100% - 8.6px), 85.71% calc(100% - 2.5px), 82.14% calc(100% - 1.5px), 78.57% calc(100% - 4.1px), 75.00% calc(100% - 2.5px), 71.43% calc(100% - 1.9px), 67.86% calc(100% - 3.7px), 64.29% calc(100% - 5.6px), 60.71% calc(100% - 4.4px), 57.14% calc(100% - 2.8px), 53.57% calc(100% - 7.6px), 50.00% calc(100% - 8.8px), 46.43% calc(100% - 4.1px), 42.86% calc(100% - 0.7px), 39.29% calc(100% - 0.3px), 35.71% calc(100% - 7.9px), 32.14% calc(100% - 0.4px), 28.57% calc(100% - 6.4px), 25.00% calc(100% - 5.1px), 21.43% calc(100% - 2.8px), 17.86% calc(100% - 7.1px), 14.29% calc(100% - 0.2px), 10.71% calc(100% - 1.2px), 7.14% calc(100% - 4.1px), 3.57% calc(100% - 0.2px), 0.00% calc(100% - 7.5px), 2.1px 96.43%, 1.3px 92.86%, 0.4px 89.29%, 5.7px 85.71%, 4.0px 82.14%, 5.7px 78.57%, 5.9px 75.00%, 7.3px 71.43%, 8.6px 67.86%, 6.2px 64.29%, 1.8px 60.71%, 4.3px 57.14%, 1.6px 53.57%, 0.1px 50.00%, 4.2px 46.43%, 6.4px 42.86%, 1.6px 39.29%, 2.5px 35.71%, 3.1px 32.14%, 6.3px 28.57%, 4.7px 25.00%, 5.5px 21.43%, 6.8px 17.86%, 3.5px 14.29%, 7.1px 10.71%, 8.2px 7.14%, 0.8px 3.57%); }
+  .bk-left > .bk-scroll { align-items: stretch; text-align: left; }
   .bk-left { padding: 22px 18px 44px; display: flex; flex-direction: column; align-items: stretch; text-align: left; border-radius: 3px 3px 0 0;
     background-image: linear-gradient(rgb(232 210 168 / .6), rgb(232 210 168 / .6)), linear-gradient(to top, rgb(60 30 8 / .35), transparent 30px), var(--tx-page-left-tile); background-size: auto, auto, 160% auto; }
   .bk-right { padding: 24px 18px 48px; border-radius: 0 0 6px 6px; min-height: 0;
@@ -2674,6 +2694,7 @@ function bookHtml(c) {
         <div class="bk-page bk-left">
           <svg class="bk-circle" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="96"/><circle cx="100" cy="100" r="88" class="d"/><circle cx="100" cy="100" r="62"/><polygon points="100,12 176,144 24,144"/><polygon points="100,188 24,56 176,56"/><circle cx="100" cy="100" r="30" class="d"/><text x="100" y="9" text-anchor="middle">ᚠ</text><text x="191" y="104" text-anchor="middle">ᚱ</text><text x="100" y="199" text-anchor="middle">ᚲ</text><text x="9" y="104" text-anchor="middle">ᚷ</text></svg>
           <span class="bk-stain l" aria-hidden="true"></span>
+          <div class="bk-scroll">
           <div class="bk-owner">
             <button class="bk-portrait ${src ? 'has' : ''}" type="button" data-stage aria-label="立ち絵を表示">${src ? `<img src="${esc(imgSrc(src))}" alt="" onerror="this.remove()">` : tokenHtml(c)}<span class="tape" aria-hidden="true"></span></button>
             <div class="bk-owner-t">
@@ -2687,13 +2708,16 @@ function bookHtml(c) {
           <div class="bk-chapter"><span class="bk-en">第${kn(idx)}章</span><h3>${sec.jp}</h3></div>
           <ol class="bk-tocs">${toc}</ol>
           ${add ? `<button class="bk-add" type="button" data-act="${add[0]}">＋ ${add[1]}</button>` : ''}
+          </div>
           <p class="bk-folio">${idx * 20 + 12}</p>
         </div>
         <span class="bk-ribbon" aria-hidden="true"></span>
         <div class="bk-page bk-right" id="bk-right">
           <span class="bk-stain" aria-hidden="true"></span>
+          <div class="bk-scroll" id="bk-scroll">
           <div class="bk-head"><span class="bk-en">第${kn(idx)}章 ・ ${kn(curNo)}</span><h3><span class="bk-ht">${cur ? esc(cur.label) : sec.jp}</span></h3></div>
           <div class="bk-body">${body}</div>
+          </div>
           <p class="bk-folio">${idx * 20 + curNo * 2 + 13}</p>
         </div>
       </div>
@@ -2805,7 +2829,11 @@ function renderSheet() {
   const book = isBook();
   $('sheet').classList.toggle('is-book', book);
   if (book) sfxPreload();
+  // 書き直しても、同じ頁なら読んでいた位置（頁の中のスクロール）を保つ
+  const pageAt = () => ['.bk-chapter h3', '#bk-right .bk-head h3'].map(q => document.querySelector(q)?.textContent);
+  const was = book ? pageAt() : [], kept = book ? [...document.querySelectorAll('#book .bk-scroll')].map(e => e.scrollTop) : [];
   $('sheet').innerHTML = book ? bookHtml(c) : hubHtml(c);
+  if (book) { const now = pageAt(); document.querySelectorAll('#book .bk-scroll').forEach((e, i) => { if (now[i] === was[i]) e.scrollTop = kept[i] || 0; }); }
   if (panelKey && !$('panel-ov').hidden) {
     const body = $('panel-body'), st = body.scrollTop;
     body.innerHTML = sectionBody(panelKey, c);

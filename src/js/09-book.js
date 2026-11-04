@@ -176,6 +176,7 @@ function bookHtml(c) {
         <div class="bk-page bk-left">
           <svg class="bk-circle" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="96"/><circle cx="100" cy="100" r="88" class="d"/><circle cx="100" cy="100" r="62"/><polygon points="100,12 176,144 24,144"/><polygon points="100,188 24,56 176,56"/><circle cx="100" cy="100" r="30" class="d"/><text x="100" y="9" text-anchor="middle">ᚠ</text><text x="191" y="104" text-anchor="middle">ᚱ</text><text x="100" y="199" text-anchor="middle">ᚲ</text><text x="9" y="104" text-anchor="middle">ᚷ</text></svg>
           <span class="bk-stain l" aria-hidden="true"></span>
+          <div class="bk-scroll">
           <div class="bk-owner">
             <button class="bk-portrait ${src ? 'has' : ''}" type="button" data-stage aria-label="立ち絵を表示">${src ? `<img src="${esc(imgSrc(src))}" alt="" onerror="this.remove()">` : tokenHtml(c)}<span class="tape" aria-hidden="true"></span></button>
             <div class="bk-owner-t">
@@ -189,13 +190,16 @@ function bookHtml(c) {
           <div class="bk-chapter"><span class="bk-en">第${kn(idx)}章</span><h3>${sec.jp}</h3></div>
           <ol class="bk-tocs">${toc}</ol>
           ${add ? `<button class="bk-add" type="button" data-act="${add[0]}">＋ ${add[1]}</button>` : ''}
+          </div>
           <p class="bk-folio">${idx * 20 + 12}</p>
         </div>
         <span class="bk-ribbon" aria-hidden="true"></span>
         <div class="bk-page bk-right" id="bk-right">
           <span class="bk-stain" aria-hidden="true"></span>
+          <div class="bk-scroll" id="bk-scroll">
           <div class="bk-head"><span class="bk-en">第${kn(idx)}章 ・ ${kn(curNo)}</span><h3><span class="bk-ht">${cur ? esc(cur.label) : sec.jp}</span></h3></div>
           <div class="bk-body">${body}</div>
+          </div>
           <p class="bk-folio">${idx * 20 + curNo * 2 + 13}</p>
         </div>
       </div>
@@ -307,7 +311,11 @@ function renderSheet() {
   const book = isBook();
   $('sheet').classList.toggle('is-book', book);
   if (book) sfxPreload();
+  // 書き直しても、同じ頁なら読んでいた位置（頁の中のスクロール）を保つ
+  const pageAt = () => ['.bk-chapter h3', '#bk-right .bk-head h3'].map(q => document.querySelector(q)?.textContent);
+  const was = book ? pageAt() : [], kept = book ? [...document.querySelectorAll('#book .bk-scroll')].map(e => e.scrollTop) : [];
   $('sheet').innerHTML = book ? bookHtml(c) : hubHtml(c);
+  if (book) { const now = pageAt(); document.querySelectorAll('#book .bk-scroll').forEach((e, i) => { if (now[i] === was[i]) e.scrollTop = kept[i] || 0; }); }
   if (panelKey && !$('panel-ov').hidden) {
     const body = $('panel-body'), st = body.scrollTop;
     body.innerHTML = sectionBody(panelKey, c);
