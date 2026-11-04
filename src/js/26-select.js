@@ -130,7 +130,7 @@ function popSelect() {
   document.querySelector('.sel-head')?.animate([{ opacity: 0, transform: 'translateY(-12px)' }, { opacity: 1, transform: 'none' }], { duration: 600, easing: 'ease-out' });
 }
 function showSelect() {
-  if (isWa() && !showSelect.inner && !reduceMotion.matches && $('select').hidden) { waDoors(() => { showSelect.inner = true; try { showSelect(); } finally { showSelect.inner = false; } }); return; }
+  if (themeSwitchFx() && !showSelect.inner && !reduceMotion.matches && $('select').hidden) { themeSwitchFx()(() => { showSelect.inner = true; try { showSelect(); } finally { showSelect.inner = false; } }); return; }
   hidePeek();
   if (selTab === 'friends') setTimeout(refreshFriendView, 0);
   stopBgm(); $('bgm').hidden = true;
@@ -146,7 +146,7 @@ function leaveSelect(fromEl, quick) {
   const sel = $('select');
   const done = () => { sel.hidden = true; document.documentElement.style.overflow = ''; scrollTo(0, 0); renderPlayer(); };
   if (reduceMotion.matches || quick) { done(); return; }
-  if (isWa()) { waDoors(done); return; } // 和風：襖がしまって、ひらくとシート
+  if (themeSwitchFx()) { themeSwitchFx()(done); return; } // 和風は襖、ドットはモザイクで切りかえ
   if (fromEl) {
     fxAt(fromEl, true);
     fromEl.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.5)', opacity: 0 }], { duration: 520, easing: 'cubic-bezier(.5, 0, .3, 1)', fill: 'forwards' });

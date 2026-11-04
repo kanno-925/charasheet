@@ -13,6 +13,7 @@ const THEME_PRESETS = {
   sakura: { name: '和風', sub: '和紙と墨と金、舞う桜', look: 'mincho wa', vals: { bg: '#ebdfc6', solid: '#f7efdd', ink: '#2e2520', sky: '#5a3c2c', cyan: '#b08d4a', amber: '#b08d4a' } },
   neon:   { name: 'ネオン', sub: '夜のサイバー', look: 'dark', vals: { bg: '#0b0918', solid: '#16122b', ink: '#ece8ff', sky: '#a159f5', cyan: '#22c8e8', amber: '#f2569e' } },
   book:   { name: '魔導書', sub: '古本に万年筆で書きこむ記録', look: 'dark mincho book', vals: { bg: '#140c07', solid: '#22160d', ink: '#efe0c4', sky: '#7a5a8c', cyan: '#c9a04e', amber: '#c9a04e' } },
+  dot:    { name: 'ドット', sub: '星降る夜のピクセル', look: 'dark dot', vals: { bg: '#0b0e30', solid: '#141a4c', ink: '#e8eeff', sky: '#86a8ff', cyan: '#a8d8ff', amber: '#ffd36b' } },
   forest: { name: '森', sub: '深緑とランタン', look: '', vals: { bg: '#dfe7dc', solid: '#f5f8f1', ink: '#1c2a1f', sky: '#2f7d4f', cyan: '#5aa78a', amber: '#d98a1f' } },
 };
 const presetOf = () => THEME_PRESETS[state.themePreset] || THEME_PRESETS.sky;
@@ -34,6 +35,7 @@ function applyTheme() {
   document.documentElement.dataset.look = presetOf().look;
   applyBg();
   waScene();
+  dotScene();
 }
 function applyBg() {
   const ac = state.chars && state.chars.find(c => c.id === state.activeId);
@@ -183,3 +185,121 @@ function waPetalsStart() {
   };
   if (n) WA.raf = requestAnimationFrame(tick); else g.clearRect(0, 0, cv.width, cv.height);
 }
+
+/* ================= ドットテーマ：星空と夜の街をドット絵で描く（低い解像度で描いて拡大） ================= */
+const DOT = { on: false, raf: 0, last: 0, base: null, stars: [], shoot: null, W: 0, H: 180, t0: 0 };
+const isDot = () => (presetOf().look || '').split(' ').includes('dot');
+function dotScene() {
+  const on = isDot();
+  let el = $('dot-bg');
+  if (on && !el) {
+    el = document.createElement('div'); el.id = 'dot-bg'; el.className = 'dot-bg'; el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = '<canvas id="dot-cv"></canvas>';
+    document.body.prepend(el);
+    addEventListener('resize', () => { if (DOT.on) dotBuild(); });
+  }
+  if (el) el.hidden = !on;
+  if (on === DOT.on) return;
+  DOT.on = on;
+  if (on) { dotBuild(); cancelAnimationFrame(DOT.raf); DOT.raf = requestAnimationFrame(dotTick); } else cancelAnimationFrame(DOT.raf);
+}
+/* 決まった並びの乱数（毎回同じ街並みになるように） */
+const dotRand = seed => () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+function dotBuild() {
+  const H = DOT.H, W = DOT.W = Math.max(240, Math.min(560, Math.round(H * innerWidth / innerHeight)));
+  const cv = $('dot-cv'); cv.width = W; cv.height = H;
+  const b = document.createElement('canvas'); b.width = W; b.height = H; const g = b.getContext('2d');
+  const R = dotRand(20261104), px = (x, y, c) => { g.fillStyle = c; g.fillRect(x | 0, y | 0, 1, 1); };
+  // 空：色の帯を市松模様でまぜる（ドット絵のグラデーション）
+  const sky = ['#070a24', '#0a0e33', '#0e1342', '#121852', '#171e63', '#1d2575', '#262d86', '#30358f'];
+  const horizon = 118, band = horizon / sky.length;
+  for (let y = 0; y < horizon; y++) {
+    const f = y / band, i = Math.min(sky.length - 1, Math.floor(f)), j = Math.min(sky.length - 1, i + 1), mix = f - i;
+    for (let x = 0; x < W; x++) px(x, y, (mix > .5 && (x + y) % 2) || (mix > .8) ? sky[j] : sky[i]);
+  }
+  // 月（右上）と光の輪
+  const mx = W - 34, my = 24, mr = 11;
+  for (let y = -mr - 6; y <= mr + 6; y++) for (let x = -mr - 6; x <= mr + 6; x++) {
+    const d = Math.hypot(x, y);
+    if (d <= mr) px(mx + x, my + y, (x + y > 6 && d > mr - 4) ? '#c9d2f2' : '#eef1ff');
+    else if (d <= mr + 3 && (x + y) % 2 === 0) px(mx + x, my + y, '#4a56a8');
+    else if (d <= mr + 6 && (x * 3 + y) % 4 === 0) px(mx + x, my + y, '#2f3891');
+  }
+  [[-4, -3, 2], [3, 2, 3], [-2, 5, 1], [5, -5, 1]].forEach(([x, y, r]) => { for (let a = -r; a <= r; a++) for (let c = -r; c <= r; c++) if (a * a + c * c <= r * r) px(mx + x + a, my + y + c, '#cfd6f3'); });
+  // 雲（紫のかたまり）
+  const cloud = (cx, cy, w) => { for (let k = 0; k < w; k++) { const h = 2 + Math.round(Math.sin(k / w * Math.PI) * (3 + R() * 2)); for (let y = 0; y < h; y++) px(cx + k, cy - y, y === h - 1 ? '#5b4fb4' : '#3e3a96'); } };
+  cloud(W * .05, 34, 46); cloud(W * .22, 22, 30); cloud(W * .55, 62, 54); cloud(W * .8, 74, 40);
+  // 遠くの街
+  const city = (y0, hMin, hMax, col, winP, seed) => {
+    const r = dotRand(seed); let x = 0;
+    while (x < W) {
+      const w = 6 + Math.floor(r() * 16), h = hMin + Math.floor(r() * (hMax - hMin));
+      g.fillStyle = col; g.fillRect(x, y0 - h, w, h);
+      for (let wy = y0 - h + 2; wy < y0 - 1; wy += 3) for (let wx = x + 1; wx < x + w - 1; wx += 2) if (r() < winP) px(wx, wy, r() < .7 ? '#ffd36b' : '#9fd4ff');
+      x += w + (r() < .3 ? 1 : 0);
+    }
+  };
+  city(horizon + 6, 10, 30, '#1b2068', .1, 7);
+  city(horizon + 12, 14, 46, '#12164c', .22, 11);
+  // 電波塔（右）
+  const tx = Math.round(W * .86), ty = horizon + 12;
+  for (let y = 0; y < 86; y++) { const w = Math.max(1, Math.round((86 - y) / 9)); g.fillStyle = y % 7 === 0 ? '#3b4aa6' : '#1a2066'; g.fillRect(tx - w, ty - y, w * 2 + 1, 1); }
+  g.fillStyle = '#9fb6ff'; g.fillRect(tx - 3, ty - 44, 7, 3); g.fillRect(tx - 2, ty - 66, 5, 2);
+  // 水面：街を上下さかさに映して、横の線で切る
+  const wy0 = horizon + 12;
+  g.fillStyle = '#0a0d33'; g.fillRect(0, wy0, W, H - wy0);
+  for (let y = 0; y < H - wy0; y++) if (y % 3 !== 2) g.drawImage(b, 0, wy0 - 1 - y, W, 1, (y % 6 < 3 ? 1 : -1), wy0 + y, W, 1);
+  g.fillStyle = 'rgba(10,13,51,.45)'; g.fillRect(0, wy0, W, H - wy0);
+  // 手前の手すりと紫陽花（左下）
+  g.fillStyle = '#0c0f3a'; g.fillRect(0, H - 34, Math.round(W * .32), 2);
+  for (let x = 2; x < W * .32; x += 9) g.fillRect(x, H - 34, 2, 34);
+  for (let k = 0; k < 70; k++) { const x = R() * W * .26, y = H - 4 - R() * 22, c = R(); g.fillStyle = c < .35 ? '#7d6ae0' : c < .7 ? '#5e72e6' : '#a993ff'; g.fillRect(x | 0, y | 0, 2, 2); }
+  for (let k = 0; k < 40; k++) px(R() * W * .26, H - 2 - R() * 26, '#2b3a7a');
+  DOT.base = b;
+  // またたく星
+  const rs = dotRand(99); DOT.stars = Array.from({ length: Math.round(W / 4) }, () => ({ x: Math.floor(rs() * W), y: Math.floor(rs() * (horizon - 30)), p: rs() * 6.3, s: .002 + rs() * .004, big: rs() < .12 }));
+}
+function dotTick(t) {
+  if (!DOT.on) return;
+  DOT.raf = requestAnimationFrame(dotTick);
+  if (document.hidden || t - DOT.last < 66) return; // 15コマ/秒で十分
+  DOT.last = t;
+  const cv = $('dot-cv'); if (!cv || !DOT.base) return;
+  const g = cv.getContext('2d'), W = DOT.W, H = DOT.H;
+  g.drawImage(DOT.base, 0, 0);
+  const still = reduceMotion.matches;
+  DOT.stars.forEach(s => {
+    const v = still ? .7 : (Math.sin(t * s.s + s.p) + 1) / 2;
+    if (v < .25) return;
+    g.fillStyle = v > .75 ? '#ffffff' : '#9fb3ff'; g.fillRect(s.x, s.y, 1, 1);
+    if (s.big && v > .6) { g.fillStyle = 'rgba(200,215,255,.7)'; g.fillRect(s.x - 1, s.y, 3, 1); g.fillRect(s.x, s.y - 1, 1, 3); }
+  });
+  if (!still) {
+    // 流れ星
+    if (!DOT.shoot && Math.random() < .012) DOT.shoot = { x: W * (.3 + Math.random() * .6), y: 4 + Math.random() * 30, l: 0 };
+    if (DOT.shoot) {
+      const s = DOT.shoot; s.l += 1;
+      for (let k = 0; k < 14; k++) { const a = Math.max(0, 1 - k / 14) * Math.min(1, (30 - s.l) / 10); g.fillStyle = `rgba(220,230,255,${a})`; g.fillRect(Math.round(s.x - s.l * 3 + k * 2), Math.round(s.y + s.l * 1.2 - k * .8), 1, 1); }
+      if (s.l > 30) DOT.shoot = null;
+    }
+    // 水面のきらめき
+    for (let k = 0; k < 18; k++) { const x = (k * 37 + Math.floor(t / 180) * 13) % W, y = 132 + (k * 11) % (H - 134); g.fillStyle = k % 3 ? 'rgba(160,190,255,.5)' : 'rgba(255,211,107,.45)'; g.fillRect(x, y, 2 + (k % 3), 1); }
+  }
+}
+/* ドットの画面切りかえ：四角いブロックが埋まって、また消える */
+function dotMosaic(mid) {
+  if (reduceMotion.matches) { mid(); return; }
+  const cv = document.createElement('canvas'); cv.className = 'dot-mosaic'; cv.setAttribute('aria-hidden', 'true');
+  const S = 28, cols = Math.ceil(innerWidth / S), rows = Math.ceil(innerHeight / S);
+  cv.width = cols * S; cv.height = rows * S; document.body.appendChild(cv);
+  const g = cv.getContext('2d'), cells = [];
+  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) cells.push([x, y, (x + y) / (cols + rows) * .7 + Math.random() * .3]);
+  const draw = (k, fill) => {
+    g.clearRect(0, 0, cv.width, cv.height);
+    cells.forEach(([x, y, o]) => { if (fill ? o <= k : o > k) { g.fillStyle = '#0b0e30'; g.fillRect(x * S, y * S, S, S); g.fillStyle = '#2a3290'; g.fillRect(x * S, y * S, S, 2); g.fillRect(x * S, y * S, 2, S); } });
+  };
+  const run = (ms, fill, then) => { const t0 = performance.now(); const step = t => { const k = Math.min(1, (t - t0) / ms); draw(k, fill); if (k < 1) requestAnimationFrame(step); else then(); }; requestAnimationFrame(step); };
+  run(360, true, () => { try { mid(); } catch (e) { console.error(e); } setTimeout(() => run(420, false, () => cv.remove()), 90); });
+}
+/* テーマごとの画面切りかえ（和風は襖、ドットはモザイク） */
+const themeSwitchFx = () => isWa() ? waDoors : isDot() ? dotMosaic : null;

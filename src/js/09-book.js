@@ -316,7 +316,8 @@ function renderSheet() {
   const pageAt = () => ['.bk-chapter h3', '#bk-right .bk-head h3'].map(q => document.querySelector(q)?.textContent);
   const was = book ? pageAt() : [], kept = book ? [...document.querySelectorAll('#book .bk-scroll')].map(e => e.scrollTop) : [];
   $('sheet').classList.toggle('is-wa', !book && isWa());
-  $('sheet').innerHTML = book ? bookHtml(c) : isWa() ? waHtml(c) : hubHtml(c);
+  $('sheet').classList.toggle('is-dot', !book && isDot());
+  $('sheet').innerHTML = book ? bookHtml(c) : isWa() ? waHtml(c) : isDot() ? dotHtml(c) : hubHtml(c);
   if (book) { const now = pageAt(); document.querySelectorAll('#book .bk-scroll').forEach((e, i) => { if (now[i] === was[i]) e.scrollTop = kept[i] || 0; }); }
   if (panelKey && !$('panel-ov').hidden) {
     const body = $('panel-body'), st = body.scrollTop;
@@ -378,7 +379,12 @@ function openPanel(key, fromEl) {
   fillPanel(key);
   ov.hidden = false;
   scrollMenu(true);
-  if (!reduceMotion.matches && isWa()) {
+  if (!reduceMotion.matches && isDot()) {
+    // 昔のゲームの窓のように、横線→縦にカクカク広がる
+    ov.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing: 'steps(3, end)' });
+    $('sao-win').animate([{ clipPath: 'inset(49% 50% 49% 50%)' }, { clipPath: 'inset(49% 0% 49% 0%)', offset: .45 }, { clipPath: 'inset(0% 0% 0% 0%)' }], { duration: 520, easing: 'steps(9, end)' });
+    stagger(320);
+  } else if (!reduceMotion.matches && isWa()) {
     // 巻物がひらくように、上から下へ広がる
     ov.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: 'ease-out' });
     $('sao-win').animate([{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)' }], { duration: 760, easing: 'cubic-bezier(.55, 0, .2, 1)' });
@@ -406,16 +412,25 @@ function openPanel(key, fromEl) {
 }
 function closePanel() {
   const ov = $('panel-ov'); if (ov.hidden) return;
-  const target = document.querySelector(`#sheet [data-open="${panelKey}"]`) || document.querySelector('#sheet .hub-core, #sheet .wa-kake');
+  const findTarget = k => document.querySelector(`#sheet [data-open="${k}"]`) || document.querySelector('#sheet .hub-core, #sheet .wa-kake, #sheet .dot-name');
+  let target = findTarget(panelKey);
   const done = anims => {
+    const k = panelKey;
     ov.hidden = true; panelKey = null;
     anims.forEach(a => a.cancel());
+    if (isDot()) { renderSheet(); target = findTarget(k); } // ドットのボックスは中身をそのまま見せているので、閉じたら描き直す
     if (target) {
       target.focus({ preventScroll: true });
       if (!reduceMotion.matches) { target.classList.remove('land'); void target.offsetWidth; target.classList.add('land'); fxAt(target, false); }
     }
   };
   if (reduceMotion.matches) return done([]);
+  if (isDot()) { // カクカク閉じる
+    const anims = [$('sao-win').animate([{ clipPath: 'inset(0% 0% 0% 0%)' }, { clipPath: 'inset(49% 0% 49% 0%)', offset: .55 }, { clipPath: 'inset(49% 50% 49% 50%)' }], { duration: 380, easing: 'steps(7, end)', fill: 'forwards' }),
+      ov.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, delay: 260, easing: 'steps(3, end)', fill: 'forwards' })];
+    Promise.all(anims.map(a => a.finished)).then(() => done(anims));
+    return;
+  }
   if (isWa()) { // 巻物を下から巻きあげてしまう
     const anims = [$('sao-win').animate([{ clipPath: 'inset(0 0 0% 0)' }, { clipPath: 'inset(0 0 100% 0)' }], { duration: 520, easing: 'cubic-bezier(.6, 0, .4, 1)', fill: 'forwards' }),
       ov.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 240, delay: 320, fill: 'forwards' })];
@@ -444,6 +459,10 @@ function closePanel() {
 function gotoPanel(key) {
   if (key === panelKey) return;
   fillPanel(key);
+  if (!reduceMotion.matches && isDot()) { // 文字が打ちこまれるように、上から1段ずつ
+    $('panel-body').animate([{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)' }], { duration: 420, easing: 'steps(8, end)' });
+    return;
+  }
   if (!reduceMotion.matches && isWa()) { // 筆でさっと書いたように、左から現れる
     $('panel-body').animate([{ clipPath: 'inset(0 100% 0 0)', opacity: .4 }, { clipPath: 'inset(0 0% 0 0)', opacity: 1 }], { duration: 560, easing: 'cubic-bezier(.5, 0, .2, 1)' });
     return;

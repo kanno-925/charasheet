@@ -4,6 +4,7 @@
 （細かい変更はコミット履歴 `git log` を見る）
 
 ## 2026-11-04
+- ドットテーマを追加（look `dark dot`、css/17-dot.css）：背景は canvas で低解像度に描いた星空・月・流れ星・夜の街・水面・紫陽花（15-theme.js の dotScene）。キャラシは光る枠のボックス（dotHtml、08-hub-panel.js）、ドット文字（DotGothic16・Pixelify Sans）、窓はカクカク開く、切りかえはモザイク（dotMosaic）。
 - グループの代表を参加中のメンバーにゆずれるように（編集画面の「代表をゆずる」、サーバー関数 transfer_group。supabase/08-group-transfer.sql が必要）。ゆずった人は参加者として残る。ログインしていない呼び出しは関数の中で止め、anon の実行権も外す（Supabaseは新しい関数をanonにも許可するため）。
 - 和風テーマのときは画面の作りごと変える：キャラシは掛け軸（立ち絵）＋縦書きの名前＋「目録」（壱〜玖の一覧）、項目の窓は巻物（上からひらく・巻きあげて閉じる）、切りかえは襖、筆文字（Yuji Syuku）と明朝（Zen Old Mincho）。waHtml は 08-hub-panel.js。
 - 和風テーマを作り直し（look `wa`、css/16-wa.css）：和紙・墨・金、参考画像から切り出した景色（assets/wa-scene.webp）、金の霞と青海波はSVG、舞い散る桜（canvas）と枝のゆれ。探索者一覧は墨色の帯に金の家紋。

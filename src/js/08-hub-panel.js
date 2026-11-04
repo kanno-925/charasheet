@@ -91,6 +91,61 @@ function waHtml(c) {
     </div>`;
 }
 
+/* ---- ドットテーマのキャラシ：光る枠のボックスを並べる（押すとその項目をひらく） ---- */
+/* ドット絵のアイコン：1文字=1マス（. は透明、文字は色） */
+const PIX = {
+  star: ['....w....', '...wyw...', '...wyw...', 'wwwyyywww', '.wyyyyyw.', '..wyyyw..', '..wyw.yw.', '.wy....w.', '.w.......'],
+  heart: ['.pp...pp.', 'pPPp.pPPp', 'pPwPpPPPp', 'pPPPPPPPp', '.pPPPPPp.', '..pPPPp..', '...pPp...', '....p....'],
+  drop: ['....b....', '...bBb...', '..bBBBb..', '.bBwBBBb.', '.bBwBBBb.', '.bBBBBBb.', '..bBBBb..', '...bbb...'],
+  brain: ['..pPpPp..', '.pPPpPPp.', 'pPwPpPPPp', 'pPPpPpPPp', 'pPPPpPPPp', '.pPpPPPp.', '..pp.pp..'],
+  case: ['...www...', '..w...w..', 'wwwwwwwww', 'wBBBBBBBw', 'wBBByBBBw', 'wBBBBBBBw', 'wwwwwwwww'],
+  box: ['.wwwwwww.', 'wBBBwBBBw', 'wwwwwwwww', 'wBBBwBBBw', 'wBByyyBBw', 'wBBBwBBBw', 'wwwwwwwww'],
+  pen: ['......ww.', '.....wyw.', '....wBw..', '...wBw...', '..wBw....', '.wBw.....', 'www......'],
+  note: ['wwwwwww..', 'wBBBBBw..', 'wBwwwBw..', 'wBBBBBww.', 'wBwwwBBw.', 'wBBBBBBw.', 'wwwwwwww.'],
+  sword: ['.......ww', '......wBw', '.....wBw.', '.y..wBw..', '..ywBw...', '..yyw....', '.y.yy....', 'y........'],
+  book: ['wwwwwwww.', 'wPPPPPPw.', 'wPwwwwPw.', 'wPPPPPPw.', 'wPwwwPPw.', 'wPPPPPPww', 'wwwwwwwww'],
+  flag: ['w........', 'wyyyy....', 'wyyyyyy..', 'wyyyyy...', 'w........', 'w........', 'w........'],
+};
+const PIX_COL = { w: '#e8eeff', y: '#ffd36b', p: '#ff6fa8', P: '#ff9cc4', b: '#5aa8ff', B: '#2d5fd6' };
+function pix(name, size = 18) {
+  const rows = PIX[name]; if (!rows) return '';
+  const w = Math.max(...rows.map(r => r.length)), h = rows.length;
+  let r = '';
+  rows.forEach((row, y) => [...row].forEach((ch, x) => { if (ch !== '.') r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${PIX_COL[ch] || '#fff'}"/>`; }));
+  return `<svg class="pix" viewBox="0 0 ${w} ${h}" width="${size}" height="${Math.round(size * h / w)}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+}
+function dotHtml(c) {
+  const d = compute(c), a = abilities(c), p = c.profile, S = SYS[c.system];
+  const box = (key, ic, title, body, cls = '') => `<button class="dot-box ${cls}" type="button" data-open="${key}"><span class="dot-tab">${pix(ic)}<span>${title}</span></span><span class="dot-in">${body}</span></button>`;
+  const line = (lbl, v) => `<span class="dot-line"><i>${lbl}</i><b>${esc(v || '')}</b></span>`;
+  const skills = c.skills.filter(s => s.name && (skillTotal(s, a) !== skillInit(s, a) || s.isJob));
+  const shown = (skills.length ? skills : c.skills.filter(s => ['目星', '聞き耳', '図書館', '回避', '応急手当', '心理学', '説得', '言いくるめ'].includes(s.name))).slice(0, 16);
+  const items = c.items.filter(x => String(x.name || '').trim());
+  const weapons = c.weapons.filter(x => String(x.name || '').trim());
+  const scen = c.scenarios.filter(x => String(x.name || '').trim());
+  const clip = (t, n) => { t = String(t || '').trim(); return t.length > n ? t.slice(0, n) + '…' : t; };
+  return `
+    <div class="hub-top dot-tools">${toolsHtml(c)}</div>
+    <div class="dot-sheet">
+      <div class="dot-col">
+        <button class="dot-box dot-name" type="button" data-stage aria-label="立ち絵を表示"><span class="dot-tab">${pix('star')}<span>Name</span></span>
+          <span class="dot-in dot-namein"><span class="dot-face">${tokenHtml(c)}</span><span class="dot-nm"><b data-hub="name"></b><small data-hub="kana"></small><small class="dot-sys">${esc(S.short)}</small></span></span></button>
+        ${box('profile', 'star', 'Profile', `${line('職業', p.occupation)}${line('年齢', p.age && p.age + '歳')}${line('性別', p.sex)}${line('誕生日', p.birthday)}${line('出身', p.origin)}`, 'dot-prof')}
+        ${box('skills', 'star', 'Skills', `<span class="dot-skills">${shown.map(s => `<span class="dot-sk"><i>◇</i><span>${esc(skillLabel(s))}</span><b>${skillTotal(s, a)}</b><small>%</small></span>`).join('')}</span><span class="dot-more">残り 職業 <b data-out="jobLeft"></b> ／ 興味 <b data-out="hobbyLeft"></b></span>`, 'dot-skillbox')}
+        ${box('weapons', 'sword', 'Weapons', weapons.length ? weapons.slice(0, 4).map(w => `<span class="dot-line"><i>◇</i><b>${esc(w.name)}</b><small>${esc(w.rate || '')}% ${esc(w.damage || '')}</small></span>`).join('') : '<span class="dot-empty">— なし —</span>')}
+      </div>
+      <div class="dot-col">
+        ${box('abilities', 'star', 'Status', `<span class="dot-status"><span class="dot-hmsan">${[['hp', 'heart', 'HP'], ['mp', 'drop', 'MP'], ['san', 'brain', 'SAN']].map(([k, ic, l]) => `<span class="dot-hm">${pix(ic, 22)}<i>${l}</i><b data-out="${k}Cur"></b><span class="dot-bar"><i data-bar="${k}"></i></span></span>`).join('')}</span>
+          <span class="dot-abil">${Object.keys(c.abilities).map(k => `<span class="dot-ab"><i>${k}</i><b>${a[k] || 0}</b></span>`).join('')}</span></span>`, 'dot-statbox')}
+        ${box('profile', 'case', 'Occupation', `<span class="dot-big">${esc(p.occupation || '— 未記入 —')}</span>`)}
+        ${box('items', 'box', 'Possessions', (items.length ? `<span class="dot-chips">${items.slice(0, 8).map(x => `<span>${esc(x.name)}${x.count && x.count !== '1' ? ` ×${esc(x.count)}` : ''}</span>`).join('')}</span>` : '<span class="dot-empty">— なし —</span>') + `<span class="dot-line"><i>所持金</i><b>${esc(c.money.cash || '')}</b></span>`)}
+        ${box('tomes', 'book', 'Mythos', c.tomes || c.entities ? `<span class="dot-txt">${esc(clip([c.tomes, c.entities].filter(Boolean).join(' / '), 80))}</span>` : '<span class="dot-empty">— なし —</span>')}
+        ${box('scenarios', 'flag', 'Log', scen.length ? scen.slice(-4).reverse().map(x => `<span class="dot-line"><i>◇</i><b>${esc(x.name)}</b><small>${esc(x.date || '')}</small></span>`).join('') : '<span class="dot-empty">— まだ冒険していない —</span>')}
+        ${box('story', 'pen', 'Memo', `<span class="dot-txt">${esc(clip(c.memo || c.backstory || '— 未記入 —', 120))}</span>`)}
+      </div>
+    </div>`;
+}
+
 /* 襖（ふすま）がしまって、ひらく画面の切りかえ。しまった瞬間に mid() を呼ぶ */
 function waDoors(mid) {
   if (reduceMotion.matches) { mid(); return; }

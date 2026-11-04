@@ -8,7 +8,7 @@
 <title>キャラシ工房</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Klee+One:wght@400;600&family=Zen+Kurenaido&family=Pinyon+Script&family=Lexend:wght@400;600;700&family=M+PLUS+Rounded+1c:wght@500;800&family=Shippori+Mincho+B1:wght@500;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Klee+One:wght@400;600&family=Zen+Kurenaido&family=Pinyon+Script&family=Lexend:wght@400;600;700&family=M+PLUS+Rounded+1c:wght@500;800&family=Shippori+Mincho+B1:wght@500;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Yuji+Syuku&family=Zen+Old+Mincho:wght@400;700&family=DotGothic16&family=Pixelify+Sans:wght@400;600&display=swap">
 <style>
 html { color-scheme: light; }
 body { margin: 0; }
@@ -1950,6 +1950,162 @@ body.ue-on .ue-panel { cursor: auto; }
 .wa-row { grid-template-columns: 3.2em minmax(0, 1.5fr) minmax(0, 1fr) 1.6em; }
 @media (max-width: 760px) { .wa-row { grid-template-columns: 2.4em minmax(0, 1fr) auto 1.4em; } }
 :root[data-look~="wa"] .fx { display: none; } /* 近未来のふわっと光る輪は和風では出さない */
+
+/* ===== ドットテーマ（look: dot）：星降る夜の街、光る枠、ドット文字 =====
+   背景は 15-theme.js の dotScene() が低い解像度で描いて拡大している（にじまないよう pixelated）。 */
+:root[data-look~="dot"] {
+  --dot-line: #8fb4ff; --dot-hi: #cfe0ff; --dot-dark: #0b0e30; --dot-fill: rgb(14 18 60 / .84);
+  --f-body: "DotGothic16", "Pixelify Sans", monospace; --f-display: "DotGothic16", monospace; --f-latin: "Pixelify Sans", "DotGothic16", monospace; --f-mono: "DotGothic16", monospace;
+  --glow-1: transparent; --glow-2: transparent; --dot: transparent;
+  --paper: var(--dot-fill); --line: rgb(143 180 255 / .3); --line-strong: rgb(143 180 255 / .6);
+  --muted: #9fb0e0; --shadow: none;
+  --dot-frame: 0 0 0 2px var(--dot-dark), 0 0 0 4px rgb(143 180 255 / .3), 0 0 22px rgb(100 140 255 / .32), inset 0 0 0 2px rgb(8 10 36 / .9), inset 0 0 0 3px rgb(143 180 255 / .2);
+}
+:root[data-look~="dot"] *, :root[data-look~="dot"] *::before, :root[data-look~="dot"] *::after { border-radius: 0 !important; }
+:root[data-look~="dot"] body { background: var(--dot-dark); font-family: var(--f-body); -webkit-font-smoothing: none; }
+:root[data-look~="dot"] body::before { display: none; }
+.dot-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+.dot-bg[hidden] { display: none; }
+.dot-bg canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+:root.has-bg .dot-bg { display: none; }
+.dot-mosaic { position: fixed; left: 0; top: 0; z-index: 200; pointer-events: none; image-rendering: pixelated; }
+:root[data-look~="dot"] .fx { display: none; }
+
+/* ---- 光る枠（キャラシのボックス・窓・カード共通） ---- */
+:root[data-look~="dot"] .koma, :root[data-look~="dot"] .modal, :root[data-look~="dot"] .sao-win, :root[data-look~="dot"] details.out, :root[data-look~="dot"] .peek,
+:root[data-look~="dot"] .dot-box, :root[data-look~="dot"] .toast {
+  background: var(--dot-fill); border: 2px solid var(--dot-line); box-shadow: var(--dot-frame); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); color: var(--ink); }
+:root[data-look~="dot"] .koma::before { background: repeating-linear-gradient(90deg, var(--dot-line) 0 6px, transparent 6px 10px) !important; height: 2px; }
+:root[data-look~="dot"] .sheet.is-dot { background: transparent; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; padding: 6px 2px 10px; }
+
+/* ---- 文字 ---- */
+:root[data-look~="dot"] .brand-mark { display: none; }
+:root[data-look~="dot"] .brand::before { content: "★"; font-size: 30px; color: #ffd36b; text-shadow: 0 0 10px rgb(255 211 107 / .7), 2px 2px 0 #4a3a10; }
+:root[data-look~="dot"] .brand h1 { font-family: var(--f-display); font-weight: 400; letter-spacing: .1em; text-shadow: 2px 2px 0 #2a3290, 0 0 12px rgb(140 170 255 / .6); }
+:root[data-look~="dot"] .brand-text small, :root[data-look~="dot"] .eyebrow { font-family: var(--f-latin); color: var(--dot-line); letter-spacing: .18em; }
+:root[data-look~="dot"] .eyebrow::before { height: 2px; background: repeating-linear-gradient(90deg, var(--dot-line) 0 4px, transparent 4px 6px); }
+:root[data-look~="dot"] .orbit { display: none; }
+:root[data-look~="dot"] .hero { grid-template-columns: minmax(0, 1fr); min-height: 260px; }
+:root[data-look~="dot"] .hero-title { font-family: var(--f-display); font-weight: 400; background: none; -webkit-text-fill-color: currentColor; color: #eef2ff; letter-spacing: .08em;
+  text-shadow: 3px 3px 0 #2a3290, 0 0 18px rgb(140 170 255 / .55); }
+:root[data-look~="dot"] .hero-lead { color: #c6d2f6; }
+:root[data-look~="dot"] .hero-lead::after { content: "◇ ─────────── ◆ ─────────── ◇"; display: block; margin-top: 14px; color: var(--dot-line); letter-spacing: -.05em; font-size: 12px; }
+:root[data-look~="dot"] .hero-tags span { font-family: var(--f-latin); border: 2px solid var(--dot-line); background: rgb(14 18 60 / .7); color: var(--dot-hi); }
+:root[data-look~="dot"] .panel-label { font-family: var(--f-latin); color: var(--dot-line); letter-spacing: .14em; }
+:root[data-look~="dot"] .panel-label::before { content: "★"; color: #ffd36b; margin-right: 6px; }
+:root[data-look~="dot"] .panel-label span { font-family: var(--f-body); color: #c6d2f6; }
+:root[data-look~="dot"] .modal h2, :root[data-look~="dot"] #panel-title, :root[data-look~="dot"] .sec-title h3, :root[data-look~="dot"] .sel-head h2 { font-family: var(--f-display); font-weight: 400; letter-spacing: .1em; }
+:root[data-look~="dot"] .sel-head h2 { background: none; -webkit-text-fill-color: currentColor; color: #eef2ff; text-shadow: 3px 3px 0 #2a3290, 0 0 16px rgb(140 170 255 / .6); }
+
+/* ---- ボタン：四角いドット、押すと沈む ---- */
+:root[data-look~="dot"] .btn { font-family: var(--f-body); font-weight: 400; letter-spacing: .06em; color: var(--ink); background: #141a52; border: 2px solid #6f8fe8;
+  box-shadow: 0 0 0 2px var(--dot-dark), 4px 4px 0 2px #05061a; transition: transform .08s steps(2), box-shadow .08s steps(2); }
+:root[data-look~="dot"] .btn:hover { border-color: var(--dot-hi); transform: translate(-1px, -1px); box-shadow: 0 0 0 2px var(--dot-dark), 5px 5px 0 2px #05061a, 0 0 14px rgb(140 170 255 / .6); }
+:root[data-look~="dot"] .btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 2px var(--dot-dark), 1px 1px 0 2px #05061a; }
+:root[data-look~="dot"] .btn.primary, :root[data-look~="dot"] .btn.copy-btn { background: linear-gradient(180deg, #3f5bdc, #2a3aa8); border-color: var(--dot-hi); color: #fff; text-shadow: 1px 1px 0 #10164a; }
+:root[data-look~="dot"] .btn.primary::before { content: "★ "; color: #ffd36b; }
+:root[data-look~="dot"] .btn.danger { color: #ff8fb3; border-color: #c04a7a; }
+:root[data-look~="dot"] .inp, :root[data-look~="dot"] select { background: #0b0e30; border: 2px solid #4b62c4; color: var(--ink); font-family: var(--f-body); box-shadow: inset 2px 2px 0 rgb(0 0 0 / .4); }
+:root[data-look~="dot"] .inp:focus, :root[data-look~="dot"] select:focus { border-color: var(--dot-hi); box-shadow: 0 0 0 2px rgb(143 180 255 / .35), 0 0 12px rgb(140 170 255 / .5); outline: none; }
+:root[data-look~="dot"] .tbl th { font-family: var(--f-latin); color: var(--dot-line); }
+:root[data-look~="dot"] .tbl td { border-bottom: 2px dashed rgb(143 180 255 / .18); }
+:root[data-look~="dot"] .token { background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--tc) 55%, #fff), var(--tc) 75%) padding-box, linear-gradient(var(--dot-hi), var(--dot-line)) border-box; image-rendering: auto; }
+
+/* ---- 左の探索者一覧：◇のメニュー、選んでいる人は光る矢印のタブ ---- */
+@media (min-width: 761px) {
+  :root[data-look~="dot"] .shelf { position: relative; padding: 8px 14px 30px 0; border-right: 2px solid rgb(143 180 255 / .55); }
+  :root[data-look~="dot"] .shelf::after { content: "◆"; position: absolute; right: -8px; top: 40%; color: var(--dot-hi); font-size: 12px; text-shadow: 0 0 8px var(--dot-line); }
+  :root[data-look~="dot"] .char-item { position: relative; padding: 9px 10px 9px 28px; color: #d6e0ff; border: 2px solid transparent; }
+  :root[data-look~="dot"] .char-item::before { content: "◇"; position: absolute; left: 8px; top: 50%; translate: 0 -50%; color: var(--dot-line); }
+  :root[data-look~="dot"] .char-item:hover { background: rgb(60 80 200 / .25); }
+  :root[data-look~="dot"] .char-item.active { color: #fff; background: linear-gradient(90deg, rgb(63 91 220 / .85), rgb(42 58 168 / .85)); border-color: var(--dot-hi);
+    box-shadow: 0 0 0 2px var(--dot-dark), 0 0 16px rgb(120 160 255 / .7); }
+  :root[data-look~="dot"] .char-item.active::before { content: "◆"; color: #ffd36b; }
+  :root[data-look~="dot"] .char-item.active::after { content: ""; position: absolute; right: -14px; top: 50%; translate: 0 -50%; border: 12px solid transparent; border-left-color: var(--dot-hi); border-right: 0; filter: drop-shadow(0 0 4px var(--dot-line)); }
+  :root[data-look~="dot"] .char-item .sys { color: #9fb0e0; }
+}
+
+/* ---- キャラシ本体：光る枠のボックス ---- */
+.dot-tools { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; align-items: center; }
+.dot-sheet { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px 24px; align-items: start; margin-top: 8px; }
+.dot-col { display: flex; flex-direction: column; gap: 22px; padding-top: 14px; min-width: 0; }
+.dot-box { position: relative; display: block; width: 100%; text-align: left; padding: 24px 16px 14px; cursor: pointer; font: inherit; transition: border-color .1s steps(2), box-shadow .1s steps(2); }
+.dot-box::before, .dot-box::after { content: ""; position: absolute; width: 10px; height: 10px; pointer-events: none; }
+.dot-box::before { right: 5px; top: 5px; border-top: 2px solid var(--dot-hi); border-right: 2px solid var(--dot-hi); box-shadow: inset -3px 3px 0 -1px rgb(207 224 255 / .5); }
+.dot-box::after { left: 5px; bottom: 5px; border-bottom: 2px solid var(--dot-hi); border-left: 2px solid var(--dot-hi); box-shadow: inset 3px -3px 0 -1px rgb(207 224 255 / .5); }
+.dot-box:hover, .dot-box:focus-visible { border-color: var(--dot-hi); box-shadow: var(--dot-frame), 0 0 30px rgb(140 170 255 / .55); outline: none; }
+.dot-box:hover .dot-tab, .dot-box:focus-visible .dot-tab { border-color: var(--dot-hi); box-shadow: 0 0 0 2px var(--dot-dark), 0 0 14px rgb(140 170 255 / .8); }
+.dot-tab { position: absolute; top: -16px; left: 12px; display: inline-flex; align-items: center; gap: 7px; padding: 3px 14px 3px 8px; background: #10164a; border: 2px solid var(--dot-line);
+  font-family: "Pixelify Sans", monospace; font-size: 16px; color: #eef2ff; letter-spacing: .04em; box-shadow: 0 0 0 2px var(--dot-dark), 0 0 10px rgb(120 160 255 / .45); }
+.pix { display: block; flex: none; image-rendering: pixelated; }
+.dot-in { display: block; min-width: 0; }
+.dot-namein { display: flex; gap: 14px; align-items: center; }
+.dot-face .token { width: 64px; height: 64px; font-size: 26px; border-width: 3px; }
+.dot-nm { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dot-nm b { font-size: 26px; font-weight: 400; letter-spacing: .08em; color: #fff; text-shadow: 2px 2px 0 #2a3290; overflow-wrap: anywhere; }
+.dot-nm small { color: #a8bcf0; font-size: 13px; letter-spacing: .1em; }
+.dot-nm .dot-sys { font-family: "Pixelify Sans", monospace; color: #ffd36b; }
+.dot-line { display: grid; grid-template-columns: 5em minmax(0, 1fr) auto; gap: 8px; align-items: baseline; padding: 5px 2px; border-bottom: 2px dashed rgb(143 180 255 / .25); }
+.dot-line i { font-style: normal; color: #9fb4ee; font-size: 13px; }
+.dot-line b { font-weight: 400; color: #eef2ff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dot-line small { color: #9fb0e0; font-size: 12px; white-space: nowrap; }
+.dot-skills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 18px; }
+.dot-sk { display: grid; grid-template-columns: 1.1em minmax(0, 1fr) 3.2em 1em; gap: 6px; align-items: center; font-size: 14px; }
+.dot-sk i { font-style: normal; color: var(--dot-line); }
+.dot-sk span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dot-sk b { font-weight: 400; text-align: right; padding: 1px 6px; border: 2px solid #4b62c4; background: #0b0e30; color: #fff; }
+.dot-sk small { color: #9fb0e0; }
+.dot-more { display: block; margin-top: 10px; font-size: 12px; color: #9fb0e0; text-align: right; }
+.dot-more b { font-weight: 400; color: #ffd36b; }
+.dot-status { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; }
+.dot-hmsan { display: flex; flex-direction: column; gap: 10px; padding-right: 16px; border-right: 2px dashed rgb(143 180 255 / .35); }
+.dot-hm { display: grid; grid-template-columns: 24px 2.6em minmax(0, 1fr); grid-template-rows: auto 6px; gap: 2px 10px; align-items: center; }
+.dot-hm .pix { grid-row: 1 / span 2; }
+.dot-hm i { font-style: normal; font-family: "Pixelify Sans", monospace; font-size: 18px; color: #eef2ff; }
+.dot-hm b { font-weight: 400; font-size: 18px; text-align: right; color: #fff; }
+.dot-bar { grid-column: 2 / -1; height: 6px; background: #0b0e30; box-shadow: 0 0 0 1px #4b62c4; overflow: hidden; }
+.dot-bar i { display: block; height: 100%; transition: width .5s steps(10); background: repeating-linear-gradient(90deg, var(--bc) 0 5px, transparent 5px 6px); }
+.dot-hm:nth-child(1) { --bc: #ff6fa8; } .dot-hm:nth-child(2) { --bc: #5aa8ff; } .dot-hm:nth-child(3) { --bc: #b48cff; }
+.dot-abil { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 8px; align-content: start; }
+.dot-ab { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.dot-ab i { font-style: normal; font-family: "Pixelify Sans", monospace; font-size: 13px; color: #a8c0ff; }
+.dot-ab b { font-weight: 400; width: 100%; text-align: center; padding: 2px 0; border: 2px solid #4b62c4; background: #0b0e30; color: #fff; }
+.dot-big { display: block; font-size: 20px; letter-spacing: .1em; padding: 4px 2px 6px; border-bottom: 2px dashed rgb(143 180 255 / .25); color: #fff; }
+.dot-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.dot-chips span { padding: 2px 8px; border: 2px solid #4b62c4; background: #0b0e30; font-size: 13px; }
+.dot-txt { display: block; font-size: 14px; line-height: 1.8; color: #d6e0ff; white-space: pre-wrap; overflow-wrap: anywhere; background: repeating-linear-gradient(transparent 0 23px, rgb(143 180 255 / .2) 23px 25px); }
+.dot-empty { display: block; color: #8496cc; font-size: 13px; padding: 4px 0; }
+@media (max-width: 760px) {
+  .dot-sheet { grid-template-columns: minmax(0, 1fr); }
+  .dot-col { gap: 22px; }
+  .dot-status { grid-template-columns: minmax(0, 1fr); }
+  .dot-hmsan { border-right: 0; padding-right: 0; border-bottom: 2px dashed rgb(143 180 255 / .35); padding-bottom: 12px; }
+  .dot-abil { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* ---- 項目の窓 ---- */
+:root[data-look~="dot"] .panel-overlay { background: rgb(5 6 26 / .62); }
+:root[data-look~="dot"] .sao-win { overflow: visible; }
+:root[data-look~="dot"] .sao-win::before, :root[data-look~="dot"] .sao-win::after { border-color: var(--dot-hi); opacity: 1; }
+:root[data-look~="dot"] .sao-line { display: none; }
+:root[data-look~="dot"] .sao-head { background: transparent; border-bottom: 2px dashed rgb(143 180 255 / .35); }
+:root[data-look~="dot"] .sao-hic { background: #10164a !important; border: 2px solid var(--dot-line) !important; color: #ffd36b !important; box-shadow: 0 0 10px rgb(120 160 255 / .5) !important; }
+:root[data-look~="dot"] .panel-en { font-family: var(--f-latin); color: var(--dot-line); }
+:root[data-look~="dot"] .sao-close { background: #141a52; border: 2px solid #6f8fe8; color: var(--ink); }
+:root[data-look~="dot"] .sao-item { border: 2px solid rgb(143 180 255 / .45); background: rgb(14 18 60 / .85); color: #d6e0ff; box-shadow: 0 0 0 2px var(--dot-dark); font-family: var(--f-body); }
+:root[data-look~="dot"] .sao-item .sao-ic { background: transparent; border-color: transparent; color: var(--dot-line); }
+:root[data-look~="dot"] .sao-item.on { background: linear-gradient(90deg, #3f5bdc, #2a3aa8); border-color: var(--dot-hi); color: #fff; box-shadow: 0 0 0 2px var(--dot-dark), 0 0 16px rgb(120 160 255 / .7); }
+:root[data-look~="dot"] .sao-item.on .sao-ic { color: #ffd36b; background: transparent; border-color: transparent; }
+:root[data-look~="dot"] .sao-item.on::after { border-left-color: var(--dot-hi); }
+
+/* ---- 探索者をえらぶ画面：後ろのシートを隠して夜景を見せる ---- */
+:root[data-look~="dot"]:not(.sel-has-bg) .select { background: rgb(8 10 36 / .25); }
+:root[data-look~="dot"]:not(.sel-has-bg) body:has(#select:not([hidden])) .app { visibility: hidden; }
+:root[data-look~="dot"] .sel-tabs, :root[data-look~="dot"] .sel-sort > *, :root[data-look~="dot"] .view-tg { background: rgb(14 18 60 / .85); border: 2px solid rgb(143 180 255 / .5); box-shadow: 0 0 0 2px var(--dot-dark); }
+:root[data-look~="dot"] .sel-tabs button.on, :root[data-look~="dot"] .view-tg button.on { background: linear-gradient(180deg, #3f5bdc, #2a3aa8); color: #fff; box-shadow: 0 0 12px rgb(120 160 255 / .7); }
+:root[data-look~="dot"] .sel-new { background: linear-gradient(180deg, #3f5bdc, #2a3aa8); border: 2px solid var(--dot-hi); box-shadow: 0 0 0 3px var(--dot-dark), 6px 6px 0 3px #05061a, 0 0 30px rgb(120 160 255 / .6); }
+:root[data-look~="dot"] .sel-name, :root[data-look~="dot"] .sl-name { background: rgb(14 18 60 / .9); border: 2px solid rgb(143 180 255 / .6); color: #eef2ff; }
+:root[data-look~="dot"] .sel-rings { opacity: .5; }
 </style>
 </head>
 <body>
@@ -3028,6 +3184,61 @@ function waHtml(c) {
     </div>`;
 }
 
+/* ---- ドットテーマのキャラシ：光る枠のボックスを並べる（押すとその項目をひらく） ---- */
+/* ドット絵のアイコン：1文字=1マス（. は透明、文字は色） */
+const PIX = {
+  star: ['....w....', '...wyw...', '...wyw...', 'wwwyyywww', '.wyyyyyw.', '..wyyyw..', '..wyw.yw.', '.wy....w.', '.w.......'],
+  heart: ['.pp...pp.', 'pPPp.pPPp', 'pPwPpPPPp', 'pPPPPPPPp', '.pPPPPPp.', '..pPPPp..', '...pPp...', '....p....'],
+  drop: ['....b....', '...bBb...', '..bBBBb..', '.bBwBBBb.', '.bBwBBBb.', '.bBBBBBb.', '..bBBBb..', '...bbb...'],
+  brain: ['..pPpPp..', '.pPPpPPp.', 'pPwPpPPPp', 'pPPpPpPPp', 'pPPPpPPPp', '.pPpPPPp.', '..pp.pp..'],
+  case: ['...www...', '..w...w..', 'wwwwwwwww', 'wBBBBBBBw', 'wBBByBBBw', 'wBBBBBBBw', 'wwwwwwwww'],
+  box: ['.wwwwwww.', 'wBBBwBBBw', 'wwwwwwwww', 'wBBBwBBBw', 'wBByyyBBw', 'wBBBwBBBw', 'wwwwwwwww'],
+  pen: ['......ww.', '.....wyw.', '....wBw..', '...wBw...', '..wBw....', '.wBw.....', 'www......'],
+  note: ['wwwwwww..', 'wBBBBBw..', 'wBwwwBw..', 'wBBBBBww.', 'wBwwwBBw.', 'wBBBBBBw.', 'wwwwwwww.'],
+  sword: ['.......ww', '......wBw', '.....wBw.', '.y..wBw..', '..ywBw...', '..yyw....', '.y.yy....', 'y........'],
+  book: ['wwwwwwww.', 'wPPPPPPw.', 'wPwwwwPw.', 'wPPPPPPw.', 'wPwwwPPw.', 'wPPPPPPww', 'wwwwwwwww'],
+  flag: ['w........', 'wyyyy....', 'wyyyyyy..', 'wyyyyy...', 'w........', 'w........', 'w........'],
+};
+const PIX_COL = { w: '#e8eeff', y: '#ffd36b', p: '#ff6fa8', P: '#ff9cc4', b: '#5aa8ff', B: '#2d5fd6' };
+function pix(name, size = 18) {
+  const rows = PIX[name]; if (!rows) return '';
+  const w = Math.max(...rows.map(r => r.length)), h = rows.length;
+  let r = '';
+  rows.forEach((row, y) => [...row].forEach((ch, x) => { if (ch !== '.') r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${PIX_COL[ch] || '#fff'}"/>`; }));
+  return `<svg class="pix" viewBox="0 0 ${w} ${h}" width="${size}" height="${Math.round(size * h / w)}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+}
+function dotHtml(c) {
+  const d = compute(c), a = abilities(c), p = c.profile, S = SYS[c.system];
+  const box = (key, ic, title, body, cls = '') => `<button class="dot-box ${cls}" type="button" data-open="${key}"><span class="dot-tab">${pix(ic)}<span>${title}</span></span><span class="dot-in">${body}</span></button>`;
+  const line = (lbl, v) => `<span class="dot-line"><i>${lbl}</i><b>${esc(v || '')}</b></span>`;
+  const skills = c.skills.filter(s => s.name && (skillTotal(s, a) !== skillInit(s, a) || s.isJob));
+  const shown = (skills.length ? skills : c.skills.filter(s => ['目星', '聞き耳', '図書館', '回避', '応急手当', '心理学', '説得', '言いくるめ'].includes(s.name))).slice(0, 16);
+  const items = c.items.filter(x => String(x.name || '').trim());
+  const weapons = c.weapons.filter(x => String(x.name || '').trim());
+  const scen = c.scenarios.filter(x => String(x.name || '').trim());
+  const clip = (t, n) => { t = String(t || '').trim(); return t.length > n ? t.slice(0, n) + '…' : t; };
+  return `
+    <div class="hub-top dot-tools">${toolsHtml(c)}</div>
+    <div class="dot-sheet">
+      <div class="dot-col">
+        <button class="dot-box dot-name" type="button" data-stage aria-label="立ち絵を表示"><span class="dot-tab">${pix('star')}<span>Name</span></span>
+          <span class="dot-in dot-namein"><span class="dot-face">${tokenHtml(c)}</span><span class="dot-nm"><b data-hub="name"></b><small data-hub="kana"></small><small class="dot-sys">${esc(S.short)}</small></span></span></button>
+        ${box('profile', 'star', 'Profile', `${line('職業', p.occupation)}${line('年齢', p.age && p.age + '歳')}${line('性別', p.sex)}${line('誕生日', p.birthday)}${line('出身', p.origin)}`, 'dot-prof')}
+        ${box('skills', 'star', 'Skills', `<span class="dot-skills">${shown.map(s => `<span class="dot-sk"><i>◇</i><span>${esc(skillLabel(s))}</span><b>${skillTotal(s, a)}</b><small>%</small></span>`).join('')}</span><span class="dot-more">残り 職業 <b data-out="jobLeft"></b> ／ 興味 <b data-out="hobbyLeft"></b></span>`, 'dot-skillbox')}
+        ${box('weapons', 'sword', 'Weapons', weapons.length ? weapons.slice(0, 4).map(w => `<span class="dot-line"><i>◇</i><b>${esc(w.name)}</b><small>${esc(w.rate || '')}% ${esc(w.damage || '')}</small></span>`).join('') : '<span class="dot-empty">— なし —</span>')}
+      </div>
+      <div class="dot-col">
+        ${box('abilities', 'star', 'Status', `<span class="dot-status"><span class="dot-hmsan">${[['hp', 'heart', 'HP'], ['mp', 'drop', 'MP'], ['san', 'brain', 'SAN']].map(([k, ic, l]) => `<span class="dot-hm">${pix(ic, 22)}<i>${l}</i><b data-out="${k}Cur"></b><span class="dot-bar"><i data-bar="${k}"></i></span></span>`).join('')}</span>
+          <span class="dot-abil">${Object.keys(c.abilities).map(k => `<span class="dot-ab"><i>${k}</i><b>${a[k] || 0}</b></span>`).join('')}</span></span>`, 'dot-statbox')}
+        ${box('profile', 'case', 'Occupation', `<span class="dot-big">${esc(p.occupation || '— 未記入 —')}</span>`)}
+        ${box('items', 'box', 'Possessions', (items.length ? `<span class="dot-chips">${items.slice(0, 8).map(x => `<span>${esc(x.name)}${x.count && x.count !== '1' ? ` ×${esc(x.count)}` : ''}</span>`).join('')}</span>` : '<span class="dot-empty">— なし —</span>') + `<span class="dot-line"><i>所持金</i><b>${esc(c.money.cash || '')}</b></span>`)}
+        ${box('tomes', 'book', 'Mythos', c.tomes || c.entities ? `<span class="dot-txt">${esc(clip([c.tomes, c.entities].filter(Boolean).join(' / '), 80))}</span>` : '<span class="dot-empty">— なし —</span>')}
+        ${box('scenarios', 'flag', 'Log', scen.length ? scen.slice(-4).reverse().map(x => `<span class="dot-line"><i>◇</i><b>${esc(x.name)}</b><small>${esc(x.date || '')}</small></span>`).join('') : '<span class="dot-empty">— まだ冒険していない —</span>')}
+        ${box('story', 'pen', 'Memo', `<span class="dot-txt">${esc(clip(c.memo || c.backstory || '— 未記入 —', 120))}</span>`)}
+      </div>
+    </div>`;
+}
+
 /* 襖（ふすま）がしまって、ひらく画面の切りかえ。しまった瞬間に mid() を呼ぶ */
 function waDoors(mid) {
   if (reduceMotion.matches) { mid(); return; }
@@ -3549,7 +3760,8 @@ function renderSheet() {
   const pageAt = () => ['.bk-chapter h3', '#bk-right .bk-head h3'].map(q => document.querySelector(q)?.textContent);
   const was = book ? pageAt() : [], kept = book ? [...document.querySelectorAll('#book .bk-scroll')].map(e => e.scrollTop) : [];
   $('sheet').classList.toggle('is-wa', !book && isWa());
-  $('sheet').innerHTML = book ? bookHtml(c) : isWa() ? waHtml(c) : hubHtml(c);
+  $('sheet').classList.toggle('is-dot', !book && isDot());
+  $('sheet').innerHTML = book ? bookHtml(c) : isWa() ? waHtml(c) : isDot() ? dotHtml(c) : hubHtml(c);
   if (book) { const now = pageAt(); document.querySelectorAll('#book .bk-scroll').forEach((e, i) => { if (now[i] === was[i]) e.scrollTop = kept[i] || 0; }); }
   if (panelKey && !$('panel-ov').hidden) {
     const body = $('panel-body'), st = body.scrollTop;
@@ -3611,7 +3823,12 @@ function openPanel(key, fromEl) {
   fillPanel(key);
   ov.hidden = false;
   scrollMenu(true);
-  if (!reduceMotion.matches && isWa()) {
+  if (!reduceMotion.matches && isDot()) {
+    // 昔のゲームの窓のように、横線→縦にカクカク広がる
+    ov.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing: 'steps(3, end)' });
+    $('sao-win').animate([{ clipPath: 'inset(49% 50% 49% 50%)' }, { clipPath: 'inset(49% 0% 49% 0%)', offset: .45 }, { clipPath: 'inset(0% 0% 0% 0%)' }], { duration: 520, easing: 'steps(9, end)' });
+    stagger(320);
+  } else if (!reduceMotion.matches && isWa()) {
     // 巻物がひらくように、上から下へ広がる
     ov.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: 'ease-out' });
     $('sao-win').animate([{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)' }], { duration: 760, easing: 'cubic-bezier(.55, 0, .2, 1)' });
@@ -3639,16 +3856,25 @@ function openPanel(key, fromEl) {
 }
 function closePanel() {
   const ov = $('panel-ov'); if (ov.hidden) return;
-  const target = document.querySelector(`#sheet [data-open="${panelKey}"]`) || document.querySelector('#sheet .hub-core, #sheet .wa-kake');
+  const findTarget = k => document.querySelector(`#sheet [data-open="${k}"]`) || document.querySelector('#sheet .hub-core, #sheet .wa-kake, #sheet .dot-name');
+  let target = findTarget(panelKey);
   const done = anims => {
+    const k = panelKey;
     ov.hidden = true; panelKey = null;
     anims.forEach(a => a.cancel());
+    if (isDot()) { renderSheet(); target = findTarget(k); } // ドットのボックスは中身をそのまま見せているので、閉じたら描き直す
     if (target) {
       target.focus({ preventScroll: true });
       if (!reduceMotion.matches) { target.classList.remove('land'); void target.offsetWidth; target.classList.add('land'); fxAt(target, false); }
     }
   };
   if (reduceMotion.matches) return done([]);
+  if (isDot()) { // カクカク閉じる
+    const anims = [$('sao-win').animate([{ clipPath: 'inset(0% 0% 0% 0%)' }, { clipPath: 'inset(49% 0% 49% 0%)', offset: .55 }, { clipPath: 'inset(49% 50% 49% 50%)' }], { duration: 380, easing: 'steps(7, end)', fill: 'forwards' }),
+      ov.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, delay: 260, easing: 'steps(3, end)', fill: 'forwards' })];
+    Promise.all(anims.map(a => a.finished)).then(() => done(anims));
+    return;
+  }
   if (isWa()) { // 巻物を下から巻きあげてしまう
     const anims = [$('sao-win').animate([{ clipPath: 'inset(0 0 0% 0)' }, { clipPath: 'inset(0 0 100% 0)' }], { duration: 520, easing: 'cubic-bezier(.6, 0, .4, 1)', fill: 'forwards' }),
       ov.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 240, delay: 320, fill: 'forwards' })];
@@ -3677,6 +3903,10 @@ function closePanel() {
 function gotoPanel(key) {
   if (key === panelKey) return;
   fillPanel(key);
+  if (!reduceMotion.matches && isDot()) { // 文字が打ちこまれるように、上から1段ずつ
+    $('panel-body').animate([{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)' }], { duration: 420, easing: 'steps(8, end)' });
+    return;
+  }
   if (!reduceMotion.matches && isWa()) { // 筆でさっと書いたように、左から現れる
     $('panel-body').animate([{ clipPath: 'inset(0 100% 0 0)', opacity: .4 }, { clipPath: 'inset(0 0% 0 0)', opacity: 1 }], { duration: 560, easing: 'cubic-bezier(.5, 0, .2, 1)' });
     return;
@@ -4110,6 +4340,7 @@ const THEME_PRESETS = {
   sakura: { name: '和風', sub: '和紙と墨と金、舞う桜', look: 'mincho wa', vals: { bg: '#ebdfc6', solid: '#f7efdd', ink: '#2e2520', sky: '#5a3c2c', cyan: '#b08d4a', amber: '#b08d4a' } },
   neon:   { name: 'ネオン', sub: '夜のサイバー', look: 'dark', vals: { bg: '#0b0918', solid: '#16122b', ink: '#ece8ff', sky: '#a159f5', cyan: '#22c8e8', amber: '#f2569e' } },
   book:   { name: '魔導書', sub: '古本に万年筆で書きこむ記録', look: 'dark mincho book', vals: { bg: '#140c07', solid: '#22160d', ink: '#efe0c4', sky: '#7a5a8c', cyan: '#c9a04e', amber: '#c9a04e' } },
+  dot:    { name: 'ドット', sub: '星降る夜のピクセル', look: 'dark dot', vals: { bg: '#0b0e30', solid: '#141a4c', ink: '#e8eeff', sky: '#86a8ff', cyan: '#a8d8ff', amber: '#ffd36b' } },
   forest: { name: '森', sub: '深緑とランタン', look: '', vals: { bg: '#dfe7dc', solid: '#f5f8f1', ink: '#1c2a1f', sky: '#2f7d4f', cyan: '#5aa78a', amber: '#d98a1f' } },
 };
 const presetOf = () => THEME_PRESETS[state.themePreset] || THEME_PRESETS.sky;
@@ -4131,6 +4362,7 @@ function applyTheme() {
   document.documentElement.dataset.look = presetOf().look;
   applyBg();
   waScene();
+  dotScene();
 }
 function applyBg() {
   const ac = state.chars && state.chars.find(c => c.id === state.activeId);
@@ -4280,6 +4512,124 @@ function waPetalsStart() {
   };
   if (n) WA.raf = requestAnimationFrame(tick); else g.clearRect(0, 0, cv.width, cv.height);
 }
+
+/* ================= ドットテーマ：星空と夜の街をドット絵で描く（低い解像度で描いて拡大） ================= */
+const DOT = { on: false, raf: 0, last: 0, base: null, stars: [], shoot: null, W: 0, H: 180, t0: 0 };
+const isDot = () => (presetOf().look || '').split(' ').includes('dot');
+function dotScene() {
+  const on = isDot();
+  let el = $('dot-bg');
+  if (on && !el) {
+    el = document.createElement('div'); el.id = 'dot-bg'; el.className = 'dot-bg'; el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = '<canvas id="dot-cv"></canvas>';
+    document.body.prepend(el);
+    addEventListener('resize', () => { if (DOT.on) dotBuild(); });
+  }
+  if (el) el.hidden = !on;
+  if (on === DOT.on) return;
+  DOT.on = on;
+  if (on) { dotBuild(); cancelAnimationFrame(DOT.raf); DOT.raf = requestAnimationFrame(dotTick); } else cancelAnimationFrame(DOT.raf);
+}
+/* 決まった並びの乱数（毎回同じ街並みになるように） */
+const dotRand = seed => () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+function dotBuild() {
+  const H = DOT.H, W = DOT.W = Math.max(240, Math.min(560, Math.round(H * innerWidth / innerHeight)));
+  const cv = $('dot-cv'); cv.width = W; cv.height = H;
+  const b = document.createElement('canvas'); b.width = W; b.height = H; const g = b.getContext('2d');
+  const R = dotRand(20261104), px = (x, y, c) => { g.fillStyle = c; g.fillRect(x | 0, y | 0, 1, 1); };
+  // 空：色の帯を市松模様でまぜる（ドット絵のグラデーション）
+  const sky = ['#070a24', '#0a0e33', '#0e1342', '#121852', '#171e63', '#1d2575', '#262d86', '#30358f'];
+  const horizon = 118, band = horizon / sky.length;
+  for (let y = 0; y < horizon; y++) {
+    const f = y / band, i = Math.min(sky.length - 1, Math.floor(f)), j = Math.min(sky.length - 1, i + 1), mix = f - i;
+    for (let x = 0; x < W; x++) px(x, y, (mix > .5 && (x + y) % 2) || (mix > .8) ? sky[j] : sky[i]);
+  }
+  // 月（右上）と光の輪
+  const mx = W - 34, my = 24, mr = 11;
+  for (let y = -mr - 6; y <= mr + 6; y++) for (let x = -mr - 6; x <= mr + 6; x++) {
+    const d = Math.hypot(x, y);
+    if (d <= mr) px(mx + x, my + y, (x + y > 6 && d > mr - 4) ? '#c9d2f2' : '#eef1ff');
+    else if (d <= mr + 3 && (x + y) % 2 === 0) px(mx + x, my + y, '#4a56a8');
+    else if (d <= mr + 6 && (x * 3 + y) % 4 === 0) px(mx + x, my + y, '#2f3891');
+  }
+  [[-4, -3, 2], [3, 2, 3], [-2, 5, 1], [5, -5, 1]].forEach(([x, y, r]) => { for (let a = -r; a <= r; a++) for (let c = -r; c <= r; c++) if (a * a + c * c <= r * r) px(mx + x + a, my + y + c, '#cfd6f3'); });
+  // 雲（紫のかたまり）
+  const cloud = (cx, cy, w) => { for (let k = 0; k < w; k++) { const h = 2 + Math.round(Math.sin(k / w * Math.PI) * (3 + R() * 2)); for (let y = 0; y < h; y++) px(cx + k, cy - y, y === h - 1 ? '#5b4fb4' : '#3e3a96'); } };
+  cloud(W * .05, 34, 46); cloud(W * .22, 22, 30); cloud(W * .55, 62, 54); cloud(W * .8, 74, 40);
+  // 遠くの街
+  const city = (y0, hMin, hMax, col, winP, seed) => {
+    const r = dotRand(seed); let x = 0;
+    while (x < W) {
+      const w = 6 + Math.floor(r() * 16), h = hMin + Math.floor(r() * (hMax - hMin));
+      g.fillStyle = col; g.fillRect(x, y0 - h, w, h);
+      for (let wy = y0 - h + 2; wy < y0 - 1; wy += 3) for (let wx = x + 1; wx < x + w - 1; wx += 2) if (r() < winP) px(wx, wy, r() < .7 ? '#ffd36b' : '#9fd4ff');
+      x += w + (r() < .3 ? 1 : 0);
+    }
+  };
+  city(horizon + 6, 10, 30, '#1b2068', .1, 7);
+  city(horizon + 12, 14, 46, '#12164c', .22, 11);
+  // 電波塔（右）
+  const tx = Math.round(W * .86), ty = horizon + 12;
+  for (let y = 0; y < 86; y++) { const w = Math.max(1, Math.round((86 - y) / 9)); g.fillStyle = y % 7 === 0 ? '#3b4aa6' : '#1a2066'; g.fillRect(tx - w, ty - y, w * 2 + 1, 1); }
+  g.fillStyle = '#9fb6ff'; g.fillRect(tx - 3, ty - 44, 7, 3); g.fillRect(tx - 2, ty - 66, 5, 2);
+  // 水面：街を上下さかさに映して、横の線で切る
+  const wy0 = horizon + 12;
+  g.fillStyle = '#0a0d33'; g.fillRect(0, wy0, W, H - wy0);
+  for (let y = 0; y < H - wy0; y++) if (y % 3 !== 2) g.drawImage(b, 0, wy0 - 1 - y, W, 1, (y % 6 < 3 ? 1 : -1), wy0 + y, W, 1);
+  g.fillStyle = 'rgba(10,13,51,.45)'; g.fillRect(0, wy0, W, H - wy0);
+  // 手前の手すりと紫陽花（左下）
+  g.fillStyle = '#0c0f3a'; g.fillRect(0, H - 34, Math.round(W * .32), 2);
+  for (let x = 2; x < W * .32; x += 9) g.fillRect(x, H - 34, 2, 34);
+  for (let k = 0; k < 70; k++) { const x = R() * W * .26, y = H - 4 - R() * 22, c = R(); g.fillStyle = c < .35 ? '#7d6ae0' : c < .7 ? '#5e72e6' : '#a993ff'; g.fillRect(x | 0, y | 0, 2, 2); }
+  for (let k = 0; k < 40; k++) px(R() * W * .26, H - 2 - R() * 26, '#2b3a7a');
+  DOT.base = b;
+  // またたく星
+  const rs = dotRand(99); DOT.stars = Array.from({ length: Math.round(W / 4) }, () => ({ x: Math.floor(rs() * W), y: Math.floor(rs() * (horizon - 30)), p: rs() * 6.3, s: .002 + rs() * .004, big: rs() < .12 }));
+}
+function dotTick(t) {
+  if (!DOT.on) return;
+  DOT.raf = requestAnimationFrame(dotTick);
+  if (document.hidden || t - DOT.last < 66) return; // 15コマ/秒で十分
+  DOT.last = t;
+  const cv = $('dot-cv'); if (!cv || !DOT.base) return;
+  const g = cv.getContext('2d'), W = DOT.W, H = DOT.H;
+  g.drawImage(DOT.base, 0, 0);
+  const still = reduceMotion.matches;
+  DOT.stars.forEach(s => {
+    const v = still ? .7 : (Math.sin(t * s.s + s.p) + 1) / 2;
+    if (v < .25) return;
+    g.fillStyle = v > .75 ? '#ffffff' : '#9fb3ff'; g.fillRect(s.x, s.y, 1, 1);
+    if (s.big && v > .6) { g.fillStyle = 'rgba(200,215,255,.7)'; g.fillRect(s.x - 1, s.y, 3, 1); g.fillRect(s.x, s.y - 1, 1, 3); }
+  });
+  if (!still) {
+    // 流れ星
+    if (!DOT.shoot && Math.random() < .012) DOT.shoot = { x: W * (.3 + Math.random() * .6), y: 4 + Math.random() * 30, l: 0 };
+    if (DOT.shoot) {
+      const s = DOT.shoot; s.l += 1;
+      for (let k = 0; k < 14; k++) { const a = Math.max(0, 1 - k / 14) * Math.min(1, (30 - s.l) / 10); g.fillStyle = `rgba(220,230,255,${a})`; g.fillRect(Math.round(s.x - s.l * 3 + k * 2), Math.round(s.y + s.l * 1.2 - k * .8), 1, 1); }
+      if (s.l > 30) DOT.shoot = null;
+    }
+    // 水面のきらめき
+    for (let k = 0; k < 18; k++) { const x = (k * 37 + Math.floor(t / 180) * 13) % W, y = 132 + (k * 11) % (H - 134); g.fillStyle = k % 3 ? 'rgba(160,190,255,.5)' : 'rgba(255,211,107,.45)'; g.fillRect(x, y, 2 + (k % 3), 1); }
+  }
+}
+/* ドットの画面切りかえ：四角いブロックが埋まって、また消える */
+function dotMosaic(mid) {
+  if (reduceMotion.matches) { mid(); return; }
+  const cv = document.createElement('canvas'); cv.className = 'dot-mosaic'; cv.setAttribute('aria-hidden', 'true');
+  const S = 28, cols = Math.ceil(innerWidth / S), rows = Math.ceil(innerHeight / S);
+  cv.width = cols * S; cv.height = rows * S; document.body.appendChild(cv);
+  const g = cv.getContext('2d'), cells = [];
+  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) cells.push([x, y, (x + y) / (cols + rows) * .7 + Math.random() * .3]);
+  const draw = (k, fill) => {
+    g.clearRect(0, 0, cv.width, cv.height);
+    cells.forEach(([x, y, o]) => { if (fill ? o <= k : o > k) { g.fillStyle = '#0b0e30'; g.fillRect(x * S, y * S, S, S); g.fillStyle = '#2a3290'; g.fillRect(x * S, y * S, S, 2); g.fillRect(x * S, y * S, 2, S); } });
+  };
+  const run = (ms, fill, then) => { const t0 = performance.now(); const step = t => { const k = Math.min(1, (t - t0) / ms); draw(k, fill); if (k < 1) requestAnimationFrame(step); else then(); }; requestAnimationFrame(step); };
+  run(360, true, () => { try { mid(); } catch (e) { console.error(e); } setTimeout(() => run(420, false, () => cv.remove()), 90); });
+}
+/* テーマごとの画面切りかえ（和風は襖、ドットはモザイク） */
+const themeSwitchFx = () => isWa() ? waDoors : isDot() ? dotMosaic : null;
 
 /* ================= 立ち絵 ================= */
 const blobUrls = new Map();
@@ -6025,7 +6375,7 @@ function popSelect() {
   document.querySelector('.sel-head')?.animate([{ opacity: 0, transform: 'translateY(-12px)' }, { opacity: 1, transform: 'none' }], { duration: 600, easing: 'ease-out' });
 }
 function showSelect() {
-  if (isWa() && !showSelect.inner && !reduceMotion.matches && $('select').hidden) { waDoors(() => { showSelect.inner = true; try { showSelect(); } finally { showSelect.inner = false; } }); return; }
+  if (themeSwitchFx() && !showSelect.inner && !reduceMotion.matches && $('select').hidden) { themeSwitchFx()(() => { showSelect.inner = true; try { showSelect(); } finally { showSelect.inner = false; } }); return; }
   hidePeek();
   if (selTab === 'friends') setTimeout(refreshFriendView, 0);
   stopBgm(); $('bgm').hidden = true;
@@ -6041,7 +6391,7 @@ function leaveSelect(fromEl, quick) {
   const sel = $('select');
   const done = () => { sel.hidden = true; document.documentElement.style.overflow = ''; scrollTo(0, 0); renderPlayer(); };
   if (reduceMotion.matches || quick) { done(); return; }
-  if (isWa()) { waDoors(done); return; } // 和風：襖がしまって、ひらくとシート
+  if (themeSwitchFx()) { themeSwitchFx()(done); return; } // 和風は襖、ドットはモザイクで切りかえ
   if (fromEl) {
     fxAt(fromEl, true);
     fromEl.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.5)', opacity: 0 }], { duration: 520, easing: 'cubic-bezier(.5, 0, .3, 1)', fill: 'forwards' });
