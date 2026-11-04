@@ -23,6 +23,7 @@ $('preset-list').innerHTML = Object.entries(SYS).map(([k, v]) =>
   `<button class="preset" type="button" data-sys="${k}"><b>${esc(v.label)}</b><span>判定 ${esc(v.cmd)}&lt;=○○ ・ 技能${v.skills.length}種</span></button>`).join('');
 $('preset-list').addEventListener('click', e => {
   const b = e.target.closest('[data-sys]'); if (!b) return;
+  if (!canAddChar()) { closeModals(); return; }
   const c = blank(b.dataset.sys);
   state.chars.unshift(c); state.activeId = c.id; save(); closeModals(); stopBgm();
   if (!$('select').hidden) leaveSelect(null, true);
@@ -30,7 +31,12 @@ $('preset-list').addEventListener('click', e => {
   openPanel('profile', document.querySelector('#sheet .hub-core'));
   $('f-profile-name')?.focus({ preventScroll: true });
 });
-$('btn-new').addEventListener('click', () => openModal('modal-new'));
+function openNewChar() {
+  if (!canAddChar()) return;
+  $('new-count').textContent = `いま ${charCount()} 人 ／ 最大 ${MAX_CHARS} 人（あと ${charRoom()} 人作れます）`;
+  openModal('modal-new');
+}
+$('btn-new').addEventListener('click', openNewChar);
 
 $('btn-import').addEventListener('click', () => { $('import-err').textContent = ''; $('import-text').value = ''; openModal('modal-import'); });
 $('import-file').addEventListener('change', e => {
@@ -60,6 +66,10 @@ $('import-run').addEventListener('click', () => {
     : (c && c.kind === 'character') ? fromCcfolia(c)
     : (c && Array.isArray(c.params)) ? migrateV1(c) : null).filter(Boolean);
   if (!list.length) { err.textContent = '探索者のデータが見つかりませんでした。このアプリのバックアップか、ココフォリアのコマデータを貼り付けてください。'; return; }
+  const room = charRoom();
+  if (!room) { err.textContent = `探索者は${MAX_CHARS}人までです。いらない探索者を削除してから読み込んでください。`; return; }
+  const cut = list.length - room;
+  if (cut > 0) list = list.slice(0, room);
   list.forEach(c => { c.id = uid(); delete c.sample; });
   if (obj && Array.isArray(obj.friends)) {
     state.friends = state.friends || [];
@@ -69,7 +79,8 @@ $('import-run').addEventListener('click', () => {
   save(); closeModals(); renderAll();
   const info = list[0].importInfo;
   list.forEach(c => { delete c.importInfo; });
-  if (info) toast(`「${list[0].profile.name || '名無し'}」を読み込みました。技能${info.matched}個を反映${info.added ? `、${info.added}個を新しく追加` : ''}しました。技能の値は「その他」欄に入っています。`);
+  if (cut > 0) toast(`探索者は${MAX_CHARS}人までなので、先頭の${room}人だけ読み込みました（${cut}人は読み込んでいません）。`);
+  else if (info) toast(`「${list[0].profile.name || '名無し'}」を読み込みました。技能${info.matched}個を反映${info.added ? `、${info.added}個を新しく追加` : ''}しました。技能の値は「その他」欄に入っています。`);
   else toast(`${list.length}人の探索者を読み込みました。`);
 });
 

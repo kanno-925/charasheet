@@ -109,7 +109,7 @@ $('select').addEventListener('click', e => {
   if (e.target.closest('#sel-login')) { acctTab = 'login'; openAccount(); return; }
   const fb = e.target.closest('.sel-friend');
   if (fb) { if (selLong) { selLong = false; return; } if (fb.dataset.kind === 'fr') viewFriend(fb.dataset.fuid, fb.dataset.fname); else openFriends(); return; }
-  if (e.target.closest('#sel-new')) { openModal('modal-new'); return; }
+  if (e.target.closest('#sel-new')) { openNewChar(); return; }
   if (e.target.closest('#sel-import')) { $('btn-import').click(); return; }
   if (e.target.closest('#sel-theme')) { $('btn-theme').click(); return; }
   const ch = e.target.closest('.sel-char, .sel-row'); if (!ch) return;

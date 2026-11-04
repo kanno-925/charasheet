@@ -108,6 +108,7 @@ onBoth('click', e => {
       return;
     }
     case 'dup': {
+      if (!canAddChar()) return;
       const copy = JSON.parse(JSON.stringify(c));
       copy.id = uid(); copy.profile.name = (c.profile.name || '名無し') + '（コピー）'; delete copy.sample;
       if (c.bgm?.src === 'idb') AudioDB.get(c.id).then(bl => bl && AudioDB.put(copy.id, bl)).catch(() => {});

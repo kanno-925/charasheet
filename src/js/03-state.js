@@ -65,3 +65,13 @@ function migrateV1(o) {
   c.memo = o.memo || ''; c.extra = o.extra || '';
   return c;
 }
+
+/* 1人が持てる探索者は最大 50 人（見本は数えない） */
+const MAX_CHARS = 50;
+const charCount = () => state.chars.filter(c => !c.sample).length;
+const charRoom = () => Math.max(0, MAX_CHARS - charCount());
+function canAddChar(n = 1) {
+  if (charRoom() >= n) return true;
+  toast(`探索者は${MAX_CHARS}人までです。いらない探索者を削除してから作ってください。`);
+  return false;
+}
