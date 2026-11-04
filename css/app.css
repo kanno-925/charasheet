@@ -971,8 +971,12 @@ label.btn { display: inline-block; }
 .sheet.is-book, .has-bg .sheet.is-book { background: transparent; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 .book { position: relative; padding: 66px 34px 64px; }
 /* give the book more room: slimmer side columns while the book theme is on */
-@media (min-width: 1181px) { .layout:has(> .sheet.is-book) { grid-template-columns: 190px minmax(0, 1fr) 300px; gap: 14px; } }
-@media (min-width: 901px) and (max-width: 1180px) { .layout:has(> .sheet.is-book) { grid-template-columns: 170px minmax(0, 1fr); gap: 14px; } }
+/* the book takes the whole width; the CCFOLIA output moves below it */
+@media (min-width: 901px) {
+  .layout:has(> .sheet.is-book) { grid-template-columns: 180px minmax(0, 1fr); gap: 14px; }
+  .layout:has(> .sheet.is-book) > .tray { grid-column: 2; position: static; max-width: 760px; width: 100%; justify-self: center; }
+}
+@media (min-width: 901px) and (max-width: 1180px) { .layout:has(> .sheet.is-book) { grid-template-columns: 160px minmax(0, 1fr); } }
 .book::before { content: ""; position: absolute; inset: 20px 0 -10px; z-index: -1; pointer-events: none; border-radius: 40px;
   background: radial-gradient(ellipse at 50% 45%, rgb(255 170 80 / .18), transparent 65%); filter: blur(34px); animation: grim-glow 7s ease-in-out infinite; }
 @keyframes grim-glow { 50% { opacity: .6; } }
@@ -996,9 +1000,9 @@ label.btn { display: inline-block; }
 .bk-clasp, .bk-cover::after { position: absolute; z-index: 4; top: 44%; width: 112px; height: 50px; pointer-events: none;
   background: var(--tx-clasp) center / contain no-repeat; filter: drop-shadow(0 5px 6px rgb(0 0 0 / .7));
   -webkit-mask-image: radial-gradient(ellipse 52% 50% at 50% 50%, #000 62%, transparent 100%); mask-image: radial-gradient(ellipse 52% 50% at 50% 50%, #000 62%, transparent 100%); }
-.bk-clasp { right: -50px; }
+.bk-clasp { right: -36px; }
 @media (max-width: 1180px) { .bk-clasp { right: -32px; } .bk-cover::after { left: -32px; } }
-.bk-cover::after { content: ""; left: -50px; transform: scaleX(-1); }
+.bk-cover::after { content: ""; left: -36px; transform: scaleX(-1); }
 
 /* --- the page block --- */
 .bk-pages {
@@ -1009,7 +1013,7 @@ label.btn { display: inline-block; }
   --sao-ink: var(--ink); --sao-mute: var(--muted); --shadow: none; --gloss: transparent;
   --f-body: "Zen Kurenaido", "Klee One", "Yu Mincho", serif; --f-mono: "Zen Kurenaido", "Klee One", serif; --f-latin: "Cinzel", "Times New Roman", serif;
   color-scheme: light; color: var(--ink); font-family: var(--f-body);
-  position: relative; z-index: 1; display: grid; grid-template-columns: minmax(220px, 1fr) minmax(0, 1.75fr); border-radius: 3px 8px 8px 3px;
+  position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); border-radius: 3px 8px 8px 3px;
   perspective: 2000px; perspective-origin: 30% 60%; filter: drop-shadow(4px 8px 8px rgb(0 0 0 / .6)); }
 /* page layers peeking out under the top sheet */
 .bk-pages::before, .bk-pages::after { content: ""; position: absolute; z-index: 0; top: 4px; bottom: -6px; pointer-events: none;
@@ -1040,7 +1044,7 @@ label.btn { display: inline-block; }
 .bk-edge { position: absolute; z-index: 0; left: 18px; right: 22px; bottom: 4px; height: 18px; pointer-events: none; border-radius: 0 0 6px 3px;
   background: linear-gradient(to bottom, rgb(0 0 0 / .45), transparent 50%), var(--tx-edge) center / 100% 100%; box-shadow: 0 3px 6px rgb(0 0 0 / .55); }
 /* dark red ribbon hanging out of the gutter */
-.bk-ribbon { position: absolute; z-index: 5; left: calc((100% - 0px) / 2.75 + 26px); bottom: -92px; width: 22px; height: 150px; pointer-events: none;
+.bk-ribbon { position: absolute; z-index: 5; left: calc(50% + 14px); bottom: -92px; width: 22px; height: 150px; pointer-events: none;
   background: linear-gradient(90deg, rgb(0 0 0 / .35), transparent 30%, transparent 70%, rgb(0 0 0 / .4)), repeating-linear-gradient(0deg, rgb(255 255 255 / .04) 0 1px, transparent 1px 3px), #5e1a16;
   clip-path: polygon(0 0, 100% 0, 96% 60%, 100% 100%, 50% calc(100% - 10px), 0 100%, 4% 55%); transform: rotate(-6deg); transform-origin: top center; box-shadow: 1px 0 3px rgb(0 0 0 / .4); }
 
