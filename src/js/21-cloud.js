@@ -83,10 +83,13 @@ async function flushSync() {
     const mine = myChars();
     const rows = [];
     mine.forEach(c => { c.owner = me.id; const js = JSON.stringify(c); if (lastSynced.get(c.id) !== js) rows.push([c, js]); });
-    if (rows.length) {
-      const { error } = await sb.from('characters').upsert(rows.map(([c]) => ({ id: c.id, owner: me.id, name: c.profile.name || '', locked: !!c.locked, data: c, updated_at: new Date(c.updatedAt || Date.now()).toISOString() })));
+    // 立ち絵の入ったキャラは大きいので、だいたい3MBずつに分けて送る（一度に全部送ると失敗しやすい）
+    const batches = [];
+    rows.forEach(r => { const b = batches[batches.length - 1]; if (b && b.size + r[1].length <= 3e6) { b.rows.push(r); b.size += r[1].length; } else batches.push({ rows: [r], size: r[1].length }); });
+    for (const b of batches) {
+      const { error } = await sb.from('characters').upsert(b.rows.map(([c]) => ({ id: c.id, owner: me.id, name: c.profile.name || '', locked: !!c.locked, data: c, updated_at: new Date(c.updatedAt || Date.now()).toISOString() })));
       if (error) throw error;
-      rows.forEach(([c, js]) => lastSynced.set(c.id, js));
+      b.rows.forEach(([c, js]) => lastSynced.set(c.id, js));
     }
     const live = new Set(mine.map(c => c.id));
     const gone = [...lastSynced.keys()].filter(id => !live.has(id));

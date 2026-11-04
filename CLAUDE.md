@@ -13,7 +13,7 @@
 
 ## 仕組み
 - JS は `src/files.txt` の順に連結され、全体が1つの即時関数で包まれる。ファイルをまたいで同じ変数・関数を使えるので**順番が大事**。新しいファイルは番号を付けて files.txt にも追加する。
-- データは `state`（03-state.js）に集まり、IndexedDB（データベース `charasheet-kobo-data` の `kv` の `state`）に保存。localStorage のキー `charasheet-kobo.v2` にも入りきるうちは予備として保存し、読み込むときは `savedAt` が新しいほうを使う（04-import.js の load/saveNow。v1 からの移行処理あり）。キャラ1人分の形は `blank()` を参照。
+- データは `state`（03-state.js）に集まり、IndexedDB（データベース `charasheet-kobo-data` の `kv`。キャラ以外は `meta`、キャラは1人ずつ `c:id` で、変わったキャラだけ書く）に保存。localStorage のキー `charasheet-kobo.v2` にも入りきるうちは予備として保存し、読み込むときは `savedAt` が新しいほうを使う（04-import.js の load/saveNow。v1 からの移行処理あり）。キャラ1人分の形は `blank()` を参照。
 - ルール（6版 `coc6`／7版 `coc7`）の能力値・技能・DB計算は `01-rules.js` の `SYS`。
 - 主な機能とファイル：取り込み（いあきゃら・ココフォリア・テキスト）04 / ココフォリア出力 06 / 魔導書テーマ 09・11-book.css / テーマ 15 / BGM 19 / フレンド 20 / クラウド同期 21 / ダイス 22 / グループ 25 / 探索者選択 26 / オープニング 27 / 画面の編集モード 28・15-ui-editor.css。
 - サーバーは Supabase（接続先は 21-cloud.js。公開してよい publishable key）。見える範囲は RLS でサーバー側に強制している。

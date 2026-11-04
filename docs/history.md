@@ -4,6 +4,7 @@
 （細かい変更はコミット履歴 `git log` を見る）
 
 ## 2026-11-04
+- 50人・全員立ち絵つきでも保存できるように：IndexedDB にキャラを1人ずつ保存し、変わったキャラだけ書く（前の `state` 1つにまとめた形は自動で移す）。クラウド同期は約3MBずつ分けて送る。
 - 保存容量を拡張：キャラシの保存先を localStorage（約5MB）から IndexedDB（数百MB以上）へ。localStorage は入りきるうちだけ予備に使う。IndexedDB を読めないときは、古いデータで上書きしないよう保存を止める。
 - フォルダを整理：assets/ をテーマごとのフォルダ（book/・wa/）に分け、名前の頭の「book-」などを外した。build.py はフォルダの中の画像も埋め込み、書いた場所にファイルが無ければ止まる。README のフォルダ構成・SQL一覧・ファイル早見表を最新に。
 - ドットテーマを追加（look `dark dot`、css/17-dot.css）：背景は canvas で低解像度に描いた星空・月・流れ星・夜の街・水面・紫陽花（15-theme.js の dotScene）。キャラシは光る枠のボックス（dotHtml、08-hub-panel.js）、ドット文字（DotGothic16・Pixelify Sans）、窓はカクカク開く、切りかえはモザイク（dotMosaic）。

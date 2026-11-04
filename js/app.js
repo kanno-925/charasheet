@@ -474,6 +474,9 @@ function fromIachara(text) {
 /* ================= 保存 =================
    データは2か所に保存する。
    ・IndexedDB（ブラウザの大きな保存場所。数百MB以上入る）… こちらが本命
+       'meta' … キャラ以外の設定と、キャラの並び順（ids）
+       'c:キャラのid' … キャラ1人分。中身が変わったキャラだけ書きなおす（50人ぶんの立ち絵を毎回書かないため）
+       'state' … 前の形（全部まとめて1つ）。読み込めるようにだけ残し、次に保存したとき消す
    ・localStorage（約5MBまで）… 入りきるうちは予備として。入りきらなくなったら消す
    読み込むときは、新しいほう（savedAt が大きいほう）を使う。 */
 const DataDB = {
@@ -490,20 +493,37 @@ const DataDB = {
   },
   async tx(mode, fn) {
     const db = await this.open();
-    return new Promise((res, rej) => { const t = db.transaction('kv', mode); const out = fn(t.objectStore('kv')); t.oncomplete = () => res(out && out.result); t.onerror = t.onabort = () => rej(t.error); });
+    return new Promise((res, rej) => { const t = db.transaction('kv', mode); const out = fn(t.objectStore('kv')); t.oncomplete = () => res(typeof out === 'function' ? out() : out && out.result); t.onerror = t.onabort = () => rej(t.error); });
   },
   get(k) { return this.tx('readonly', st => st.get(k)); },
-  put(k, v) { return this.tx('readwrite', st => st.put(v, k)); },
+  getMany(keys) { return this.tx('readonly', st => { const rs = keys.map(k => st.get(k)); return () => rs.map(r => r.result); }); },
 };
 const KEY_IDB = 'charasheet-kobo.idb';   // 「IndexedDB に保存したことがある」しるし
-let loaded = false, idbOk = false;
+const LS_MAX = 2400000;                   // localStorage に入るのはだいたいこの文字数まで
+const charJson = new Map();               // IndexedDB に書いてあるキャラの中身（変わったかどうかを比べる）
+let loaded = false, idbOk = false, idbLegacy = false;
 const withTimeout = (pr, ms) => Promise.race([pr, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+const parseState = raw => { try { const s = raw ? JSON.parse(raw) : null; return s && Array.isArray(s.chars) ? s : null; } catch (e) { return null; } };
+
+async function loadIdb() {
+  const [meta, legacy] = await DataDB.getMany(['meta', 'state']);
+  idbLegacy = legacy != null;
+  let m = null; try { m = meta ? JSON.parse(meta) : null; } catch (e) { m = null; }
+  if (m && Array.isArray(m.ids)) {
+    const raws = await DataDB.getMany(m.ids.map(id => 'c:' + id));
+    const chars = [];
+    raws.forEach((r, i) => { try { if (r) { chars.push(JSON.parse(r)); charJson.set(m.ids[i], r); } } catch (e) { /* 壊れた1人分はとばす */ } });
+    delete m.ids; m.chars = chars;
+    const old = parseState(legacy);
+    return old && (old.savedAt || 0) > (m.savedAt || 0) ? old : m;
+  }
+  return parseState(legacy);
+}
 
 async function load() {
-  const parse = raw => { try { const s = raw ? JSON.parse(raw) : null; return s && Array.isArray(s.chars) ? s : null; } catch (e) { return null; } };
   let fromLs = null, fromIdb = null, usedIdb = false;
-  try { usedIdb = localStorage.getItem(KEY_IDB) === '1'; fromLs = parse(localStorage.getItem(KEY)); } catch (e) { /* storage unavailable */ }
-  try { fromIdb = parse(await withTimeout(DataDB.get('state'), 4000)); idbOk = true; } catch (e) { idbOk = false; }
+  try { usedIdb = localStorage.getItem(KEY_IDB) === '1'; fromLs = parseState(localStorage.getItem(KEY)); } catch (e) { /* storage unavailable */ }
+  try { fromIdb = await withTimeout(loadIdb(), 8000); idbOk = true; } catch (e) { idbOk = false; }
   if (!idbOk && usedIdb) {
     // 本命の保存場所が読めない。ここで保存すると古いデータで上書きしてしまうので、保存しない
     toast('保存したデータを読み込めませんでした。ほかのタブを閉じてから、ページを読み込み直してください。');
@@ -523,20 +543,38 @@ async function load() {
   if (!state.chars.length) state.chars = [sample()];
   if (!state.chars.some(c => c.id === state.activeId)) state.activeId = state.chars[0].id;
   loaded = true;
-  if (idbOk && !fromIdb) saveNow();   // 今までの localStorage のデータを IndexedDB にも写しておく
+  if (idbOk && (!fromIdb || idbLegacy || best !== fromIdb)) saveNow();   // 新しい形で IndexedDB に書いておく
 }
 let saveTimer, persistAsked = false;
 function saveNow() {
   clearTimeout(saveTimer);
   if (!loaded) return;   // 読み込みが終わる前に保存すると、空のデータで上書きしてしまう
   state.savedAt = Date.now();
-  const json = JSON.stringify(state);
+  const { chars, ...rest } = state;
+  const ids = chars.map(c => c.id);
+  const meta = JSON.stringify(Object.assign(rest, { ids }));
+  const jsons = chars.map(c => JSON.stringify(c));
+  const total = jsons.reduce((n, j) => n + j.length, meta.length);
+
   let lsOk = false;
-  try { localStorage.setItem(KEY, json); lsOk = true; }
-  catch (e) { try { localStorage.removeItem(KEY); } catch (e2) { /* */ } }   // 入りきらない古い予備は消して、ほかの設定のために場所を空ける
+  if (total < LS_MAX) { try { localStorage.setItem(KEY, JSON.stringify(state)); lsOk = true; } catch (e) { /* 入りきらない */ } }
+  if (!lsOk) { try { localStorage.removeItem(KEY); } catch (e) { /* */ } }   // 入りきらない古い予備は消して、ほかの設定のために場所を空ける
   const full = () => toast('保存容量がいっぱいです。立ち絵を小さい画像に変えるか、使っていない探索者を削除してください。');
   if (!idbOk) { if (!lsOk) full(); return; }
-  DataDB.put('state', json).then(() => {
+
+  const live = new Set(ids);
+  const changed = ids.map((id, i) => [id, jsons[i]]).filter(([id, j]) => charJson.get(id) !== j);
+  const removed = [...charJson.keys()].filter(id => !live.has(id));
+  const dropLegacy = idbLegacy;
+  DataDB.tx('readwrite', st => {
+    st.put(meta, 'meta');
+    changed.forEach(([id, j]) => st.put(j, 'c:' + id));
+    removed.forEach(id => st.delete('c:' + id));
+    if (dropLegacy) st.delete('state');
+  }).then(() => {
+    changed.forEach(([id, j]) => charJson.set(id, j));
+    removed.forEach(id => charJson.delete(id));
+    if (dropLegacy) idbLegacy = false;
     try { localStorage.setItem(KEY_IDB, '1'); } catch (e) { /* */ }
     // ブラウザが空き容量のために勝手に消さないようお願いしておく（できないブラウザもある）
     if (!persistAsked) { persistAsked = true; navigator.storage?.persist?.().catch(() => {}); }
@@ -2791,10 +2829,13 @@ async function flushSync() {
     const mine = myChars();
     const rows = [];
     mine.forEach(c => { c.owner = me.id; const js = JSON.stringify(c); if (lastSynced.get(c.id) !== js) rows.push([c, js]); });
-    if (rows.length) {
-      const { error } = await sb.from('characters').upsert(rows.map(([c]) => ({ id: c.id, owner: me.id, name: c.profile.name || '', locked: !!c.locked, data: c, updated_at: new Date(c.updatedAt || Date.now()).toISOString() })));
+    // 立ち絵の入ったキャラは大きいので、だいたい3MBずつに分けて送る（一度に全部送ると失敗しやすい）
+    const batches = [];
+    rows.forEach(r => { const b = batches[batches.length - 1]; if (b && b.size + r[1].length <= 3e6) { b.rows.push(r); b.size += r[1].length; } else batches.push({ rows: [r], size: r[1].length }); });
+    for (const b of batches) {
+      const { error } = await sb.from('characters').upsert(b.rows.map(([c]) => ({ id: c.id, owner: me.id, name: c.profile.name || '', locked: !!c.locked, data: c, updated_at: new Date(c.updatedAt || Date.now()).toISOString() })));
       if (error) throw error;
-      rows.forEach(([c, js]) => lastSynced.set(c.id, js));
+      b.rows.forEach(([c, js]) => lastSynced.set(c.id, js));
     }
     const live = new Set(mine.map(c => c.id));
     const gone = [...lastSynced.keys()].filter(id => !live.has(id));
