@@ -735,11 +735,11 @@ function sfxFlip(delayMs, ms, n = 1, gap = 0) {
   }
 }
 /* 万年筆で書く音 */
-function sfxWrite(ms) {
+function sfxWrite(ms, delayMs = 0) {
   if (!sfxOn()) return;
-  if (sfxSample('write', 20, Math.min(ms, 7000), .8)) return;
+  if (sfxSample('write', 20 + delayMs, Math.min(ms, 7000), .8)) return;
   const ctx = actx(); if (!ctx) return;
-  let t = ctx.currentTime + .02; const end = t + Math.min(ms, 6000) / 1000;
+  let t = ctx.currentTime + .02 + delayMs / 1000; const end = t + Math.min(ms, 6000) / 1000;
   while (t < end) {
     const d = .05 + Math.random() * .14;
     noiseBurst(ctx, t, d, { f0: 3800 + Math.random() * 1800, f1: 2600 + Math.random() * 1600, q: 2.2, vol: .05 + Math.random() * .05, attack: .008, hp: 1800 });
@@ -869,15 +869,17 @@ function bookHtml(c) {
     </div>
   </div>`;
 }
-function writeIn(pg) {
+/* 頁に文字が書きこまれていく（delay ミリ秒後から）。
+   filter はアニメさせない：かすれ文字の SVG フィルターが外れて、終わりに見た目が跳ねるため */
+function writeIn(pg, delay = 0) {
   if (!pg || reduceMotion.matches) return;
   const els = [...pg.querySelectorAll('.bk-head .bk-en, .bk-head h3, .bk-note, .field, .sec-title, .points .pt, .tbl thead tr, .tbl tbody tr, .dv, .chart-fig, .sub-title, .scn-friends, .played-with, .bk-entry-act, .bk-manage, textarea, .bk-empty')]
     .filter(el => !el.closest('.field') || el.classList.contains('field')).slice(0, 44);
   const dur = 900, step = 115;
   els.forEach((el, i) => el.animate(
-    [{ clipPath: 'inset(0 100% 0 0)', filter: 'blur(1.2px)', opacity: .35 }, { clipPath: 'inset(0 0% 0 0)', filter: 'blur(0)', opacity: 1 }],
-    { duration: dur, delay: i * step, easing: 'cubic-bezier(.45, .1, .35, 1)', fill: 'backwards' }));
-  if (els.length) sfxWrite(dur + (els.length - 1) * step);
+    [{ clipPath: 'inset(0 100% 0 0)', opacity: .3 }, { clipPath: 'inset(0 0% 0 0)', opacity: 1 }],
+    { duration: dur, delay: delay + i * step, easing: 'cubic-bezier(.45, .1, .35, 1)', fill: 'backwards' }));
+  if (els.length) sfxWrite(dur + (els.length - 1) * step, delay);
 }
 let bookBusy = false;
 function setBookSub(id) {
@@ -936,9 +938,8 @@ function flipLeaves(fromIdx, toIdx, count) {
     leaf.querySelectorAll('.lf').forEach(f => anims.push(f.animate(seq.map(x => ({ offset: x.t, filter: `brightness(${x.b})` })), { duration: dur, delay: i * gap, easing: 'cubic-bezier(.42, .02, .3, 1)', fill: 'both' })));
   }
   sfxFlip(dur * .08, dur + (n - 1) * gap, n, gap);
-  pg.querySelector('.bk-head')?.animate([{ opacity: 0 }, { opacity: 0, offset: .55 }, { opacity: 1 }], { duration: dur + n * gap, easing: 'ease-out' });
-  pg.querySelector('.bk-body')?.animate([{ opacity: 0, filter: 'blur(3px)' }, { opacity: 0, offset: .55 }, { opacity: 1, filter: 'blur(0)' }], { duration: dur + n * gap + 120, easing: 'ease-out' });
-  setTimeout(() => writeIn(pg), Math.max(0, dur + n * gap - 260));
+  // 新しい頁は白紙から：書きこみ前の文字は最初から隠しておき、めくり終わりに合わせて書き始める
+  writeIn(pg, Math.max(0, dur + n * gap - 260));
   Promise.all(anims.map(a => a.finished)).then(() => wrap.remove(), () => wrap.remove());
 }
 /* 探索者を選んで本を開くとき：閉じた魔導書が手前に開く */
