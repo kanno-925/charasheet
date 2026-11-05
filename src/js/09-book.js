@@ -483,7 +483,7 @@ function openPanel(key, fromEl) {
 }
 function closePanel() {
   const ov = $('panel-ov'); if (ov.hidden) return;
-  const findTarget = k => document.querySelector(`#sheet [data-open="${k}"]`) || document.querySelector('#sheet .hub-core, #sheet .wa-kake, #sheet .dot-name, #sheet .aq-portrait');
+  const findTarget = k => document.querySelector(`#sheet [data-open="${k}"]`) || document.querySelector('#sheet .hub-core, #sheet .wa-kake, #sheet .dot-name, #sheet .aq-port');
   let target = findTarget(panelKey);
   const done = anims => {
     const k = panelKey;

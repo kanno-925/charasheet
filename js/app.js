@@ -1534,7 +1534,7 @@ function openPanel(key, fromEl) {
 }
 function closePanel() {
   const ov = $('panel-ov'); if (ov.hidden) return;
-  const findTarget = k => document.querySelector(`#sheet [data-open="${k}"]`) || document.querySelector('#sheet .hub-core, #sheet .wa-kake, #sheet .dot-name, #sheet .aq-portrait');
+  const findTarget = k => document.querySelector(`#sheet [data-open="${k}"]`) || document.querySelector('#sheet .hub-core, #sheet .wa-kake, #sheet .dot-name, #sheet .aq-port');
   let target = findTarget(panelKey);
   const done = anims => {
     const k = panelKey;
@@ -4953,7 +4953,9 @@ uePull();
 /* ================= アクアリウムテーマ（look: aqua）：水底の遺跡、光の帯、くらげ、ガラスの泡のような画面 =================
    ・背景は見本の絵から文字を消した assets/aqua/scene.webp（少し暗め）。canvas はその上で動く光・粒・泡だけ
    ・画面の切りかえは aquaWave：ぼやけた水の中（assets/aqua/bokeh.webp）にガラスの札と光の輪、泡がのぼる
-   ・キャラシは aquaHtml（ガラスの水槽のようなパネル） */
+   ・キャラシは aquaHtml：厚いガラスの水槽。舷窓（丸窓）の肖像と展示の札、液体の入ったガラス管の HP/MP/SAN、
+     能力値、9つの項目のボタン。一覧のキャラは舷窓に入った肖像を横に並べる（CSS）
+   ・はじめの画面（オープニング）はどのテーマでも同じまま */
 const isAqua = () => (presetOf().look || '').split(' ').includes('aqua');
 const AQ = { on: false, raf: 0, last: 0, W: 0, H: 0, k: 1, bub: [], dust: [] };
 
@@ -4962,7 +4964,7 @@ function aquaScene() {
   let el = $('aq-bg');
   if (on && !el) {
     el = document.createElement('div'); el.id = 'aq-bg'; el.className = 'aq-bg'; el.setAttribute('aria-hidden', 'true');
-    el.innerHTML = '<canvas id="aq-cv"></canvas>';
+    el.innerHTML = '<i class="aq-caus c1"></i><i class="aq-caus c2"></i><canvas id="aq-cv"></canvas>';   // 水底にゆれる光の網（2枚を逆向きに動かす）
     document.body.prepend(el);
     let rt = 0;
     addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (AQ.on) aquaBuild(); }, 200); });
@@ -5036,48 +5038,28 @@ function aquaTick(t) {
   });
 }
 
-/* ---- キャラシ：ガラスの水槽のようなパネル ---- */
-const AQ_ICON = {
-  shell: '<path d="M12 20.5c-4.6 0-8.3-3.2-8.3-7.4 0-4.6 3.7-9.1 8.3-9.1s8.3 4.5 8.3 9.1c0 4.2-3.7 7.4-8.3 7.4z"/><path d="M12 20.5V4M12 20.5 6.6 6.6M12 20.5l5.4-13.9M12 20.5 4.3 10.4M12 20.5l7.7-10.1"/><path d="M9.5 20.2 8.8 22h6.4l-.7-1.8"/>',
-  heart: '<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.4a4.3 4.3 0 0 1 7.5 2.4C19.5 15.4 12 20 12 20z"/>',
-  drop: '<path d="M12 3.5s6 6.6 6 10.7a6 6 0 0 1-12 0C6 10.1 12 3.5 12 3.5z"/><path d="M9.2 14.5a3 3 0 0 0 2.6 2.8" class="hl"/>',
-  brain: '<path d="M9 5.2a3 3 0 0 0-4.6 2.6 3 3 0 0 0-.9 5 3.2 3.2 0 0 0 2.8 4.8A3 3 0 0 0 12 18.4V6.3A3 3 0 0 0 9 5.2zM15 5.2a3 3 0 0 1 4.6 2.6 3 3 0 0 1 .9 5 3.2 3.2 0 0 1-2.8 4.8A3 3 0 0 1 12 18.4"/><path d="M8 9.5h2M14 9.5h2M8.5 13.5H10M14 13.5h1.5" class="hl"/>',
-  job: '<rect x="4" y="8" width="16" height="11" rx="2"/><path d="M9 8V6.2A1.2 1.2 0 0 1 10.2 5h3.6A1.2 1.2 0 0 1 15 6.2V8M4 12.5h16"/>',
-  age: '<path d="M7 4h10M7 20h10M8 4c0 4 4 5 4 8s-4 4-4 8M16 4c0 4-4 5-4 8s4 4 4 8"/>',
-  sex: '<circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c.8-3.6 3.4-5.6 6.5-5.6s5.7 2 6.5 5.6"/>',
-  home: '<path d="M4 11.5 12 4.5l8 7M6.5 10v9h11v-9"/>',
-  more: '<rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M8.5 8h7M8.5 11.5h7M8.5 15h4.5"/>',
-  star: '<path d="M12 3.5l2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 17l-5.3 2.8 1.1-5.9-4.4-4.1 6-.8z"/>',
-  atom: '<circle cx="12" cy="12" r="1.6"/><ellipse cx="12" cy="12" rx="8.5" ry="3.4"/><ellipse cx="12" cy="12" rx="8.5" ry="3.4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="8.5" ry="3.4" transform="rotate(-60 12 12)"/>',
-  bag: '<path d="M6 8.5h12l-1 11H7z"/><path d="M9 8.5V7a3 3 0 0 1 6 0v1.5"/><circle cx="12" cy="13.5" r="1.8"/>',
-  leaf: '<path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19c3-4 6-7 10-10"/>',
-};
-const aqIcon = (k, cls = '') => `<svg class="aq-ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${AQ_ICON[k] || ''}</svg>`;
+/* ---- キャラシ：厚いガラスの水槽 ---- */
 function aquaHtml(c) {
   const a = abilities(c), p = c.profile, S = SYS[c.system], src = portraitSrc(c);
-  const ab = Object.keys(c.abilities);
+  const fact = (lbl, v) => `<span class="aq-fact"><i>${lbl}</i><b>${esc(v || '—')}</b></span>`;
   return `
-    <div class="hub-top aq-tools">${toolsHtml(c)}</div>
-    <div class="aq-sheet">
-      <i class="aq-wave-top" aria-hidden="true"></i>
-      <div class="aq-title">${aqIcon('shell', 'aq-shell')}<div><b data-hub="name"></b><small>— Character Status —</small></div></div>
-      <nav class="aq-tabs" aria-label="項目">${[['abilities', 'star', 'ステータス'], ['skills', 'atom', '技能'], ['items', 'bag', '所持品'], ['story', 'leaf', 'メモ']].map(([k, ic, l], i) => `<button class="aq-tab ${i ? '' : 'on'}" type="button" data-open="${k}">${aqIcon(ic)}<span>${l}</span></button>`).join('')}</nav>
-      <div class="aq-main">
-        <button class="aq-portrait ${src ? 'has' : ''}" type="button" data-stage aria-label="立ち絵を表示">${src ? `<img src="${esc(imgSrc(src))}" alt="" draggable="false" onerror="this.remove()">` : tokenHtml(c)}<i class="aq-glint" aria-hidden="true"></i></button>
-        <div class="aq-bars">${[['hp', 'heart', 'HP'], ['mp', 'drop', 'MP'], ['san', 'brain', 'SAN']].map(([k, ic, l]) => `
-          <div class="aq-bar ${k}">${aqIcon(ic)}<span class="aq-bl">${l}</span><b data-out="${k}Cur"></b><span class="aq-tr"><i data-bar="${k}"></i></span></div>`).join('')}
-          <p class="aq-kana" data-hub="kana"></p>
+    <div class="aq-tank">
+      <i class="aq-tank-light" aria-hidden="true"></i>
+      <div class="aq-tank-tools">${toolsHtml(c)}</div>
+      <div class="aq-head">
+        <button class="aq-port" type="button" data-stage aria-label="立ち絵を表示"><span class="aq-port-in">${src ? `<img src="${esc(imgSrc(src))}" alt="" draggable="false" onerror="this.remove()">` : tokenHtml(c)}</span></button>
+        <div class="aq-plate">
+          <small class="aq-plate-k">Investigator ・ ${esc(S.short)}</small>
+          <b class="aq-plate-n" data-hub="name"></b>
+          <span class="aq-plate-kana" data-hub="kana"></span>
+          <span class="aq-facts">${fact('職業', p.occupation)}${fact('年齢', p.age && p.age + '歳')}${fact('性別', p.sex)}${fact('出身', p.origin)}</span>
         </div>
       </div>
-      <div class="aq-lower">
-        <button class="aq-abils" type="button" data-open="abilities" aria-label="能力値をひらく">${ab.map(k => `<span class="aq-ab"><i>${k}</i><b>${a[k] || 0}</b></span>`).join('')}</button>
-        <button class="aq-prof" type="button" data-open="profile" aria-label="プロフィールをひらく">
-          <span class="aq-pf">${aqIcon('job')}<span><i>職業</i><b>${esc(p.occupation || '—')}</b></span></span>
-          <span class="aq-pf">${aqIcon('age')}<span><i>年齢</i><b>${esc(p.age ? p.age + '歳' : '—')}</b></span></span>
-          <span class="aq-pf">${aqIcon('sex')}<span><i>性別</i><b>${esc(p.sex || '—')}</b></span></span>
-        </button>
+      <div class="aq-tubes">${[['hp', 'HP', '耐久力'], ['mp', 'MP', 'マジック・ポイント'], ['san', 'SAN', '正気度']].map(([k, l, jp]) => `
+        <div class="aq-tube-row ${k}"><span class="aq-tl"><b>${l}</b><small>${jp}</small></span><span class="aq-tube"><i data-bar="${k}"><em></em></i></span><b class="aq-tv" data-out="${k}Cur"></b></div>`).join('')}
       </div>
-      <button class="aq-more" type="button" data-open="profile">${aqIcon('more')}<span>詳細を見る</span><span class="aq-go" aria-hidden="true">›</span></button>
+      <button class="aq-abils" type="button" data-open="abilities" aria-label="能力値をひらく">${Object.keys(c.abilities).map(k => `<span class="aq-ab"><i>${k}</i><b>${a[k] || 0}</b></span>`).join('')}</button>
+      <nav class="aq-nav" aria-label="項目">${SECTIONS.map(s => `<button class="aq-nb" type="button" data-open="${s.key}">${icon(s.key)}<span>${s.jp}</span><small data-sum="${s.key}"></small></button>`).join('')}</nav>
     </div>`;
 }
 
