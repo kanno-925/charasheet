@@ -17,6 +17,7 @@ css/15-ui-editor.css
 css/16-wa.css
 css/17-dot.css
 css/18-book-ui.css
+css/19-aqua.css
 js/01-rules.js
 js/02-util.js
 js/03-state.js
@@ -45,4 +46,5 @@ js/25-groups.js
 js/26-select.js
 js/27-intro.js
 js/28-ui-editor.js
-js/29-main.js
+js/29-aqua.js
+js/30-main.js

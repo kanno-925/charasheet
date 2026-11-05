@@ -2291,6 +2291,249 @@ body.ue-on .ue-panel { cursor: auto; }
 @media (max-width: 760px) {
   :root[data-look~="book"] .hero::after { width: 44vw; right: 0; opacity: .16; }
 }
+
+/* ===== アクアリウムテーマ（look: aqua）：水底の遺跡、光の帯、ガラスの泡のような画面 =====
+   背景は 29-aqua.js の aquaScene が canvas に描く。画面の部品は「水のかたまり」のようなガラス：
+   ・角は少しずつちがう丸み（水滴のようにいびつ）
+   ・上のふちに白い光、内側に水色の光、外に青いにじみ
+   iPhone で重くならないよう、ガラスの形を毎コマ変えるアニメはしない。 */
+:root[data-look~="aqua"] {
+  --aq-edge: rgb(195 242 255 / .6); --aq-hi: #eaf9ff; --aq-cyan: #8fe6ff; --aq-violet: #b9a0ff;
+  --aq-r: 26px 32px 24px 30px / 30px 24px 32px 26px;
+  --aq-r-sm: 18px 22px 17px 21px / 21px 17px 22px 18px;
+  --aq-bg: linear-gradient(165deg, rgb(160 230 255 / .26), rgb(80 160 235 / .1) 36%, rgb(20 70 160 / .16) 70%, rgb(130 205 255 / .2));
+  --aq-sh: inset 0 1.5px 0 rgb(255 255 255 / .6), inset 0 0 22px rgb(150 225 255 / .28), inset 0 -12px 24px rgb(8 36 100 / .32), 0 0 16px rgb(110 200 255 / .28), 0 16px 34px -14px rgb(0 10 40 / .75);
+  --aq-sh-hot: inset 0 1.5px 0 rgb(255 255 255 / .75), inset 0 0 26px rgb(170 235 255 / .45), inset 0 -12px 24px rgb(8 36 100 / .3), 0 0 26px rgb(130 215 255 / .6), 0 16px 34px -14px rgb(0 10 40 / .75);
+  --f-body: "Zen Old Mincho", "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --f-display: "Shippori Mincho B1", "Zen Old Mincho", "Hiragino Mincho ProN", serif;
+  --f-latin: "Cinzel", "Times New Roman", serif; --f-mono: "Shippori Mincho B1", serif;
+  --line: rgb(180 235 255 / .22); --line-strong: rgb(180 235 255 / .48); --muted: #9fcbe6;
+  --paper: rgb(20 70 140 / .2); --code-bg: rgb(4 28 70 / .45); --accent-soft: rgb(120 210 255 / .14);
+  --glow-1: transparent; --glow-2: transparent; --dot: transparent; --gloss: rgb(255 255 255 / .35);
+  --hp: #86d2ff; --mp: #62ece2; --san: #b9a0ff; --orange: #ffc38f; --pink: #ff9fcf; --lime: #8ff0c0; --yellow: #ffe58f;
+  --shadow: 0 16px 34px -14px rgb(0 10 40 / .75);
+}
+:root[data-look~="aqua"] body { background: #04173c; font-family: var(--f-body); letter-spacing: .03em; }
+:root[data-look~="aqua"] body::before { display: none; }
+.aq-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+.aq-bg[hidden] { display: none; }
+.aq-bg canvas { width: 100%; height: 100%; display: block; }
+:root.has-bg .aq-bg { display: none; }
+.aq-wave { position: fixed; left: 0; top: 0; z-index: 200; width: 100vw; height: 100vh; }
+.aq-ripple { position: fixed; z-index: 150; width: 300px; height: 300px; border-radius: 50%; pointer-events: none;
+  border: 2px solid rgb(210 248 255 / .75); box-shadow: 0 0 18px rgb(140 220 255 / .6), inset 0 0 18px rgb(140 220 255 / .45); }
+.fx-bub { border: 1.5px solid rgb(225 250 255 / .85); width: 14px; height: 14px; margin: -7px 0 0 -7px;
+  background: radial-gradient(circle at 34% 30%, rgb(255 255 255 / .9) 0 16%, rgb(190 240 255 / .18) 38%, transparent 70%);
+  animation: fx-bub 1.2s cubic-bezier(.2, .6, .4, 1) var(--d, 0ms) both; }
+@keyframes fx-bub { from { transform: translate(0, 0) scale(var(--s)); opacity: 0; } 15% { opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(var(--s)); opacity: 0; } }
+
+/* ---- ガラスの面（共通） ---- */
+:root[data-look~="aqua"] :is(.koma, .modal, .sao-win, details.out, .peek, .toast, .dcard, .aq-sheet, .bgm) {
+  background: var(--aq-bg); border: 1.5px solid var(--aq-edge); border-radius: var(--aq-r); box-shadow: var(--aq-sh);
+  -webkit-backdrop-filter: blur(7px) saturate(1.3); backdrop-filter: blur(7px) saturate(1.3); color: var(--ink); }
+:root[data-look~="aqua"] .modal, :root[data-look~="aqua"] .sao-win { background: linear-gradient(165deg, rgb(70 150 225 / .55), rgb(14 60 140 / .62) 45%, rgb(8 40 105 / .7)); }
+:root[data-look~="aqua"] .koma::before { height: 2px; inset: 10px 28px auto; border-radius: 2px; background: linear-gradient(90deg, transparent, rgb(220 250 255 / .9), transparent); }
+:root[data-look~="aqua"] .overlay, :root[data-look~="aqua"] .panel-overlay { background: rgb(2 18 48 / .5); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
+
+/* ---- 文字 ---- */
+:root[data-look~="aqua"] :is(.modal h2, #panel-title, .sec-title h3, .koma-name, details.out summary) { font-family: var(--f-display); font-weight: 500; letter-spacing: .1em; color: var(--aq-hi); text-shadow: 0 0 12px rgb(140 220 255 / .6); }
+:root[data-look~="aqua"] :is(.eyebrow, .panel-label, .panel-en, .sec-title .en, .tbl th) { font-family: "Cinzel", serif; color: var(--aq-cyan); letter-spacing: .2em; }
+:root[data-look~="aqua"] .eyebrow::before { height: 1px; background: linear-gradient(90deg, transparent, var(--aq-cyan)); }
+:root[data-look~="aqua"] .panel-label span { font-family: var(--f-body); color: #d4eefc; }
+:root[data-look~="aqua"] .panel-label::before { content: ""; display: inline-block; width: 18px; height: 18px; margin-right: 8px; vertical-align: -3px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23bff3ff' stroke-width='1.4' stroke-linecap='round'%3E%3Cpath d='M12 20.5c-4.6 0-8.3-3.2-8.3-7.4 0-4.6 3.7-9.1 8.3-9.1s8.3 4.5 8.3 9.1c0 4.2-3.7 7.4-8.3 7.4z'/%3E%3Cpath d='M12 20.5V4M12 20.5 6.6 6.6M12 20.5l5.4-13.9M12 20.5 4.3 10.4M12 20.5l7.7-10.1'/%3E%3C/svg%3E") center / contain no-repeat; }
+
+/* ---- 上の帯：羅針盤のしるしと、筆記体 ---- */
+:root[data-look~="aqua"] .brand-mark { display: none; }
+:root[data-look~="aqua"] .brand::before { content: ""; flex: none; width: 46px; height: 46px; filter: drop-shadow(0 0 8px rgb(150 225 255 / .7));
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='%23d8f7ff' stroke-width='1'%3E%3Ccircle cx='24' cy='24' r='17'/%3E%3Ccircle cx='24' cy='24' r='14' stroke-dasharray='1 2'/%3E%3Cpath d='M24 2 27 21 46 24 27 27 24 46 21 27 2 24 21 21Z' fill='%23d8f7ff' fill-opacity='.25' stroke-linejoin='round'/%3E%3Cpath d='M24 10 25.5 22.5 38 24 25.5 25.5 24 38 22.5 25.5 10 24 22.5 22.5Z' transform='rotate(45 24 24)' stroke-linejoin='round'/%3E%3Ccircle cx='24' cy='24' r='2.2' fill='%23d8f7ff'/%3E%3C/svg%3E") center / contain no-repeat; }
+:root[data-look~="aqua"] .brand h1 { font-family: var(--f-display); font-weight: 500; letter-spacing: .14em; color: var(--aq-hi); background: none; -webkit-text-fill-color: currentColor; text-shadow: 0 0 14px rgb(150 225 255 / .75); }
+:root[data-look~="aqua"] .brand-text small { font-size: 0; letter-spacing: 0; }
+:root[data-look~="aqua"] .brand-text small::before { content: "Charasheet Studio"; font-family: "Pinyon Script", cursive; font-size: 19px; color: #cfeeff; text-shadow: 0 0 10px rgb(150 225 255 / .7); }
+
+/* ---- ボタン：ガラスのしずく ---- */
+:root[data-look~="aqua"] .btn { border-radius: 22px 26px 21px 25px / 25px 21px 26px 22px; border: 1.5px solid rgb(195 242 255 / .5); color: var(--aq-hi); font-family: var(--f-body); font-weight: 700; letter-spacing: .08em;
+  background: linear-gradient(180deg, rgb(170 235 255 / .24), rgb(60 140 220 / .16) 55%, rgb(120 200 255 / .22)); box-shadow: inset 0 1.5px 0 rgb(255 255 255 / .55), inset 0 -6px 12px rgb(8 36 100 / .3), 0 0 10px rgb(110 200 255 / .22);
+  text-shadow: 0 0 8px rgb(150 225 255 / .5); }
+:root[data-look~="aqua"] .btn:hover { border-color: rgb(225 250 255 / .9); box-shadow: var(--aq-sh-hot); transform: translateY(-1px); }
+:root[data-look~="aqua"] .btn.primary, :root[data-look~="aqua"] .btn.copy-btn, :root[data-look~="aqua"] .btn.mbar-copy {
+  border-color: rgb(225 250 255 / .85); color: #fff; background: radial-gradient(ellipse at 50% -20%, rgb(255 255 255 / .55), transparent 55%), linear-gradient(180deg, rgb(120 215 255 / .62), rgb(40 130 220 / .55) 60%, rgb(150 120 255 / .45));
+  box-shadow: var(--aq-sh-hot); text-shadow: 0 0 10px rgb(200 245 255 / .9), 0 1px 2px rgb(0 30 80 / .6); }
+:root[data-look~="aqua"] .btn.danger { color: #ffc2d6; border-color: rgb(255 170 200 / .55); }
+:root[data-look~="aqua"] .btn.ghost { background: transparent; }
+:root[data-look~="aqua"] .icon-btn { color: var(--aq-cyan); }
+:root[data-look~="aqua"] .inp, :root[data-look~="aqua"] select, :root[data-look~="aqua"] .tbl .c-in:focus {
+  background: rgb(4 28 70 / .45); border: 1px solid rgb(180 235 255 / .32); border-radius: 14px 16px 13px 15px; color: var(--ink); font-family: var(--f-body); box-shadow: inset 0 2px 6px rgb(0 10 40 / .4); }
+:root[data-look~="aqua"] .inp:focus, :root[data-look~="aqua"] select:focus { border-color: rgb(220 250 255 / .9); box-shadow: inset 0 2px 6px rgb(0 10 40 / .4), 0 0 0 3px rgb(130 215 255 / .25), 0 0 14px rgb(130 215 255 / .5); outline: none; }
+:root[data-look~="aqua"] .chip, :root[data-look~="aqua"] .sys-badge, :root[data-look~="aqua"] .hero-tags span { border-radius: 14px 16px 13px 15px; border: 1px solid rgb(195 242 255 / .45); background: rgb(120 200 255 / .14); color: #dff6ff; }
+:root[data-look~="aqua"] .hero-tags span { font-family: "Cinzel", serif; letter-spacing: .14em; }
+:root[data-look~="aqua"] .tbl td { border-bottom-color: rgb(180 235 255 / .14); }
+:root[data-look~="aqua"] .tbl tbody tr:hover td { background: rgb(120 210 255 / .08); }
+:root[data-look~="aqua"] .preset, :root[data-look~="aqua"] .tp { border-radius: var(--aq-r-sm); background: rgb(120 200 255 / .1); border-color: rgb(195 242 255 / .35); }
+:root[data-look~="aqua"] .tp.on { border-color: rgb(225 250 255 / .9); box-shadow: 0 0 14px rgb(130 215 255 / .55); }
+:root[data-look~="aqua"] .steps li::before { font-family: "Cinzel", serif; color: var(--aq-cyan); background: rgb(120 200 255 / .14); border-color: rgb(195 242 255 / .5); }
+:root[data-look~="aqua"] .ring-g .val { stroke: var(--glow); }
+:root[data-look~="aqua"] .ring-g .rl { font-family: "Cinzel", serif; }
+
+/* ---- コマの丸：泡の中の肖像 ---- */
+:root[data-look~="aqua"] .token {
+  background: radial-gradient(circle at 34% 28%, color-mix(in srgb, var(--tc) 35%, #eaf8ff), color-mix(in srgb, var(--tc) 45%, #0b2c5c) 80%) padding-box,
+              conic-gradient(from 200deg, #ffffff, #8fe6ff, #6aa8ff, #b9a0ff, #8fe6ff, #ffffff) border-box;
+  box-shadow: 0 0 14px rgb(130 215 255 / .55), inset 0 0 10px rgb(255 255 255 / .35); color: #fff; text-shadow: 0 0 8px rgb(0 40 100 / .7); font-family: var(--f-display); font-weight: 500; }
+
+/* ---- はじめの見出し：手書きのように傾けた一文と、水の流れの線 ---- */
+:root[data-look~="aqua"] .orbit { display: none; }
+:root[data-look~="aqua"] .hero { grid-template-columns: minmax(0, 1fr); min-height: 230px; }
+:root[data-look~="aqua"] .hero-title { font-family: var(--f-display); font-weight: 500; letter-spacing: .16em; line-height: 1.55; color: var(--aq-hi); background: none; -webkit-text-fill-color: currentColor;
+  text-shadow: 0 0 18px rgb(150 225 255 / .85), 0 2px 8px rgb(0 20 60 / .6); transform: rotate(-4deg); transform-origin: 0 100%; margin: 6px 0 4px 10px; }
+:root[data-look~="aqua"] .hero-title::after { content: ""; display: block; width: min(420px, 80%); height: 34px; opacity: .8;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 420 34' fill='none' stroke='%23d8f7ff' stroke-linecap='round'%3E%3Cpath d='M4 22C60 30 120 6 190 14s130 22 226-4' stroke-width='1.4'/%3E%3Cpath d='M40 27c40 4 90-10 140-6' stroke-width='.8' opacity='.6'/%3E%3Cpath d='M190 14c-10-8-28-8-30 2s14 12 20 4' stroke-width='1'/%3E%3C/svg%3E") left center / contain no-repeat;
+  filter: drop-shadow(0 0 4px rgb(150 225 255 / .8)); margin-top: 4px; }
+:root[data-look~="aqua"] .hero-lead { color: #d0ebfb; text-shadow: 0 1px 4px rgb(0 20 60 / .6); }
+
+/* ---- 探索者の一覧：ガラスのカード（丸い肖像・名前・› ） ---- */
+:root[data-look~="aqua"] .char-item { position: relative; border-radius: var(--aq-r-sm); padding: 8px 30px 8px 10px; border: 1.5px solid rgb(195 242 255 / .3); background: rgb(120 200 255 / .08); color: var(--aq-hi); }
+:root[data-look~="aqua"] .char-item::after { content: "›"; position: absolute; right: 12px; top: 50%; translate: 0 -54%; font-size: 22px; color: #cfeeff; opacity: .8; }
+:root[data-look~="aqua"] .char-item:hover { background: rgb(120 200 255 / .16); border-color: rgb(210 248 255 / .6); }
+:root[data-look~="aqua"] .char-item.active { border-color: rgb(225 250 255 / .9); background: var(--aq-bg); box-shadow: var(--aq-sh-hot); }
+:root[data-look~="aqua"] .char-item .nm { font-family: var(--f-display); font-weight: 500; letter-spacing: .1em; }
+:root[data-look~="aqua"] .char-item .sys { color: #a9d4ee; }
+
+/* ---- キャラシ：ガラスの水槽 ---- */
+:root[data-look~="aqua"] .sheet.is-aqua { background: transparent; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; padding: 4px 0 10px; }
+.aq-tools { margin-bottom: 4px; }
+.aq-sheet { position: relative; display: flex; flex-direction: column; gap: 16px; padding: 28px 26px 22px; margin-top: 12px; }
+.aq-wave-top { position: absolute; left: 22px; right: 22px; top: -9px; height: 18px; pointer-events: none; opacity: .85;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 18' fill='none' stroke='%23e2f9ff' stroke-width='1.3' stroke-linecap='round'%3E%3Cpath d='M0 10c10-8 20-8 30 0s20 8 30 0 20-8 30 0 20 8 30 0'/%3E%3C/svg%3E") 0 0 / 120px 18px repeat-x;
+  filter: drop-shadow(0 0 4px rgb(160 230 255 / .9)); }
+.aq-ic { width: 22px; height: 22px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.aq-title { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.aq-title > div { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.aq-shell { width: 50px; height: 50px; color: #d9f6ff; filter: drop-shadow(0 0 8px rgb(150 225 255 / .8)); }
+.aq-title b { font-family: var(--f-display); font-weight: 500; font-size: clamp(24px, 4vw, 32px); letter-spacing: .14em; color: #fff; text-shadow: 0 0 16px rgb(150 225 255 / .85); overflow-wrap: anywhere; line-height: 1.3; }
+.aq-title small { font-family: "Cinzel", serif; font-size: 14px; letter-spacing: .12em; color: #bfe9ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.aq-sys { flex: none; padding: 3px 12px; border-radius: 14px 16px 13px 15px; border: 1px solid rgb(195 242 255 / .5); background: rgb(120 200 255 / .14); font-size: 12px; color: #dff6ff; }
+.aq-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: none; }
+.aq-tabs::-webkit-scrollbar { display: none; }
+.aq-tab { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; cursor: pointer; font: inherit; font-size: 14px; letter-spacing: .08em; color: var(--aq-hi);
+  border-radius: 20px 24px 19px 23px / 23px 19px 24px 20px; border: 1.5px solid rgb(195 242 255 / .45); background: linear-gradient(180deg, rgb(170 235 255 / .2), rgb(60 140 220 / .1));
+  box-shadow: inset 0 1.5px 0 rgb(255 255 255 / .5), 0 0 8px rgb(110 200 255 / .2); transition: box-shadow .25s, transform .25s, border-color .25s; }
+.aq-tab:first-child { background: linear-gradient(180deg, rgb(150 230 255 / .45), rgb(60 150 230 / .3)); border-color: rgb(225 250 255 / .85); box-shadow: var(--aq-sh-hot); }
+.aq-tab:hover, .aq-tab:focus-visible { border-color: rgb(225 250 255 / .9); box-shadow: var(--aq-sh-hot); transform: translateY(-2px); outline: none; }
+.aq-tab .ico { width: 16px; height: 16px; }
+.aq-main { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 22px; align-items: center; }
+.aq-portrait { position: relative; aspect-ratio: 1; width: 100%; padding: 0; cursor: pointer; overflow: hidden; display: grid; place-items: center;
+  border-radius: 20px 24px 19px 23px / 23px 19px 24px 20px; border: 2px solid rgb(215 248 255 / .75); background: radial-gradient(circle at 50% 30%, rgb(120 200 255 / .35), rgb(10 50 120 / .6));
+  box-shadow: 0 0 20px rgb(130 215 255 / .55), inset 0 0 20px rgb(160 230 255 / .35); }
+.aq-portrait img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; }
+.aq-portrait .token { width: 62%; height: 62%; font-size: 42px; border-width: 4px; }
+.aq-glint { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(130deg, rgb(255 255 255 / .35), transparent 30%, transparent 70%, rgb(150 225 255 / .25)); }
+.aq-bars { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.aq-bar { display: grid; grid-template-columns: 26px 3.4em minmax(0, 1fr); grid-template-rows: auto 8px; gap: 4px 10px; align-items: center; }
+.aq-bar .aq-ic { grid-row: 1 / span 2; width: 26px; height: 26px; fill: currentColor; fill-opacity: .3; filter: drop-shadow(0 0 6px currentColor); }
+.aq-bar .aq-ic .hl { fill: none; }
+.aq-bar.hp { color: #8fd4ff; } .aq-bar.mp { color: #6ff0e4; } .aq-bar.san { color: #c3adff; }
+.aq-bl { font-family: "Cinzel", serif; font-size: 17px; color: #e6f7ff; letter-spacing: .08em; }
+.aq-bar b { font-family: var(--f-display); font-weight: 500; font-size: 19px; text-align: right; color: #fff; text-shadow: 0 0 10px rgb(150 225 255 / .7); }
+.aq-tr { grid-column: 2 / -1; height: 8px; border-radius: 6px; background: rgb(4 28 70 / .55); box-shadow: inset 0 1px 3px rgb(0 10 40 / .6), 0 0 0 1px rgb(180 235 255 / .2); overflow: hidden; }
+.aq-tr i { display: block; height: 100%; border-radius: inherit; transition: width .8s cubic-bezier(.2, .8, .2, 1); box-shadow: 0 0 10px currentColor; }
+.aq-bar.hp .aq-tr i { background: linear-gradient(90deg, #6cc3ff, #d6f3ff); }
+.aq-bar.mp .aq-tr i { background: linear-gradient(90deg, #3fd8d6, #b8fff7); }
+.aq-bar.san .aq-tr i { background: linear-gradient(90deg, #9b84ff, #e2d8ff); }
+.aq-kana { margin: 2px 0 0; color: #b6dcf2; font-size: 13px; letter-spacing: .1em; }
+.aq-lower { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.aq-abils { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 0; border: 0; background: none; cursor: pointer; font: inherit; color: inherit; }
+.aq-ab { display: flex; flex-direction: column; align-items: center; padding: 6px 4px 7px; border-radius: 18px 22px 17px 21px / 21px 17px 22px 18px;
+  border: 1.5px solid rgb(195 242 255 / .4); background: linear-gradient(180deg, rgb(170 235 255 / .16), rgb(40 110 200 / .1)); box-shadow: inset 0 1.5px 0 rgb(255 255 255 / .4), 0 0 8px rgb(110 200 255 / .15); }
+.aq-ab i { font-style: normal; font-family: "Cinzel", serif; font-size: 13px; color: #cdeeff; letter-spacing: .08em; }
+.aq-ab b { font-family: var(--f-display); font-weight: 500; font-size: 22px; line-height: 1.15; color: #fff; text-shadow: 0 0 10px rgb(150 225 255 / .7); }
+.aq-abils:hover .aq-ab, .aq-abils:focus-visible .aq-ab { border-color: rgb(225 250 255 / .8); box-shadow: inset 0 1.5px 0 rgb(255 255 255 / .55), 0 0 14px rgb(130 215 255 / .5); }
+.aq-abils:focus-visible { outline: none; }
+.aq-prof { display: flex; flex-direction: column; justify-content: space-around; gap: 6px; padding: 12px 14px; cursor: pointer; font: inherit; color: inherit; text-align: left;
+  border-radius: var(--aq-r-sm); border: 1.5px solid rgb(195 242 255 / .4); background: linear-gradient(180deg, rgb(170 235 255 / .14), rgb(40 110 200 / .08)); box-shadow: inset 0 1.5px 0 rgb(255 255 255 / .4); }
+.aq-prof:hover, .aq-prof:focus-visible { border-color: rgb(225 250 255 / .85); box-shadow: var(--aq-sh-hot); outline: none; }
+.aq-pf { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.aq-pf .aq-ic { width: 26px; height: 26px; color: #d6f4ff; }
+.aq-pf > span { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+.aq-pf i { font-style: normal; font-size: 12px; color: #a9d4ee; }
+.aq-pf b { font-weight: 500; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aq-more { align-self: center; display: inline-flex; align-items: center; gap: 10px; padding: 12px 34px; min-width: min(360px, 100%); justify-content: center; cursor: pointer; font: inherit; font-size: 15px; letter-spacing: .12em; color: #fff;
+  border-radius: 24px 28px 23px 27px / 27px 23px 28px 24px; border: 1.5px solid rgb(215 248 255 / .7); background: linear-gradient(180deg, rgb(170 235 255 / .26), rgb(60 140 220 / .14)); box-shadow: var(--aq-sh); text-shadow: 0 0 10px rgb(150 225 255 / .7); }
+.aq-more:hover, .aq-more:focus-visible { box-shadow: var(--aq-sh-hot); outline: none; }
+.aq-go { font-size: 20px; line-height: 1; }
+@media (max-width: 760px) {
+  .aq-sheet { padding: 24px 14px 18px; gap: 14px; }
+  .aq-main { grid-template-columns: 118px minmax(0, 1fr); gap: 14px; }
+  .aq-shell { width: 40px; height: 40px; }
+  .aq-title small { font-size: 11px; letter-spacing: .06em; }
+  .aq-lower { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 10px; }
+  .aq-abils { gap: 6px; }
+  .aq-ab b { font-size: 19px; }
+  .aq-prof { padding: 10px; }
+  .aq-pf { gap: 6px; } .aq-pf .aq-ic { width: 22px; height: 22px; }
+  .aq-bl { font-size: 15px; } .aq-bar b { font-size: 16px; }
+  .aq-bar { grid-template-columns: 22px 3em minmax(0, 1fr); } .aq-bar .aq-ic { width: 22px; height: 22px; }
+}
+
+/* ---- 項目の窓：大きな泡 ---- */
+:root[data-look~="aqua"] .sao-line { display: none; }
+:root[data-look~="aqua"] .sao-win::before, :root[data-look~="aqua"] .sao-win::after { display: none; }
+:root[data-look~="aqua"] .sao-head { background: transparent; border-bottom: 1px solid rgb(195 242 255 / .25); }
+:root[data-look~="aqua"] .sao-hic { border-radius: 50% !important; background: radial-gradient(circle at 34% 30%, rgb(255 255 255 / .6), rgb(120 200 255 / .25) 45%, rgb(40 110 200 / .3)) !important; border: 1.5px solid rgb(215 248 255 / .7) !important; color: #fff !important; box-shadow: 0 0 12px rgb(130 215 255 / .55) !important; }
+:root[data-look~="aqua"] .panel-en { font-family: "Pinyon Script", cursive; font-size: 18px; letter-spacing: .04em; text-transform: none; }
+:root[data-look~="aqua"] .sao-close { border-radius: 50%; background: rgb(120 200 255 / .16); border: 1.5px solid rgb(195 242 255 / .55); color: #fff; }
+:root[data-look~="aqua"] .sao-item { border-radius: 20px 24px 19px 23px / 23px 19px 24px 20px; border: 1.5px solid rgb(195 242 255 / .4); background: linear-gradient(180deg, rgb(120 200 255 / .26), rgb(20 80 170 / .32)); color: #e6f7ff; font-family: var(--f-body);
+  box-shadow: inset 0 1.5px 0 rgb(255 255 255 / .45); }
+:root[data-look~="aqua"] .sao-item .sao-ic { background: transparent; border-color: transparent; color: var(--aq-cyan); }
+:root[data-look~="aqua"] .sao-item.on { border-color: rgb(230 250 255 / .9); background: linear-gradient(180deg, rgb(150 230 255 / .5), rgb(60 150 230 / .4)); color: #fff; box-shadow: var(--aq-sh-hot); }
+:root[data-look~="aqua"] .sao-item.on .sao-ic { color: #fff; background: transparent; border-color: transparent; }
+:root[data-look~="aqua"] .sao-item.on::after { display: none; }
+
+/* ---- 下の帯（スマホ）・お知らせ ---- */
+:root[data-look~="aqua"] .mbar { background: linear-gradient(180deg, rgb(60 140 220 / .4), rgb(8 40 100 / .7)); border-top: 1.5px solid rgb(205 245 255 / .6); box-shadow: 0 -8px 24px -10px rgb(110 200 255 / .45);
+  -webkit-backdrop-filter: blur(10px) saturate(1.3); backdrop-filter: blur(10px) saturate(1.3); }
+:root[data-look~="aqua"] .toast { color: #fff; text-shadow: 0 0 8px rgb(150 225 255 / .6); }
+:root[data-look~="aqua"] .bgm-play { background: radial-gradient(circle at 34% 30%, rgb(255 255 255 / .7), rgb(120 210 255 / .6) 40%, rgb(40 120 220 / .7)); color: #fff; }
+:root[data-look~="aqua"] .bgm-info small { color: var(--aq-cyan); font-family: "Cinzel", serif; }
+
+/* ---- 探索者をえらぶ画面：後ろのキャラシを隠して水底を見せる。真ん中は大きな泡 ---- */
+:root[data-look~="aqua"]:not(.sel-has-bg) .select { background: radial-gradient(ellipse 70% 50% at 50% 45%, rgb(150 225 255 / .12), transparent 70%), rgb(4 23 60 / .12); }
+:root[data-look~="aqua"]:not(.sel-has-bg) body:has(#select:not([hidden])) .app, :root[data-look~="aqua"] body:has(#select:not([hidden])) .mbar { visibility: hidden; }
+:root[data-look~="aqua"] .sel-head h2 { font-family: var(--f-display); font-weight: 500; letter-spacing: .18em; background: none; color: #fff; -webkit-text-fill-color: currentColor; text-shadow: 0 0 18px rgb(150 225 255 / .85); }
+:root[data-look~="aqua"] .sel-head p { color: #cbe8f8; text-shadow: 0 1px 4px rgb(0 20 60 / .6); }
+:root[data-look~="aqua"] :is(.sel-tabs, .view-tg, .sort-by) { border-radius: 22px 26px 21px 25px / 25px 21px 26px 22px; border: 1.5px solid rgb(195 242 255 / .45); background: linear-gradient(180deg, rgb(150 225 255 / .2), rgb(30 100 190 / .2));
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: inset 0 1.5px 0 rgb(255 255 255 / .45), 0 0 12px rgb(110 200 255 / .25); }
+:root[data-look~="aqua"] :is(.sel-tabs, .view-tg) button { color: #d9f2ff; font-family: var(--f-body); border-radius: 18px 22px 17px 21px / 21px 17px 22px 18px; }
+:root[data-look~="aqua"] :is(.sel-tabs, .view-tg) button.on { background: linear-gradient(180deg, rgb(160 235 255 / .55), rgb(60 150 230 / .45)); color: #fff; box-shadow: 0 0 14px rgb(130 215 255 / .6), inset 0 1.5px 0 rgb(255 255 255 / .6); text-shadow: 0 0 8px rgb(200 245 255 / .9); }
+:root[data-look~="aqua"] .sort-by select { color: #fff; background: transparent; border: 0; box-shadow: none; }
+:root[data-look~="aqua"] .sort-by select option { color: #04173c; }
+:root[data-look~="aqua"] .sel-rings circle, :root[data-look~="aqua"] .sel-rings ellipse { stroke: rgb(200 245 255 / .4); stroke-dasharray: 1 9; stroke-linecap: round; stroke-width: 2; }
+:root[data-look~="aqua"] .sel-new { color: #fff; text-shadow: 0 0 10px rgb(120 210 255 / .9), 0 1px 2px rgb(0 30 80 / .5);
+  background: radial-gradient(circle at 30% 24%, rgb(255 255 255 / .9) 0 5%, rgb(220 250 255 / .4) 11%, transparent 24%),
+              radial-gradient(circle at 70% 80%, rgb(200 170 255 / .45), transparent 45%),
+              radial-gradient(circle at 50% 50%, rgb(110 200 255 / .14) 50%, rgb(130 220 255 / .45) 80%, rgb(230 250 255 / .7) 100%);
+  border: 1.5px solid rgb(235 252 255 / .85);
+  box-shadow: 0 0 30px rgb(130 215 255 / .55), 0 0 0 12px rgb(130 215 255 / .08), inset 0 0 30px rgb(180 235 255 / .35), inset -10px -14px 30px rgb(120 90 255 / .25);
+  animation: aq-bob 6s ease-in-out infinite; }
+:root[data-look~="aqua"] .sel-new::before { background: radial-gradient(circle, rgb(150 225 255 / .3), transparent 68%); }
+:root[data-look~="aqua"] .sel-new b { font-family: var(--f-display); font-weight: 500; letter-spacing: .14em; }
+:root[data-look~="aqua"] .sel-new small { font-family: "Cinzel", serif; letter-spacing: .16em; color: #dff6ff; }
+@keyframes aq-bob { 50% { transform: translateY(-8px); } }
+:root[data-look~="aqua"] .sel-char .token { box-shadow: 0 0 22px rgb(130 215 255 / .6), inset 0 0 14px rgb(255 255 255 / .35); }
+:root[data-look~="aqua"] :is(.sel-name, .sl-name) { border-radius: 16px 20px 15px 19px / 19px 15px 20px 16px; border: 1.5px solid rgb(205 245 255 / .55); background: linear-gradient(180deg, rgb(120 200 255 / .3), rgb(20 80 170 / .4));
+  color: #fff; font-family: var(--f-display); font-weight: 500; letter-spacing: .1em; box-shadow: 0 0 12px rgb(110 200 255 / .35); }
+:root[data-look~="aqua"] :is(.sel-sys, .sl-sys) { color: #cbe8f8; text-shadow: 0 1px 3px rgb(0 20 60 / .7); }
+:root[data-look~="aqua"] :is(.sel-row, .sel-list-new) { border-radius: var(--aq-r); border: 1.5px solid rgb(195 242 255 / .5); background: var(--aq-bg); color: #fff; box-shadow: var(--aq-sh);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+:root[data-look~="aqua"] :is(.sel-row, .sel-list-new):hover { box-shadow: var(--aq-sh-hot); border-color: rgb(225 250 255 / .9); }
+:root[data-look~="aqua"] .sr-name b { font-family: var(--f-display); font-weight: 500; letter-spacing: .12em; font-size: 1.15em; }
+:root[data-look~="aqua"] .sr-meta span { border-radius: 12px; }
+
+@media (max-width: 760px) {
+  :root[data-look~="aqua"] .hero { min-height: 0; }
+  :root[data-look~="aqua"] .hero-title { margin-left: 4px; }
+  :root[data-look~="aqua"] .brand::before { width: 38px; height: 38px; }
+}
 </style>
 </head>
 <body>
@@ -4105,7 +4348,8 @@ function renderSheet() {
   const was = book ? pageAt() : [], kept = book ? [...document.querySelectorAll('#book .bk-scroll')].map(e => e.scrollTop) : [];
   $('sheet').classList.toggle('is-wa', !book && isWa());
   $('sheet').classList.toggle('is-dot', !book && isDot());
-  $('sheet').innerHTML = book ? bookHtml(c) : isWa() ? waHtml(c) : isDot() ? dotHtml(c) : hubHtml(c);
+  $('sheet').classList.toggle('is-aqua', !book && isAqua());
+  $('sheet').innerHTML = book ? bookHtml(c) : isWa() ? waHtml(c) : isDot() ? dotHtml(c) : isAqua() ? aquaHtml(c) : hubHtml(c);
   if (book) { const now = pageAt(); document.querySelectorAll('#book .bk-scroll').forEach((e, i) => { if (now[i] === was[i]) e.scrollTop = kept[i] || 0; }); }
   if (panelKey && !$('panel-ov').hidden) {
     const body = $('panel-body'), st = body.scrollTop;
@@ -4167,7 +4411,11 @@ function openPanel(key, fromEl) {
   fillPanel(key);
   ov.hidden = false;
   scrollMenu(true);
-  if (!reduceMotion.matches && isDot()) {
+  if (!reduceMotion.matches && isAqua()) {
+    // 泡がふくらむようにひらく
+    aquaPanelOpen(ov);
+    stagger(380);
+  } else if (!reduceMotion.matches && isDot()) {
     // 昔のゲームの窓のように、横線→縦にカクカク広がる
     ov.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing: 'steps(3, end)' });
     $('sao-win').animate([{ clipPath: 'inset(49% 50% 49% 50%)' }, { clipPath: 'inset(49% 0% 49% 0%)', offset: .45 }, { clipPath: 'inset(0% 0% 0% 0%)' }], { duration: 520, easing: 'steps(9, end)' });
@@ -4200,19 +4448,24 @@ function openPanel(key, fromEl) {
 }
 function closePanel() {
   const ov = $('panel-ov'); if (ov.hidden) return;
-  const findTarget = k => document.querySelector(`#sheet [data-open="${k}"]`) || document.querySelector('#sheet .hub-core, #sheet .wa-kake, #sheet .dot-name');
+  const findTarget = k => document.querySelector(`#sheet [data-open="${k}"]`) || document.querySelector('#sheet .hub-core, #sheet .wa-kake, #sheet .dot-name, #sheet .aq-portrait');
   let target = findTarget(panelKey);
   const done = anims => {
     const k = panelKey;
     ov.hidden = true; panelKey = null;
     anims.forEach(a => a.cancel());
-    if (isDot()) { renderSheet(); target = findTarget(k); } // ドットのボックスは中身をそのまま見せているので、閉じたら描き直す
+    if (isDot() || isAqua()) { renderSheet(); target = findTarget(k); } // ドット・アクアリウムは中身をそのまま見せているので、閉じたら描き直す
     if (target) {
       target.focus({ preventScroll: true });
       if (!reduceMotion.matches) { target.classList.remove('land'); void target.offsetWidth; target.classList.add('land'); fxAt(target, false); }
     }
   };
   if (reduceMotion.matches) return done([]);
+  if (isAqua()) { // しぼんで泡に戻る
+    const anims = aquaPanelClose(ov);
+    Promise.all(anims.map(a => a.finished)).then(() => done(anims));
+    return;
+  }
   if (isDot()) { // カクカク閉じる
     const anims = [$('sao-win').animate([{ clipPath: 'inset(0% 0% 0% 0%)' }, { clipPath: 'inset(49% 0% 49% 0%)', offset: .55 }, { clipPath: 'inset(49% 50% 49% 50%)' }], { duration: 380, easing: 'steps(7, end)', fill: 'forwards' }),
       ov.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, delay: 260, easing: 'steps(3, end)', fill: 'forwards' })];
@@ -4247,6 +4500,10 @@ function closePanel() {
 function gotoPanel(key) {
   if (key === panelKey) return;
   fillPanel(key);
+  if (!reduceMotion.matches && isAqua()) { // 水の中からゆらりと浮かびあがる
+    $('panel-body').animate([{ opacity: 0, transform: 'translateY(14px)', filter: 'blur(5px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: 520, easing: 'cubic-bezier(.2, .7, .2, 1)' });
+    return;
+  }
   if (!reduceMotion.matches && isDot()) { // 文字が打ちこまれるように、上から1段ずつ
     $('panel-body').animate([{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)' }], { duration: 420, easing: 'steps(8, end)' });
     return;
@@ -4353,6 +4610,10 @@ function fx(x, y, burst = false) {
     setTimeout(() => e.remove(), 1400);
   };
   make('fx-bloom'); make('fx-ring'); make('fx-ring late');
+  if (isAqua()) {   // アクアリウムでは、火花のかわりに小さな泡がのぼる
+    for (let i = 0; i < (burst ? 12 : 4); i++) make('fx-bub', { '--dx': (Math.random() - .5) * (burst ? 120 : 40) + 'px', '--dy': -(50 + Math.random() * (burst ? 140 : 60)) + 'px', '--s': (.4 + Math.random() * .8).toFixed(2), '--d': Math.round(Math.random() * 200) + 'ms' });
+    return;
+  }
   if (burst) {
     make('fx-ring big');
     for (let i = 0; i < 14; i++) {
@@ -4677,11 +4938,12 @@ const THEME_ROWS = [
 ];
 const hexToRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 const rgbToHex = a => '#' + a.map(v => Math.max(0, Math.min(255, Math.round(v) || 0)).toString(16).padStart(2, '0')).join('');
-/* テーマは 近未来・和風・魔導書・ドット の4つ（深淵・古書・ネオン・森は 2026-11-05 に削除） */
+/* テーマは 近未来・和風・魔導書・ドット・アクアリウム（深淵・古書・ネオン・森は 2026-11-05 に削除） */
 const THEME_PRESETS = {
   sky:    { name: '近未来', sub: '白と空色', look: '', vals: {} },
   sakura: { name: '和風', sub: '和紙と墨と金、舞う桜', look: 'mincho wa', vals: { bg: '#ebdfc6', solid: '#f7efdd', ink: '#2e2520', sky: '#5a3c2c', cyan: '#b08d4a', amber: '#b08d4a' } },
   book:   { name: '魔導書', sub: '古本に万年筆で書きこむ記録', look: 'dark mincho book', vals: { bg: '#140c07', solid: '#22160d', ink: '#efe0c4', sky: '#7a5a8c', cyan: '#c9a04e', amber: '#c9a04e' } },
+  aqua:   { name: 'アクアリウム', sub: '水底の遺跡と光、くらげ', look: 'dark aqua', vals: { bg: '#04173c', solid: '#0b2c5c', ink: '#e8f7ff', sky: '#7fd6ff', cyan: '#b4f1ff', amber: '#9fe8ff' } },
   dot:    { name: 'ドット', sub: '星降る夜のピクセル', look: 'dark dot', vals: { bg: '#0b0e30', solid: '#141a4c', ink: '#e8eeff', sky: '#86a8ff', cyan: '#a8d8ff', amber: '#ffd36b' } },
 };
 const presetOf = () => THEME_PRESETS[state.themePreset] || THEME_PRESETS.sky;
@@ -4704,6 +4966,7 @@ function applyTheme() {
   applyBg();
   waScene();
   dotScene();
+  aquaScene();
 }
 function applyBg() {
   const ac = state.chars && state.chars.find(c => c.id === state.activeId);
@@ -4969,8 +5232,8 @@ function dotMosaic(mid) {
   const run = (ms, fill, then) => { const t0 = performance.now(); const step = t => { const k = Math.min(1, (t - t0) / ms); draw(k, fill); if (k < 1) requestAnimationFrame(step); else then(); }; requestAnimationFrame(step); };
   run(360, true, () => { try { mid(); } catch (e) { console.error(e); } setTimeout(() => run(420, false, () => cv.remove()), 90); });
 }
-/* テーマごとの画面切りかえ（和風は襖、ドットはモザイク、魔導書は表紙が閉じてひらく） */
-const themeSwitchFx = () => isWa() ? waDoors : isDot() ? dotMosaic : isBook() ? bookCover : null;
+/* テーマごとの画面切りかえ（和風は襖、ドットはモザイク、魔導書は表紙が閉じてひらく、アクアリウムは水が満ちて引く） */
+const themeSwitchFx = () => isWa() ? waDoors : isDot() ? dotMosaic : isBook() ? bookCover : isAqua() ? aquaWave : null;
 
 /* ================= 立ち絵 ================= */
 const blobUrls = new Map();
@@ -6712,6 +6975,14 @@ function initSlide() {
 function popSelect() {
   if (reduceMotion.matches) return;
   const stage = $('sel-stage');
+  if (isAqua()) {   // 泡のように下からふわりと浮かんでくる
+    const d0 = aqWaveBusy ? 900 : 60;
+    stage.querySelectorAll('.sel-char, .sel-row').forEach((el, i) => el.animate(
+      [{ opacity: 0, transform: 'translateY(40px) scale(.85)' }, { opacity: 1, transform: 'translateY(-4px) scale(1.02)', offset: .7 }, { opacity: 1, transform: 'none' }],
+      { duration: 900, delay: d0 + i * 70, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'backwards' }));
+    [$('sel-new'), document.querySelector('.sel-head')].forEach(el => el?.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], { duration: 800, delay: d0, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'backwards' }));
+    return;
+  }
   if (isBook()) {
     const d0 = bookCoverBusy ? 980 : 80;   // 表紙がひらいてから書きこむ
     stage.querySelectorAll('.sel-char, .sel-row').forEach((el, i) => el.animate(
@@ -6735,7 +7006,7 @@ function showSelect() {
   applyBg();
   document.documentElement.style.overflow = 'hidden';
   renderSelect();
-  if (!reduceMotion.matches && !isBook()) sel.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: 'ease-out' });
+  if (!reduceMotion.matches && !isBook() && !isAqua()) sel.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: 'ease-out' });
   popSelect();
 }
 function leaveSelect(fromEl, quick) {
@@ -7589,6 +7860,382 @@ document.addEventListener('click', e => {
 $('ue-open')?.addEventListener('click', ueStart);
 ueLoad();
 uePull();
+
+/* ================= アクアリウムテーマ（look: aqua）：水底の遺跡、光の帯、くらげと魚、ガラスの泡のような画面 =================
+   ・背景は canvas に描く：動かない部分（水の色・遺跡・岩・さんご）は先に1枚に描いておき、
+     毎コマは「光の帯・海藻・魚・くらげ・泡・ただよう粒」だけを重ねる（iPhone でも軽く）
+   ・画面の切りかえは aquaWave：下から水が満ちて画面をおおい、泡が立ちのぼってから、水が引いて新しい画面
+   ・キャラシは aquaHtml（ガラスの水槽のようなパネル） */
+const isAqua = () => (presetOf().look || '').split(' ').includes('aqua');
+const AQ = { on: false, raf: 0, last: 0, base: null, W: 0, H: 0, k: 1, fish: [], jelly: [], bub: [], dust: [], weed: [] };
+
+function aquaScene() {
+  const on = isAqua();
+  let el = $('aq-bg');
+  if (on && !el) {
+    el = document.createElement('div'); el.id = 'aq-bg'; el.className = 'aq-bg'; el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = '<canvas id="aq-cv"></canvas>';
+    document.body.prepend(el);
+    let rt = 0;
+    addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (AQ.on) aquaBuild(); }, 200); });
+  }
+  if (el) el.hidden = !on;
+  if (on === AQ.on) return;
+  AQ.on = on;
+  cancelAnimationFrame(AQ.raf);
+  if (on) { aquaBuild(); AQ.raf = requestAnimationFrame(aquaTick); }
+}
+
+/* 決まった並びの乱数（毎回同じ遺跡の形になるように） */
+const aqRand = seed => () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+
+function aquaBuild() {
+  const cssW = innerWidth, cssH = innerHeight;
+  const k = AQ.k = Math.max(.5, Math.min(1, 720 / Math.max(cssW, cssH * .6)));   // 大きい画面は少し小さく描いて拡大（水の中なので少しぼやけるくらいがちょうどいい）
+  const W = AQ.W = Math.round(cssW * k), H = AQ.H = Math.round(cssH * k);
+  const cv = $('aq-cv'); cv.width = W; cv.height = H; AQ.drawn = false;
+  const b = document.createElement('canvas'); b.width = W; b.height = H;
+  const g = b.getContext('2d'), R = aqRand(20261105);
+
+  // 水の色：上は光の入る明るい青、下ほど深い藍
+  const lg = g.createLinearGradient(0, 0, 0, H);
+  lg.addColorStop(0, '#3b9de0'); lg.addColorStop(.16, '#1b6dbc'); lg.addColorStop(.42, '#0d4793'); lg.addColorStop(.72, '#082e68'); lg.addColorStop(1, '#04173c');
+  g.fillStyle = lg; g.fillRect(0, 0, W, H);
+  const sg = g.createRadialGradient(W * .42, -H * .08, 0, W * .42, -H * .08, Math.max(W, H) * .8);
+  sg.addColorStop(0, 'rgba(210,248,255,.55)'); sg.addColorStop(.35, 'rgba(140,215,255,.18)'); sg.addColorStop(1, 'rgba(140,215,255,0)');
+  g.fillStyle = sg; g.fillRect(0, 0, W, H);
+
+  // 水面のゆらぎ（上のほうの明るいもよう）
+  g.save(); g.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 90; i++) {
+    const x = R() * W, y = R() * H * .14, w = 10 + R() * 40;
+    g.strokeStyle = `rgba(200,245,255,${.05 + R() * .08})`; g.lineWidth = 1 + R() * 1.5;
+    g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + w / 2, y + (R() - .5) * 8, x + w, y + (R() - .5) * 4); g.stroke();
+  }
+  g.restore();
+
+  const s = Math.min(W, H * .75) / 400;   // 遺跡の大きさの目安
+  // 遠くの遺跡（霧の向こう）
+  aqRuins(g, R, { x: W * .55, base: H * .78, s: s * .8, col: 'rgba(40,110,185,.35)', hi: 'rgba(150,215,255,.10)' });
+  aqColumn(g, { x: W * .08, base: H * .74, w: 16 * s, h: 150 * s, broken: 0.7, col: 'rgba(40,110,185,.35)', hi: 'rgba(150,215,255,.10)' }, R);
+  // 霧
+  const fg = g.createLinearGradient(0, H * .35, 0, H);
+  fg.addColorStop(0, 'rgba(20,80,160,0)'); fg.addColorStop(1, 'rgba(10,50,120,.45)');
+  g.fillStyle = fg; g.fillRect(0, 0, W, H);
+  // 近くの遺跡（右側に大きく）
+  aqRuins(g, R, { x: W * .78, base: H * .9, s: s * 1.15, col: 'rgba(14,58,125,.82)', hi: 'rgba(120,200,255,.18)' });
+  aqColumn(g, { x: W * .2, base: H * .93, w: 22 * s, h: 190 * s, broken: .55, col: 'rgba(14,58,125,.75)', hi: 'rgba(120,200,255,.16)' }, R);
+  aqColumn(g, { x: W * .33, base: H * .95, w: 18 * s, h: 80 * s, broken: .9, col: 'rgba(14,58,125,.7)', hi: 'rgba(120,200,255,.14)' }, R);
+
+  // 海の底：岩
+  g.fillStyle = 'rgba(4,22,56,.95)';
+  g.beginPath(); g.moveTo(0, H);
+  for (let x = 0; x <= W; x += W / 24) g.lineTo(x, H - (14 + R() * 26) * s - Math.max(0, Math.sin(x / W * Math.PI * 2.2)) * 30 * s);
+  g.lineTo(W, H); g.closePath(); g.fill();
+  for (let i = 0; i < 9; i++) {   // ごろごろした石
+    const x = R() * W, r = (8 + R() * 22) * s;
+    g.fillStyle = `rgba(${10 + R() * 14},${40 + R() * 20},${90 + R() * 30},.9)`;
+    g.beginPath(); g.ellipse(x, H - r * .4, r * 1.4, r, 0, Math.PI, 0); g.fill();
+  }
+  // さんご（左下と右下に、ピンクと紫）
+  [[W * .06, '#d58fd8'], [W * .16, '#9d8cff'], [W * .9, '#e4a0d4'], [W * .97, '#8fb6ff'], [W * .5, '#b993ff']].forEach(([x, col], i) => {
+    aqCoral(g, R, x, H - 6 * s, (i === 4 ? 26 : 40) * s, col);
+  });
+  // さんごの近くに小さな光る粒
+  g.save(); g.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 40; i++) { const x = (R() < .5 ? R() * .25 : .75 + R() * .25) * W, y = H - R() * 70 * s; g.fillStyle = `rgba(255,200,240,${.15 + R() * .25})`; g.beginPath(); g.arc(x, y, .6 + R() * 1.4, 0, 6.3); g.fill(); }
+  g.restore();
+  // いちばん下を暗く
+  const bg2 = g.createLinearGradient(0, H * .8, 0, H);
+  bg2.addColorStop(0, 'rgba(2,12,34,0)'); bg2.addColorStop(1, 'rgba(2,12,34,.55)');
+  g.fillStyle = bg2; g.fillRect(0, H * .8, W, H * .2);
+  AQ.base = b;
+
+  // 動くものの準備
+  const r2 = Math.random;
+  AQ.weed = Array.from({ length: 9 }, (_, i) => ({ x: (i < 5 ? r2() * .28 : .72 + r2() * .28) * W, h: (50 + r2() * 90) * s, w: (3 + r2() * 3) * s, ph: r2() * 6.3, sp: .0006 + r2() * .0006 }));
+  AQ.dust = Array.from({ length: Math.round(W * H / 6000) }, () => ({ x: r2() * W, y: r2() * H, r: .4 + r2() * 1.2, vx: (r2() - .5) * .05, vy: -.02 - r2() * .05, ph: r2() * 6.3 }));
+  AQ.bub = Array.from({ length: 16 }, () => aqBubble(true));
+  AQ.fish = [];
+  for (let sc = 0; sc < 2; sc++) {   // 魚の群れ 2つ
+    const dir = sc ? -1 : 1, cy = H * (.2 + r2() * .35), cx = r2() * W, n = 7 + Math.round(r2() * 6), sz = (5 + r2() * 3) * s;
+    for (let i = 0; i < n; i++) AQ.fish.push({ x: cx + (r2() - .5) * 90 * s, y: cy + (r2() - .5) * 50 * s, dir, v: (.12 + r2() * .05) * s * 2, sz: sz * (.8 + r2() * .4), ph: r2() * 6.3, school: sc });
+  }
+  AQ.jelly = Array.from({ length: W > 500 ? 3 : 2 }, (_, i) => ({ x: W * (i === 0 ? .82 : i === 1 ? .12 : .55), y: H * (.12 + i * .28), sz: (i === 0 ? 30 : 18 + r2() * 8) * s, ph: r2() * 6.3, vy: (.05 + r2() * .04) * s, sway: r2() * 6.3 }));
+}
+function aqBubble(fresh) {
+  const r = Math.random;
+  return { x: r() * AQ.W, y: fresh ? r() * AQ.H : AQ.H + 10, r: (.8 + r() * 2.6) * Math.max(.7, AQ.k * 1.4), v: .25 + r() * .5, ph: r() * 6.3 };
+}
+/* 柱：土台・柱身（縦のみぞ）・柱頭。broken が小さいほど上が欠けている */
+function aqColumn(g, o, R) {
+  const { x, base, w, h, col, hi } = o, top = base - h * o.broken;
+  g.fillStyle = col;
+  g.fillRect(x - w * .8, base - w * .35, w * 1.6, w * .35);          // 土台
+  g.beginPath(); g.moveTo(x - w / 2, base - w * .35); g.lineTo(x - w / 2, top + w * .2);
+  for (let i = 0; i <= 4; i++) g.lineTo(x - w / 2 + w * i / 4, top + (R() - .2) * w * .6);   // 欠けたところ
+  g.lineTo(x + w / 2, base - w * .35); g.closePath(); g.fill();
+  if (o.broken > .95) { g.fillRect(x - w * .85, top - w * .3, w * 1.7, w * .3); }
+  g.strokeStyle = hi; g.lineWidth = Math.max(.6, w * .06);
+  for (let i = 1; i < 4; i++) { const xx = x - w / 2 + w * i / 4; g.beginPath(); g.moveTo(xx, base - w * .4); g.lineTo(xx, top + w * .5); g.stroke(); }
+}
+/* 神殿の跡：アーチの並ぶ2段の回廊と、折れた柱 */
+function aqRuins(g, R, o) {
+  const { x, base, s, col, hi } = o;
+  const bw = 230 * s, h1 = 120 * s, h2 = 85 * s, left = x - bw / 2;
+  g.fillStyle = col;
+  const arcade = (y0, h, n, w0, l0) => {
+    g.beginPath(); g.rect(l0, y0 - h, w0, h);
+    const cw = w0 / n;
+    for (let i = 0; i < n; i++) {   // アーチの穴（evenodd でくり抜く）
+      const ax = l0 + cw * i + cw * .18, aw = cw * .64, ah = h * .72, ay = y0;
+      g.moveTo(ax, ay); g.lineTo(ax, ay - ah + aw / 2); g.arc(ax + aw / 2, ay - ah + aw / 2, aw / 2, Math.PI, 0); g.lineTo(ax + aw, ay); g.closePath();
+    }
+    g.fill('evenodd');
+    g.fillRect(l0 - cw * .08, y0 - h - h * .08, w0 + cw * .16, h * .08);   // 上の横木
+  };
+  arcade(base, h1, 5, bw, left);
+  arcade(base - h1 - h1 * .08, h2, 4, bw * .74, left + bw * .06);
+  // 崩れた右上のかけら
+  g.beginPath(); g.moveTo(left + bw * .8, base - h1 - h1 * .08); g.lineTo(left + bw * .86, base - h1 - h2 * .55); g.lineTo(left + bw * .93, base - h1 - h2 * .3); g.lineTo(left + bw, base - h1 - h1 * .08); g.closePath(); g.fill();
+  // ハイライト（上から光が当たる縁）
+  g.strokeStyle = hi; g.lineWidth = Math.max(.8, 1.6 * s);
+  g.beginPath(); g.moveTo(left, base - h1); g.lineTo(left + bw, base - h1); g.moveTo(left + bw * .06, base - h1 - h2 - h1 * .08); g.lineTo(left + bw * .8, base - h1 - h2 - h1 * .08); g.stroke();
+  // そばの柱
+  aqColumn(g, { x: left - 26 * s, base, w: 20 * s, h: 200 * s, broken: 1, col, hi }, R);
+  aqColumn(g, { x: left + bw + 30 * s, base, w: 20 * s, h: 170 * s, broken: .62, col, hi }, R);
+  // 落ちた石
+  for (let i = 0; i < 5; i++) { g.fillRect(left + R() * bw, base - 6 * s, (8 + R() * 14) * s, (5 + R() * 6) * s); }
+}
+/* さんご：枝分かれする線を何本か */
+function aqCoral(g, R, x, y, size, col) {
+  g.save(); g.strokeStyle = col; g.lineCap = 'round'; g.globalAlpha = .75; g.shadowColor = col; g.shadowBlur = size * .25;
+  const br = (x0, y0, len, ang, wdt, depth) => {
+    const x1 = x0 + Math.cos(ang) * len, y1 = y0 + Math.sin(ang) * len;
+    g.lineWidth = wdt; g.beginPath(); g.moveTo(x0, y0); g.quadraticCurveTo((x0 + x1) / 2 + (R() - .5) * len * .4, (y0 + y1) / 2, x1, y1); g.stroke();
+    if (depth > 0) { br(x1, y1, len * .72, ang - .35 - R() * .3, wdt * .7, depth - 1); br(x1, y1, len * .7, ang + .35 + R() * .3, wdt * .7, depth - 1); }
+  };
+  for (let i = 0; i < 3; i++) br(x + (i - 1) * size * .25, y, size * .45, -Math.PI / 2 + (i - 1) * .35, size * .14, 3);
+  g.restore();
+}
+
+function aquaTick(t) {
+  if (!AQ.on) return;
+  AQ.raf = requestAnimationFrame(aquaTick);
+  const still = reduceMotion.matches;
+  if (document.hidden || (!still && t - AQ.last < 33) || (still && AQ.drawn)) return;   // 30コマ/秒で十分
+  const dt = Math.min(3, (t - (AQ.last || t)) / 16.7); AQ.last = t; AQ.drawn = true;
+  const cv = $('aq-cv'); if (!cv || !AQ.base) return;
+  const g = cv.getContext('2d'), W = AQ.W, H = AQ.H, s = Math.min(W, H * .75) / 400;
+  g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+  g.drawImage(AQ.base, 0, 0);
+
+  // 光の帯（上から斜めに差しこみ、ゆっくりゆれる）
+  g.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 6; i++) {
+    const cx = W * (.12 + i * .17) + Math.sin(t * .00018 + i * 1.7) * W * .04, wTop = W * (.025 + (i % 3) * .012), wBot = wTop * 4.5, len = H * (.6 + (i % 2) * .25);
+    const a = .08 + .05 * Math.sin(t * .0004 + i * 2.1);
+    const lg = g.createLinearGradient(0, 0, 0, len); lg.addColorStop(0, `rgba(215,248,255,${a + .05})`); lg.addColorStop(1, 'rgba(215,248,255,0)');
+    g.fillStyle = lg; g.beginPath(); g.moveTo(cx - wTop, -5); g.lineTo(cx + wTop, -5); g.lineTo(cx + wBot + len * .18, len); g.lineTo(cx - wBot + len * .18, len); g.closePath(); g.fill();
+  }
+  g.globalCompositeOperation = 'source-over';
+
+  // 海藻
+  AQ.weed.forEach(w => {
+    g.strokeStyle = 'rgba(30,110,120,.7)'; g.lineWidth = w.w; g.lineCap = 'round'; g.beginPath(); g.moveTo(w.x, H);
+    const n = 6; for (let j = 1; j <= n; j++) { const yy = H - w.h * j / n, sw = Math.sin(t * w.sp + w.ph + j * .7) * j * 2.2 * s; g.lineTo(w.x + sw, yy); }
+    g.stroke();
+  });
+
+  // ただよう粒
+  g.fillStyle = 'rgba(210,240,255,.55)';
+  AQ.dust.forEach(p => {
+    if (!still) { p.x += p.vx * dt + Math.sin(t * .0005 + p.ph) * .04; p.y += p.vy * dt; if (p.y < -2) { p.y = H + 2; p.x = Math.random() * W; } }
+    g.globalAlpha = .3 + .4 * Math.abs(Math.sin(t * .001 + p.ph)); g.fillRect(p.x, p.y, p.r, p.r);
+  });
+  g.globalAlpha = 1;
+
+  // 魚の群れ
+  AQ.fish.forEach(f => {
+    if (!still) { f.x += f.v * f.dir * dt; f.y += Math.sin(t * .001 + f.ph) * .08 * dt; if (f.dir > 0 && f.x > W + 40) f.x = -40 - Math.random() * 60; if (f.dir < 0 && f.x < -40) f.x = W + 40 + Math.random() * 60; }
+    const tail = Math.sin(t * .012 + f.ph) * .35;
+    g.save(); g.translate(f.x, f.y); g.scale(f.dir, 1);
+    g.fillStyle = 'rgba(160,215,255,.55)';
+    g.beginPath(); g.ellipse(0, 0, f.sz, f.sz * .38, 0, 0, 6.3); g.fill();
+    g.beginPath(); g.moveTo(-f.sz * .85, 0); g.lineTo(-f.sz * 1.5, -f.sz * (.42 + tail * .3)); g.lineTo(-f.sz * 1.5, f.sz * (.42 - tail * .3)); g.closePath(); g.fill();
+    g.fillStyle = 'rgba(230,250,255,.5)'; g.fillRect(f.sz * .25, -f.sz * .2, f.sz * .5, f.sz * .12);
+    g.restore();
+  });
+
+  // くらげ（ふくらんでは縮む傘と、ゆれる足）
+  AQ.jelly.forEach(j => {
+    if (!still) { j.y -= j.vy * dt * (1 + .8 * Math.max(0, Math.sin(t * .0016 + j.ph))); if (j.y < -j.sz * 4) { j.y = H + j.sz * 2; j.x = W * (.1 + Math.random() * .8); } }
+    const pulse = Math.sin(t * .0016 + j.ph), bw = j.sz * (1 + pulse * .08), bh = j.sz * (.75 - pulse * .07), x = j.x + Math.sin(t * .0003 + j.sway) * j.sz * .6, y = j.y;
+    g.save(); g.globalCompositeOperation = 'lighter';
+    const halo = g.createRadialGradient(x, y, 0, x, y, j.sz * 2.4); halo.addColorStop(0, 'rgba(170,220,255,.22)'); halo.addColorStop(1, 'rgba(170,220,255,0)');
+    g.fillStyle = halo; g.fillRect(x - j.sz * 2.4, y - j.sz * 2.4, j.sz * 4.8, j.sz * 4.8);
+    // 足
+    g.strokeStyle = 'rgba(190,225,255,.32)'; g.lineWidth = Math.max(.6, j.sz * .04);
+    for (let i = 0; i < 7; i++) {
+      const sx = x - bw * .8 + bw * 1.6 * i / 6, L = j.sz * (2.2 + (i % 3) * .5);
+      g.beginPath(); g.moveTo(sx, y);
+      for (let q = 1; q <= 5; q++) g.lineTo(sx + Math.sin(t * .002 + i + q * .9 + j.ph) * j.sz * .18 * q / 2, y + L * q / 5);
+      g.stroke();
+    }
+    g.strokeStyle = 'rgba(220,200,255,.35)'; g.lineWidth = Math.max(1, j.sz * .09);   // 口のまわりのひらひら
+    for (let i = 0; i < 3; i++) { const sx = x + (i - 1) * bw * .25; g.beginPath(); g.moveTo(sx, y); g.quadraticCurveTo(sx + Math.sin(t * .0018 + i) * j.sz * .3, y + j.sz * .8, sx + Math.sin(t * .0014 + i * 2) * j.sz * .2, y + j.sz * 1.5); g.stroke(); }
+    // 傘
+    const bell = g.createRadialGradient(x, y - bh * .4, bw * .1, x, y - bh * .2, bw * 1.1);
+    bell.addColorStop(0, 'rgba(235,245,255,.42)'); bell.addColorStop(.6, 'rgba(160,210,255,.22)'); bell.addColorStop(1, 'rgba(200,170,255,.38)');
+    g.fillStyle = bell; g.beginPath(); g.ellipse(x, y, bw, bh, 0, Math.PI, 0);
+    g.quadraticCurveTo(x + bw * .5, y + bh * .22, x, y + bh * .1); g.quadraticCurveTo(x - bw * .5, y + bh * .22, x - bw, y); g.fill();
+    g.strokeStyle = 'rgba(230,245,255,.45)'; g.lineWidth = Math.max(.6, j.sz * .03); g.beginPath(); g.ellipse(x, y, bw, bh, 0, Math.PI, 0); g.stroke();
+    g.restore();
+  });
+
+  // 泡
+  AQ.bub.forEach((b, i) => {
+    if (!still) { b.y -= b.v * dt; b.x += Math.sin(t * .003 + b.ph) * .15 * dt; if (b.y < -10) AQ.bub[i] = aqBubble(false); }
+    g.strokeStyle = 'rgba(220,250,255,.55)'; g.lineWidth = .8; g.beginPath(); g.arc(b.x, b.y, b.r, 0, 6.3); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,.6)'; g.beginPath(); g.arc(b.x - b.r * .35, b.y - b.r * .35, b.r * .28, 0, 6.3); g.fill();
+  });
+}
+
+/* ---- キャラシ：ガラスの水槽のようなパネル ---- */
+const AQ_ICON = {
+  shell: '<path d="M12 20.5c-4.6 0-8.3-3.2-8.3-7.4 0-4.6 3.7-9.1 8.3-9.1s8.3 4.5 8.3 9.1c0 4.2-3.7 7.4-8.3 7.4z"/><path d="M12 20.5V4M12 20.5 6.6 6.6M12 20.5l5.4-13.9M12 20.5 4.3 10.4M12 20.5l7.7-10.1"/><path d="M9.5 20.2 8.8 22h6.4l-.7-1.8"/>',
+  heart: '<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.4a4.3 4.3 0 0 1 7.5 2.4C19.5 15.4 12 20 12 20z"/>',
+  drop: '<path d="M12 3.5s6 6.6 6 10.7a6 6 0 0 1-12 0C6 10.1 12 3.5 12 3.5z"/><path d="M9.2 14.5a3 3 0 0 0 2.6 2.8" class="hl"/>',
+  brain: '<path d="M9 5.2a3 3 0 0 0-4.6 2.6 3 3 0 0 0-.9 5 3.2 3.2 0 0 0 2.8 4.8A3 3 0 0 0 12 18.4V6.3A3 3 0 0 0 9 5.2zM15 5.2a3 3 0 0 1 4.6 2.6 3 3 0 0 1 .9 5 3.2 3.2 0 0 1-2.8 4.8A3 3 0 0 1 12 18.4"/><path d="M8 9.5h2M14 9.5h2M8.5 13.5H10M14 13.5h1.5" class="hl"/>',
+  job: '<rect x="4" y="8" width="16" height="11" rx="2"/><path d="M9 8V6.2A1.2 1.2 0 0 1 10.2 5h3.6A1.2 1.2 0 0 1 15 6.2V8M4 12.5h16"/>',
+  age: '<path d="M7 4h10M7 20h10M8 4c0 4 4 5 4 8s-4 4-4 8M16 4c0 4-4 5-4 8s4 4 4 8"/>',
+  sex: '<circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c.8-3.6 3.4-5.6 6.5-5.6s5.7 2 6.5 5.6"/>',
+  home: '<path d="M4 11.5 12 4.5l8 7M6.5 10v9h11v-9"/>',
+  more: '<rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M8.5 8h7M8.5 11.5h7M8.5 15h4.5"/>',
+};
+const aqIcon = (k, cls = '') => `<svg class="aq-ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${AQ_ICON[k] || ''}</svg>`;
+function aquaHtml(c) {
+  const a = abilities(c), p = c.profile, S = SYS[c.system], src = portraitSrc(c);
+  const ab = Object.keys(c.abilities);
+  return `
+    <div class="hub-top aq-tools">${toolsHtml(c)}</div>
+    <div class="aq-sheet">
+      <i class="aq-wave-top" aria-hidden="true"></i>
+      <div class="aq-title">${aqIcon('shell', 'aq-shell')}<div><b data-hub="name"></b><small>— Character Status —</small></div><span class="aq-sys">${esc(S.short)}</span></div>
+      <nav class="aq-tabs" aria-label="項目">${SECTIONS.map((s, i) => `<button class="aq-tab" type="button" data-open="${s.key}" style="--i:${i}">${icon(s.key)}<span>${s.jp}</span></button>`).join('')}</nav>
+      <div class="aq-main">
+        <button class="aq-portrait ${src ? 'has' : ''}" type="button" data-stage aria-label="立ち絵を表示">${src ? `<img src="${esc(imgSrc(src))}" alt="" draggable="false" onerror="this.remove()">` : tokenHtml(c)}<i class="aq-glint" aria-hidden="true"></i></button>
+        <div class="aq-bars">${[['hp', 'heart', 'HP'], ['mp', 'drop', 'MP'], ['san', 'brain', 'SAN']].map(([k, ic, l]) => `
+          <div class="aq-bar ${k}">${aqIcon(ic)}<span class="aq-bl">${l}</span><b data-out="${k}Cur"></b><span class="aq-tr"><i data-bar="${k}"></i></span></div>`).join('')}
+          <p class="aq-kana" data-hub="kana"></p>
+        </div>
+      </div>
+      <div class="aq-lower">
+        <button class="aq-abils" type="button" data-open="abilities" aria-label="能力値をひらく">${ab.map(k => `<span class="aq-ab"><i>${k}</i><b>${a[k] || 0}</b></span>`).join('')}</button>
+        <button class="aq-prof" type="button" data-open="profile" aria-label="プロフィールをひらく">
+          <span class="aq-pf">${aqIcon('job')}<span><i>職業</i><b>${esc(p.occupation || '—')}</b></span></span>
+          <span class="aq-pf">${aqIcon('age')}<span><i>年齢</i><b>${esc(p.age ? p.age + '歳' : '—')}</b></span></span>
+          <span class="aq-pf">${aqIcon('sex')}<span><i>性別</i><b>${esc(p.sex || '—')}</b></span></span>
+        </button>
+      </div>
+      <button class="aq-more" type="button" data-open="skills">${aqIcon('more')}<span>技能を見る</span><span class="aq-go" aria-hidden="true">›</span></button>
+    </div>`;
+}
+
+/* ---- 画面の切りかえ：下から水が満ちて、泡がのぼり、水が引いて新しい画面 ---- */
+let aqWaveBusy = false;
+function aquaWave(mid) {
+  if (reduceMotion.matches || aqWaveBusy) { mid(); return; }
+  aqWaveBusy = true;
+  const cv = document.createElement('canvas'); cv.className = 'aq-wave'; cv.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(cv);
+  const dpr = Math.min(2, devicePixelRatio || 1), W = innerWidth, H = innerHeight;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const R = Math.random, bubs = [];
+  const addBub = (y0) => bubs.push({ x: R() * W, y: y0 ?? H + 10 + R() * 60, r: 2 + R() * (R() < .15 ? 14 : 6), v: 2.5 + R() * 4.5, ph: R() * 6.3 });
+  for (let i = 0; i < 26; i++) addBub(H + R() * 200);
+  const RISE = 620, HOLD = 260, FALL = 760, T = RISE + HOLD + FALL;
+  const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  let t0 = 0, switched = false, lastT = 0;
+  const surface = (lv, t, amp) => { g.moveTo(-10, lv); for (let x = -10; x <= W + 10; x += 10) g.lineTo(x, lv + Math.sin(x * .012 + t * .006) * amp + Math.sin(x * .027 - t * .009) * amp * .45); };
+  const frame = now => {
+    if (!t0) t0 = lastT = now;
+    const t = now - t0, dt = Math.min(3, (now - lastT) / 16.7); lastT = now;
+    let lv, amp;
+    if (t < RISE) { const e = ease(t / RISE); lv = H + 40 - (H + 100) * e; amp = 10 + 16 * Math.sin(e * Math.PI); }
+    else if (t < RISE + HOLD) { lv = -60; amp = 8; if (!switched) { switched = true; try { mid(); } catch (e) { console.error(e); } } }
+    else { const e = ease(Math.min(1, (t - RISE - HOLD) / FALL)); lv = -60 + (H + 120) * e; amp = 10 + 14 * Math.sin(e * Math.PI); }
+    g.clearRect(0, 0, W, H);
+    // 手前に少し明るい波（奥行き）
+    g.beginPath(); surface(lv - 16, t + 400, amp * .8); g.lineTo(W + 10, H + 10); g.lineTo(-10, H + 10); g.closePath();
+    g.fillStyle = 'rgba(140,220,255,.32)'; g.fill();
+    // 水の本体
+    g.beginPath(); surface(lv, t, amp); g.lineTo(W + 10, H + 10); g.lineTo(-10, H + 10); g.closePath();
+    const lg = g.createLinearGradient(0, Math.max(-60, lv), 0, Math.max(-60, lv) + H);
+    lg.addColorStop(0, 'rgba(70,170,235,.97)'); lg.addColorStop(.35, 'rgba(18,90,170,.98)'); lg.addColorStop(1, 'rgba(5,30,80,1)');
+    g.fillStyle = lg; g.fill();
+    // 水の中の光の帯
+    g.save(); g.clip(); g.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 4; i++) {
+      const cx = W * (.15 + i * .25) + Math.sin(t * .002 + i) * 30, w0 = W * .03;
+      const rg = g.createLinearGradient(0, lv, 0, lv + H * .7); rg.addColorStop(0, 'rgba(210,248,255,.22)'); rg.addColorStop(1, 'rgba(210,248,255,0)');
+      g.fillStyle = rg; g.beginPath(); g.moveTo(cx - w0, lv); g.lineTo(cx + w0, lv); g.lineTo(cx + w0 * 4 + 60, lv + H * .7); g.lineTo(cx - w0 * 4 + 60, lv + H * .7); g.closePath(); g.fill();
+    }
+    g.restore();
+    // 水面の光る線
+    g.beginPath(); surface(lv, t, amp); g.strokeStyle = 'rgba(230,252,255,.9)'; g.lineWidth = 2.2; g.stroke();
+    g.beginPath(); surface(lv + 7, t + 200, amp * .6); g.strokeStyle = 'rgba(200,245,255,.35)'; g.lineWidth = 1.2; g.stroke();
+    // 泡（水の中だけ）
+    if (t < RISE + HOLD + FALL * .4 && bubs.length < 70 && R() < .6) addBub();
+    bubs.forEach(b => {
+      b.y -= b.v * dt; b.x += Math.sin(t * .006 + b.ph) * .6 * dt;
+      if (b.y < lv - 4 + Math.sin(b.x * .012 + t * .006) * amp) return;
+      g.strokeStyle = 'rgba(230,252,255,.75)'; g.lineWidth = 1.1; g.beginPath(); g.arc(b.x, b.y, b.r, 0, 6.3); g.stroke();
+      g.fillStyle = 'rgba(200,240,255,.12)'; g.fill();
+      g.fillStyle = 'rgba(255,255,255,.85)'; g.beginPath(); g.arc(b.x - b.r * .35, b.y - b.r * .38, Math.max(.8, b.r * .25), 0, 6.3); g.fill();
+    });
+    if (t < T) requestAnimationFrame(frame);
+    else { cv.remove(); aqWaveBusy = false; }
+  };
+  requestAnimationFrame(frame);
+}
+
+/* ---- 項目の窓：泡がふくらむようにひらき、しぼんではじけるように閉じる ---- */
+function aquaPanelOpen(ov) {
+  ov.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, easing: 'ease-out' });
+  $('sao-win').animate([
+    { clipPath: 'circle(0% at 50% 55%)', transform: 'scale(.9)' },
+    { clipPath: 'circle(48% at 50% 52%)', transform: 'scale(1.015)', offset: .6 },
+    { clipPath: 'circle(150% at 50% 50%)', transform: 'scale(1)' },
+  ], { duration: 720, easing: 'cubic-bezier(.3, .7, .3, 1)' });
+  document.querySelectorAll('.sao-item').forEach((el, i) => el.animate(
+    [{ opacity: 0, transform: 'translateY(16px) scale(.8)' }, { opacity: 1 }],
+    { duration: 520, delay: 120 + i * 45, easing: 'cubic-bezier(.2, .9, .3, 1.3)', fill: 'backwards' }));
+  aqRipple($('sao-win'));
+}
+function aquaPanelClose(ov) {
+  return [
+    $('sao-win').animate([
+      { clipPath: 'circle(150% at 50% 50%)', transform: 'scale(1)' },
+      { clipPath: 'circle(30% at 50% 52%)', transform: 'scale(.97)', offset: .7 },
+      { clipPath: 'circle(0% at 50% 55%)', transform: 'scale(.9)' },
+    ], { duration: 460, easing: 'cubic-bezier(.6, 0, .6, 1)', fill: 'forwards' }),
+    ov.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, delay: 240, fill: 'forwards' }),
+  ];
+}
+/* 水面に石を落としたような波紋を、要素のまん中に */
+function aqRipple(el) {
+  if (!el || reduceMotion.matches) return;
+  const r = el.getBoundingClientRect();
+  for (let i = 0; i < 3; i++) {
+    const e = document.createElement('i'); e.className = 'aq-ripple'; e.setAttribute('aria-hidden', 'true');
+    e.style.left = (r.left + r.width / 2) + 'px'; e.style.top = (r.top + r.height / 2) + 'px';
+    document.body.appendChild(e);
+    e.animate([{ transform: 'translate(-50%, -50%) scale(.1)', opacity: .9 }, { transform: 'translate(-50%, -50%) scale(1)', opacity: 0 }], { duration: 1100, delay: i * 160, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'both' })
+      .finished.then(() => e.remove(), () => e.remove());
+  }
+}
 
 /* ================= 起動 ================= */
 /* 保存データの読み込み（IndexedDB）は少し時間がかかるので、終わってから画面を作る */

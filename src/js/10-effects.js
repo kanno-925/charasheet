@@ -11,6 +11,10 @@ function fx(x, y, burst = false) {
     setTimeout(() => e.remove(), 1400);
   };
   make('fx-bloom'); make('fx-ring'); make('fx-ring late');
+  if (isAqua()) {   // アクアリウムでは、火花のかわりに小さな泡がのぼる
+    for (let i = 0; i < (burst ? 12 : 4); i++) make('fx-bub', { '--dx': (Math.random() - .5) * (burst ? 120 : 40) + 'px', '--dy': -(50 + Math.random() * (burst ? 140 : 60)) + 'px', '--s': (.4 + Math.random() * .8).toFixed(2), '--d': Math.round(Math.random() * 200) + 'ms' });
+    return;
+  }
   if (burst) {
     make('fx-ring big');
     for (let i = 0; i < 14; i++) {

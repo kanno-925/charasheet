@@ -123,6 +123,14 @@ function initSlide() {
 function popSelect() {
   if (reduceMotion.matches) return;
   const stage = $('sel-stage');
+  if (isAqua()) {   // 泡のように下からふわりと浮かんでくる
+    const d0 = aqWaveBusy ? 900 : 60;
+    stage.querySelectorAll('.sel-char, .sel-row').forEach((el, i) => el.animate(
+      [{ opacity: 0, transform: 'translateY(40px) scale(.85)' }, { opacity: 1, transform: 'translateY(-4px) scale(1.02)', offset: .7 }, { opacity: 1, transform: 'none' }],
+      { duration: 900, delay: d0 + i * 70, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'backwards' }));
+    [$('sel-new'), document.querySelector('.sel-head')].forEach(el => el?.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], { duration: 800, delay: d0, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'backwards' }));
+    return;
+  }
   if (isBook()) {
     const d0 = bookCoverBusy ? 980 : 80;   // 表紙がひらいてから書きこむ
     stage.querySelectorAll('.sel-char, .sel-row').forEach((el, i) => el.animate(
@@ -146,7 +154,7 @@ function showSelect() {
   applyBg();
   document.documentElement.style.overflow = 'hidden';
   renderSelect();
-  if (!reduceMotion.matches && !isBook()) sel.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: 'ease-out' });
+  if (!reduceMotion.matches && !isBook() && !isAqua()) sel.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: 'ease-out' });
   popSelect();
 }
 function leaveSelect(fromEl, quick) {
