@@ -686,7 +686,7 @@ function renderShelf() {
     <button class="char-item ${c.id === state.activeId ? 'active' : ''}" type="button" data-id="${c.id}">
       ${tokenHtml(c)}
       <span style="min-width:0"><span class="nm">${esc(c.profile.name || '名無し')}</span><span class="sys">${esc(SYS[c.system].short)}${c.profile.occupation ? ' ・ ' + esc(c.profile.occupation) : ''}</span></span>
-      <span class="ci-lv" title="通過したシナリオの数">通過 ${c.scenarios.filter(x => String(x.name || '').trim()).length}</span><span class="ci-go" aria-hidden="true">›</span>
+      <span class="ci-lv" title="通過したシナリオの数＋1（0本なら Lv. 1）">Lv. ${c.scenarios.filter(x => String(x.name || '').trim()).length + 1}</span><span class="ci-go" aria-hidden="true">›</span>
     </button>`).join('');
 }
 
@@ -1534,7 +1534,7 @@ function openPanel(key, fromEl) {
 }
 function closePanel() {
   const ov = $('panel-ov'); if (ov.hidden) return;
-  const findTarget = k => document.querySelector(`#sheet [data-open="${k}"]`) || document.querySelector('#sheet .hub-core, #sheet .wa-kake, #sheet .dot-name, #sheet .aq-port');
+  const findTarget = k => document.querySelector(`#sheet [data-open="${k}"]`) || document.querySelector('#sheet .hub-core, #sheet .wa-kake, #sheet .dot-name, #sheet .aq-pic');
   let target = findTarget(panelKey);
   const done = anims => {
     const k = panelKey;
@@ -4990,6 +4990,12 @@ function aquaMenuSetup() {
   document.addEventListener('click', e => { if (bar.classList.contains('aq-open') && !e.target.closest('.bar-actions')) set(false); });
   bar.querySelector('.bar-actions')?.addEventListener('click', e => { if (e.target.closest('.btn')) set(false); });
   $('shelf-new')?.addEventListener('click', () => $('btn-new').click());
+  // 見本どおりの「ホーム・バックアップ・テーマ・背景・歯車」の列（本物のボタンを押す代わりのボタン）
+  const row = document.createElement('nav'); row.className = 'aq-navrow'; row.setAttribute('aria-label', 'おもなメニュー');
+  row.innerHTML = [['btn-select', 'home', 'ホーム'], ['btn-export', 'backup', 'バックアップ'], ['btn-theme', 'theme', 'テーマ・背景'], ['btn-account', 'gear', 'アカウント']]
+    .map(([id, k, l]) => `<button type="button" class="aq-nv ${k}" data-for="${id}" aria-label="${l}"></button>`).join('');
+  row.addEventListener('click', e => { const b = e.target.closest('[data-for]'); if (b) $(b.dataset.for)?.click(); });
+  bar.after(row);
 }
 
 /* 背景の絵（assets/aqua/scene.webp）は CSS で敷く。canvas には、その上で動くもの（光のゆらぎ・ただよう粒・泡）だけを描く */
@@ -5040,26 +5046,24 @@ function aquaTick(t) {
 
 /* ---- キャラシ：厚いガラスの水槽 ---- */
 function aquaHtml(c) {
-  const a = abilities(c), p = c.profile, S = SYS[c.system], src = portraitSrc(c);
-  const fact = (lbl, v) => `<span class="aq-fact"><i>${lbl}</i><b>${esc(v || '—')}</b></span>`;
+  const a = abilities(c), p = c.profile, src = portraitSrc(c);
+  const pf = (ic, lbl, v) => `<span class="aq-pf-row"><i class="aq-i ${ic}"></i><span><i>${lbl}</i><b>${esc(v || '—')}</b></span></span>`;
   return `
-    <div class="aq-tank">
-      <i class="aq-tank-light" aria-hidden="true"></i>
-      <div class="aq-tank-tools">${toolsHtml(c)}</div>
-      <div class="aq-head">
-        <button class="aq-port" type="button" data-stage aria-label="立ち絵を表示"><span class="aq-port-in">${src ? `<img src="${esc(imgSrc(src))}" alt="" draggable="false" onerror="this.remove()">` : tokenHtml(c)}</span></button>
-        <div class="aq-plate">
-          <small class="aq-plate-k">Investigator ・ ${esc(S.short)}</small>
-          <b class="aq-plate-n" data-hub="name"></b>
-          <span class="aq-plate-kana" data-hub="kana"></span>
-          <span class="aq-facts">${fact('職業', p.occupation)}${fact('年齢', p.age && p.age + '歳')}${fact('性別', p.sex)}${fact('出身', p.origin)}</span>
+    <div class="aq-st">
+      <div class="aq-st-tools">${toolsHtml(c)}</div>
+      <div class="aq-st-head"><i class="aq-i shell" aria-hidden="true"></i><div><b data-hub="name"></b><small>— Character Status —</small></div></div>
+      <nav class="aq-st-tabs" aria-label="項目">${[['abilities', 'ステータス'], ['skills', '技能'], ['items', '所持品'], ['story', 'メモ']].map(([k, l], i) => `<button class="aq-tabimg t${i}" type="button" data-open="${k}" aria-label="${l}"></button>`).join('')}</nav>
+      <div class="aq-st-main">
+        <button class="aq-pic" type="button" data-stage aria-label="立ち絵を表示"><span class="aq-pic-in">${src ? `<img src="${esc(imgSrc(src))}" alt="" draggable="false" onerror="this.remove()">` : tokenHtml(c)}</span></button>
+        <div class="aq-bars">${[['hp', 'heart', 'HP'], ['mp', 'drop', 'MP'], ['san', 'brain', 'SAN']].map(([k, ic, l]) => `
+          <div class="aq-bar ${k}"><i class="aq-i ${ic}"></i><span class="aq-bl">${l}</span><b class="aq-bv" data-out="${k}Cur"></b><span class="aq-tr"><i data-bar="${k}"></i></span></div>`).join('')}
         </div>
       </div>
-      <div class="aq-tubes">${[['hp', 'HP', '耐久力'], ['mp', 'MP', 'マジック・ポイント'], ['san', 'SAN', '正気度']].map(([k, l, jp]) => `
-        <div class="aq-tube-row ${k}"><span class="aq-tl"><b>${l}</b><small>${jp}</small></span><span class="aq-tube"><i data-bar="${k}"><em></em></i></span><b class="aq-tv" data-out="${k}Cur"></b></div>`).join('')}
+      <div class="aq-st-low">
+        <button class="aq-tiles" type="button" data-open="abilities" aria-label="能力値をひらく">${Object.keys(c.abilities).map(k => `<span class="aq-tile"><i>${k}</i><b>${a[k] || 0}</b></span>`).join('')}</button>
+        <button class="aq-pbox" type="button" data-open="profile" aria-label="プロフィールをひらく">${pf('job', '職業', p.occupation)}${pf('age', '年齢', p.age && p.age + '歳')}${pf('sex', '性別', p.sex)}</button>
       </div>
-      <button class="aq-abils" type="button" data-open="abilities" aria-label="能力値をひらく">${Object.keys(c.abilities).map(k => `<span class="aq-ab"><i>${k}</i><b>${a[k] || 0}</b></span>`).join('')}</button>
-      <nav class="aq-nav" aria-label="項目">${SECTIONS.map(s => `<button class="aq-nb" type="button" data-open="${s.key}">${icon(s.key)}<span>${s.jp}</span><small data-sum="${s.key}"></small></button>`).join('')}</nav>
+      <button class="aq-detail" type="button" data-open="profile" aria-label="詳細を見る"></button>
     </div>`;
 }
 

@@ -14,7 +14,7 @@ function renderShelf() {
     <button class="char-item ${c.id === state.activeId ? 'active' : ''}" type="button" data-id="${c.id}">
       ${tokenHtml(c)}
       <span style="min-width:0"><span class="nm">${esc(c.profile.name || '名無し')}</span><span class="sys">${esc(SYS[c.system].short)}${c.profile.occupation ? ' ・ ' + esc(c.profile.occupation) : ''}</span></span>
-      <span class="ci-lv" title="通過したシナリオの数">通過 ${c.scenarios.filter(x => String(x.name || '').trim()).length}</span><span class="ci-go" aria-hidden="true">›</span>
+      <span class="ci-lv" title="通過したシナリオの数＋1（0本なら Lv. 1）">Lv. ${c.scenarios.filter(x => String(x.name || '').trim()).length + 1}</span><span class="ci-go" aria-hidden="true">›</span>
     </button>`).join('');
 }
 
