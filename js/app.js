@@ -686,7 +686,7 @@ function renderShelf() {
     <button class="char-item ${c.id === state.activeId ? 'active' : ''}" type="button" data-id="${c.id}">
       ${tokenHtml(c)}
       <span style="min-width:0"><span class="nm">${esc(c.profile.name || '名無し')}</span><span class="sys">${esc(SYS[c.system].short)}${c.profile.occupation ? ' ・ ' + esc(c.profile.occupation) : ''}</span></span>
-      <span class="ci-lv" title="通過したシナリオの数＋1（0本なら Lv. 1）">Lv. ${c.scenarios.filter(x => String(x.name || '').trim()).length + 1}</span><span class="ci-go" aria-hidden="true">›</span>
+      <span class="ci-go" aria-hidden="true">›</span>
     </button>`).join('');
 }
 
@@ -5067,51 +5067,77 @@ function aquaHtml(c) {
     </div>`;
 }
 
-/* ---- 画面の切りかえ：見本の「編集中…」のように、ぼやけた水の中にガラスの札と、まわりを回る光の輪 ----
-   ① ぼやけた水底がふわっと広がり、札が浮かぶ（行き先の名前と Loading…）
-   ② 札が出ているあいだに画面を入れかえる（mid）
-   ③ 札が泡になって消え、水が晴れて新しい画面 */
+/* ---- 画面の切りかえ：水にもぐるように ----
+   ① 下から本物らしい泡（ふちが光り、上に光の点、ゆれながらのぼる）がいっせいに吹き上がり、
+      画面は水の中のようにぼやけて（すりガラス）、水底の光の網がゆれる
+   ② 泡と水でおおわれているあいだに画面を入れかえる（mid）
+   ③ 泡がのぼりきるにつれて水が晴れ、新しい画面があらわれる */
 let aqWaveBusy = false;
-const AQ_SHELL = '<svg class="av-shell" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5c-4.6 0-8.3-3.2-8.3-7.4 0-4.6 3.7-9.1 8.3-9.1s8.3 4.5 8.3 9.1c0 4.2-3.7 7.4-8.3 7.4z"/><path class="ln" d="M12 20.5V4M12 20.5 6.6 6.6M12 20.5l5.4-13.9M12 20.5 4.3 10.4M12 20.5l7.7-10.1"/><path d="M9.5 20.2 8.8 22h6.4l-.7-1.8"/></svg>';
+const aqBubbleSprites = (() => {
+  let cache = null;
+  return () => {
+    if (cache) return cache;
+    const make = sz => {
+      const c = document.createElement('canvas'); c.width = c.height = sz; const g = c.getContext('2d'); const r = sz / 2 - 1, o = sz / 2;
+      const body = g.createRadialGradient(o - r * .15, o - r * .2, r * .1, o, o, r);
+      body.addColorStop(0, 'rgba(200,240,255,0.03)'); body.addColorStop(.72, 'rgba(160,220,255,0.07)'); body.addColorStop(.9, 'rgba(200,240,255,0.32)');
+      body.addColorStop(.97, 'rgba(250,254,255,0.8)'); body.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = body; g.beginPath(); g.arc(o, o, r, 0, 6.283); g.fill();
+      const sp = g.createRadialGradient(o - r * .38, o - r * .45, 0, o - r * .38, o - r * .45, r * .36);
+      sp.addColorStop(0, 'rgba(255,255,255,0.95)'); sp.addColorStop(.5, 'rgba(255,255,255,0.35)'); sp.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = sp; g.beginPath(); g.ellipse(o - r * .38, o - r * .45, r * .34, r * .22, -.7, 0, 6.283); g.fill();
+      const rf = g.createRadialGradient(o + r * .4, o + r * .45, 0, o + r * .4, o + r * .45, r * .5);
+      rf.addColorStop(0, 'rgba(150,230,255,0.4)'); rf.addColorStop(1, 'rgba(150,230,255,0)');
+      g.fillStyle = rf; g.beginPath(); g.ellipse(o + r * .35, o + r * .5, r * .5, r * .22, -.5, 0, 6.283); g.fill();
+      return c;
+    };
+    return (cache = [make(48), make(160)]);
+  };
+})();
 function aquaWave(mid) {
   if (reduceMotion.matches || aqWaveBusy) { mid(); return; }
   aqWaveBusy = true;
   const toSheet = !$('select').hidden, c = active();
-  const title = toSheet ? (c?.profile.name || '名無し') : 'キャラクター一覧';
-  const ov = document.createElement('div'); ov.className = 'aq-veil'; ov.setAttribute('aria-hidden', 'true');
-  ov.innerHTML = `<i class="av-bg"></i><canvas class="av-bub"></canvas>
-    <div class="av-card"><svg class="av-ring" viewBox="0 0 400 140" preserveAspectRatio="none"><ellipse class="r1" cx="200" cy="70" rx="196" ry="44" pathLength="100"/><ellipse class="r2" cx="200" cy="70" rx="196" ry="44" pathLength="100"/></svg>
-      ${AQ_SHELL}<b class="av-t"></b><small class="av-s">Loading…</small></div>`;
-  ov.querySelector('.av-t').textContent = title;
+  const ov = document.createElement('div'); ov.className = 'aq-dive'; ov.setAttribute('aria-hidden', 'true');
+  ov.innerHTML = '<i class="ad-veil"></i><i class="ad-caus"></i><i class="ad-rays"></i><canvas class="ad-bub"></canvas><b class="ad-name"></b>';
+  ov.querySelector('.ad-name').textContent = toSheet ? (c?.profile.name || '') : 'キャラクター一覧';
   document.body.appendChild(ov);
-  const bg = ov.querySelector('.av-bg'), card = ov.querySelector('.av-card');
-  // 泡（下からのぼる）
-  const cv = ov.querySelector('.av-bub'), dpr = Math.min(2, devicePixelRatio || 1), W = innerWidth, H = innerHeight;
+  const veil = ov.querySelector('.ad-veil'), caus = ov.querySelector('.ad-caus'), rays = ov.querySelector('.ad-rays'), name = ov.querySelector('.ad-name');
+  const cv = ov.querySelector('.ad-bub'), dpr = Math.min(2, devicePixelRatio || 1), W = innerWidth, H = innerHeight;
   cv.width = W * dpr; cv.height = H * dpr; const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const R = Math.random, bubs = Array.from({ length: 34 }, () => ({ x: R() * W, y: H * (.4 + R() * .8), r: 2 + R() * (R() < .2 ? 12 : 5), v: 1.2 + R() * 2.6, ph: R() * 6.3 }));
-  let run = true, t0 = 0;
-  const draw = now => {
-    if (!run) return; if (!t0) t0 = now; const t = now - t0;
+  const [small, big] = aqBubbleSprites(), R = Math.random, bubs = [];
+  const spawn = (n, fast) => { for (let i = 0; i < n; i++) {
+    const k = R(), size = k < .7 ? 3 + R() * 12 : k < .94 ? 16 + R() * 34 : 50 + R() * 90;
+    bubs.push({ x: R() * W, y: H + size + R() * H * (fast ? .5 : .2), s: size, vy: (fast ? 7 : 3) + R() * (fast ? 12 : 6) + size * .03, ph: R() * 6.3, sw: .4 + R() * 1.4, a: .65 + R() * .35 });
+  } };
+  spawn(Math.round(W * H / 2600), true);
+  const T = 1650, MID = 430;
+  let t0 = 0, last = 0, switched = false, run = true;
+  const frame = now => {
+    if (!run) return;
+    if (!t0) t0 = last = now;
+    const t = now - t0, dt = Math.min(3, (now - last) / 16.7); last = now;
+    if (t < 1000 && R() < .7) spawn(t < 500 ? 6 : 2, t < 500);
     g.clearRect(0, 0, W, H);
-    bubs.forEach(b => {
-      b.y -= b.v; b.x += Math.sin(t * .004 + b.ph) * .5; if (b.y < -20) { b.y = H + 20; b.x = R() * W; }
-      g.strokeStyle = 'rgba(230,252,255,.7)'; g.lineWidth = 1; g.beginPath(); g.arc(b.x, b.y, b.r, 0, 6.3); g.stroke();
-      g.fillStyle = 'rgba(200,240,255,.1)'; g.fill();
-      g.fillStyle = 'rgba(255,255,255,.85)'; g.beginPath(); g.arc(b.x - b.r * .35, b.y - b.r * .38, Math.max(.7, b.r * .25), 0, 6.3); g.fill();
-    });
-    requestAnimationFrame(draw);
+    for (let i = bubs.length - 1; i >= 0; i--) {
+      const b = bubs[i];
+      b.vy *= 1 + .012 * dt; b.y -= b.vy * dt; b.x += Math.sin(t * .006 + b.ph) * b.sw * dt;
+      if (b.y < -b.s * 1.5) { bubs.splice(i, 1); continue; }
+      const wob = Math.sin(t * .012 + b.ph) * (b.s > 30 ? .07 : .03), w = b.s * (1 + wob), h = b.s * (1 - wob) * (1 + Math.min(.25, b.vy * .008));
+      g.globalAlpha = b.a; g.drawImage(b.s > 30 ? big : small, b.x - w / 2, b.y - h / 2, w, h);
+    }
+    g.globalAlpha = 1;
+    if (!switched && t >= MID) { switched = true; try { mid(); } catch (e) { console.error(e); } }
+    if (t < T || bubs.length) requestAnimationFrame(frame);
+    else { run = false; ov.remove(); aqWaveBusy = false; }
   };
-  requestAnimationFrame(draw);
-  const ease = 'cubic-bezier(.3, .7, .3, 1)';
-  ov.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, easing: 'ease-out', fill: 'forwards' });
-  bg.animate([{ transform: 'scale(1.12)' }, { transform: 'scale(1.02)' }], { duration: 1700, easing: ease, fill: 'forwards' });
-  card.animate([{ opacity: 0, transform: 'translateY(18px) scale(.92)', filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: 620, delay: 140, easing: ease, fill: 'both' });
-  setTimeout(() => { try { mid(); } catch (e) { console.error(e); } }, 470);
-  setTimeout(() => {
-    card.animate([{ opacity: 1, transform: 'none', filter: 'blur(0)' }, { opacity: 0, transform: 'translateY(-14px) scale(1.06)', filter: 'blur(8px)' }], { duration: 420, easing: 'ease-in', fill: 'forwards' });
-    ov.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 560, delay: 180, easing: 'ease-in-out', fill: 'forwards' })
-      .finished.then(() => { run = false; ov.remove(); aqWaveBusy = false; }, () => { run = false; ov.remove(); aqWaveBusy = false; });
-  }, 1250);
+  requestAnimationFrame(frame);
+  const ease = 'cubic-bezier(.3, .6, .3, 1)';
+  veil.animate([{ opacity: 0 }, { opacity: 1, offset: .26 }, { opacity: 1, offset: .55 }, { opacity: 0 }], { duration: T, easing: 'ease-in-out', fill: 'forwards' });
+  caus.animate([{ opacity: 0, transform: 'translate(0, 0) scale(1.1)' }, { opacity: .13, offset: .3 }, { opacity: .1, offset: .6 }, { opacity: 0, transform: 'translate(-80px, -140px) scale(1)' }], { duration: T, easing: 'linear', fill: 'forwards' });
+  rays.animate([{ opacity: 0 }, { opacity: 1, offset: .3 }, { opacity: .8, offset: .6 }, { opacity: 0 }], { duration: T, easing: 'ease-in-out', fill: 'forwards' });
+  name.animate([{ opacity: 0, transform: 'translateY(10px)', filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)', offset: .35 }, { opacity: 1, offset: .55 }, { opacity: 0, transform: 'translateY(-12px)', filter: 'blur(6px)' }], { duration: T, easing: ease, fill: 'forwards' });
+  setTimeout(() => { if (aqWaveBusy && ov.isConnected && !switched) { switched = true; try { mid(); } catch (e) { console.error(e); } } }, MID + 400);   // 画面が止まっていても、入れかえは必ずする
 }
 
 /* ---- 項目の窓：泡がふくらむようにひらき、しぼんではじけるように閉じる ---- */
