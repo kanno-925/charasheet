@@ -2616,6 +2616,26 @@ body.ue-on .ue-panel { cursor: auto; }
 @media (max-width: 1200px) { :root[data-look~="aqua"] .pl-aq small { display: none; } }
 .aq-plate-k { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 760px) { .aq-plate-k { letter-spacing: .1em; font-size: 10px; } }
+
+/* ---- 文字をうっすら光らせる（見本のように、白い文字のまわりに水色の光） ----
+   本文はひかえめ（読みやすさを優先）、題名・名前・数字は少し強く。暗い影も重ねて、明るい背景の上でも読めるように */
+:root[data-look~="aqua"] { --aq-glow: 0 0 7px rgb(170 235 255 / .7), 0 0 16px rgb(110 200 255 / .38), 0 1px 3px rgb(0 18 50 / .55);
+  --aq-glow-strong: 0 0 6px rgb(200 245 255 / .95), 0 0 16px rgb(130 215 255 / .75), 0 0 32px rgb(90 180 255 / .45), 0 2px 4px rgb(0 18 50 / .6); }
+:root[data-look~="aqua"] body { text-shadow: var(--aq-glow); }
+:root[data-look~="aqua"] .brand-text small::before, :root[data-look~="aqua"] .hero-title::before,
+:root[data-look~="aqua"] .sel-head h2, :root[data-look~="aqua"] .aq-plate-n, :root[data-look~="aqua"] .pl-aq, :root[data-look~="aqua"] .av-t,
+:root[data-look~="aqua"] :is(.modal h2, #panel-title, .koma-name), :root[data-look~="aqua"] .sel-new b,
+:root[data-look~="aqua"] :is(.aq-tv, .aq-ab b, .aq-tl b, .aq-fact b), :root[data-look~="aqua"] .ring-g .num-big { text-shadow: var(--aq-glow-strong); }
+:root[data-look~="aqua"] :is(.char-item .nm, .char-item .sys, .sel-sys, .sl-sys, .sel-head p, .sel-head .eyebrow, .aq-plate-kana, .aq-fact i, .aq-plate-k, .aq-nb span, .aq-ab i, .pl-aq small) { text-shadow: var(--aq-glow); }
+/* ボタンの文字も光る（青いボタンは白く強めに） */
+:root[data-look~="aqua"] .btn, :root[data-look~="aqua"] .shelf-new, :root[data-look~="aqua"] :is(.sel-tabs, .view-tg) button, :root[data-look~="aqua"] .sao-item { text-shadow: var(--aq-glow); }
+:root[data-look~="aqua"] :is(.btn.primary, .btn.copy-btn, .btn.mbar-copy, .shelf-new, :is(.sel-tabs, .view-tg) button.on, .sao-item.on) { text-shadow: 0 0 8px rgb(220 248 255 / .85), 0 0 16px rgb(150 225 255 / .5), 0 1px 2px rgb(0 30 80 / .6); }
+/* アイコンも少し光る */
+:root[data-look~="aqua"] :is(.aq-nb .ico, .sao-ic .ico, .aq-menu-btn svg) { filter: drop-shadow(0 0 4px rgb(150 225 255 / .7)); }
+:root[data-look~="aqua"] .bar-actions .btn::before { filter: drop-shadow(0 0 4px rgb(150 225 255 / .7)); }
+/* 入力欄の中の文字は光らせない（にじんで読みにくくなるため） */
+:root[data-look~="aqua"] :is(input, textarea, select, option, pre, code) { text-shadow: none; }
+:root[data-look~="aqua"] .brand h1::after { color: #e2f4ff; text-shadow: 0 0 5px rgb(170 235 255 / .6), 0 1px 3px rgb(0 18 50 / .8); }
 </style>
 </head>
 <body>
