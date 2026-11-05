@@ -53,3 +53,5 @@
 .gc-dice label { display: inline-flex; align-items: center; gap: 6px; }
 .gc-dice .inp { width: 4.5em; padding: 4px 6px; text-align: right; }
 .gc-role.dice { background: color-mix(in srgb, var(--amber) 22%, transparent); color: var(--ink); }
+.dice-box.locked .db-lim, .dice-box.locked .btn:disabled { opacity: .5; filter: grayscale(1); cursor: not-allowed; }
+.dice-box.locked .db-lim .inp:disabled { background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--muted); cursor: not-allowed; pointer-events: none; }

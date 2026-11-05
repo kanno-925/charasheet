@@ -108,7 +108,11 @@ function diceSpend(c) {
 function diceBoxHtml(c) {
   const d = diceInfo(c);
   const count = d.limit == null ? `振った回数 <b>${d.used}</b>（上限なし）` : `残り <b class="${d.left ? '' : 'zero'}">${d.left}</b> / ${d.limit}回`;
-  if (d.group) return `<span class="dice-box" data-dicebox><span class="db-c">${count}</span><small class="db-src">「${esc(d.group.data.name || '無題')}」のキーパーが決めた上限</small></span>`;
+  // キーパーが決めた上限：数字は見えるが、さわれない（グレー）
+  if (d.group) return `<span class="dice-box locked" data-dicebox><span class="db-c">${count}</span>
+    <label class="db-lim" title="グループ「${esc(d.group.data.name || '無題')}」のキーパーが決めた上限です">上限<input class="inp num" type="text" value="${d.limit}" disabled aria-disabled="true" aria-label="ダイスの上限回数（キーパーが決めた値のため変更できません）">回</label>
+    <button class="btn small ghost" type="button" disabled>回数をリセット</button>
+    <small class="db-src">🔒 「${esc(d.group.data.name || '無題')}」のキーパーが決めた上限</small></span>`;
   return `<span class="dice-box" data-dicebox><span class="db-c">${count}</span>
     <label class="db-lim">上限<input class="inp num" type="text" inputmode="numeric" data-p="dice.limit" value="${esc(c.dice.limit ?? '')}" placeholder="なし" aria-label="ダイスを振れる上限回数（空欄なら上限なし）">回</label>
     ${d.used ? '<button class="btn small ghost" type="button" data-act="dice-reset">回数をリセット</button>' : ''}</span>`;
