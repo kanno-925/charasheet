@@ -2491,6 +2491,8 @@ function radarSvg(c, a, size, animate) {
     return `<text class="rl-k" x="${x.toFixed(1)}" y="${(y - 6).toFixed(1)}" text-anchor="${anchor}">${k}</text><text class="rl-v" x="${x.toFixed(1)}" y="${(y + 8).toFixed(1)}" text-anchor="${anchor}">${a[k] || 0}</text>`;
   }).join('');
   const dots = pts.map(([x, y], i) => `<circle class="rd" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5"/><circle class="rh" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="14" data-tip="${keys[i]} ${a[keys[i]] || 0}"/>`).join('');
+  const aqua = isAqua();
+  if (aqua) return radarAqua({ c, a, keys, size, cx, cy, R, pts, axes, labels, animate });
   return `<svg class="radar-svg${animate ? ' grow' : ''}" viewBox="0 0 ${size} ${size}" role="img" aria-label="能力値チャート：${keys.map(k => `${k} ${a[k] || 0}`).join('、')}" style="--cx:${cx}px;--cy:${cy}px">
     ${grid}${axes}<g class="rshape"><polygon class="rarea" points="${pts.map(p => p.map(v => v.toFixed(1)).join(',')).join(' ')}"/>${dots}</g>${labels}</svg>`;
 }
@@ -2514,6 +2516,34 @@ function updateCharts(c, a) {
   if (r) { r.innerHTML = radarSvg(c, a, 300, !r.dataset.drawn); r.dataset.drawn = '1'; }
   const k = $('sk-chart');
   if (k) { k.innerHTML = skillBarsHtml(c, a, !k.dataset.drawn); k.dataset.drawn = '1'; }
+}
+/* アクアリウムテーマのレーダー：水のしずくのように、点を通るなめらかな線でつなぐ（値の位置は変えない）。
+   中は水色〜紫のすける水、ゆれる光の網、点は泡。全体がゆっくり「ふよふよ」ゆれる（CSS） */
+let radarUid = 0;
+function radarAqua({ c, a, keys, size, cx, cy, R, pts, axes, labels, animate }) {
+  const id = 'aqr' + (++radarUid);
+  const n = pts.length, f = v => v.toFixed(1);
+  // 点を通るなめらかな線（Catmull-Rom を弱めにかけて、形は崩しすぎない）
+  const T = .16;
+  let d = `M${f(pts[0][0])},${f(pts[0][1])}`;
+  for (let i = 0; i < n; i++) {
+    const p0 = pts[(i - 1 + n) % n], p1 = pts[i], p2 = pts[(i + 1) % n], p3 = pts[(i + 2) % n];
+    d += ` C${f(p1[0] + (p2[0] - p0[0]) * T)},${f(p1[1] + (p2[1] - p0[1]) * T)} ${f(p2[0] - (p3[0] - p1[0]) * T)},${f(p2[1] - (p3[1] - p1[1]) * T)} ${f(p2[0])},${f(p2[1])}`;
+  }
+  const rings = [.25, .5, .75, 1].map((k, i) => `<circle class="rg-c${i === 3 ? ' out' : ''}" cx="${cx}" cy="${cy}" r="${f(R * k)}"/>`).join('');
+  const dots = pts.map(([x, y], i) => `<g class="rb" style="--d:${(i * .37).toFixed(2)}s"><circle class="rb-o" cx="${f(x)}" cy="${f(y)}" r="6.5"/><circle class="rb-h" cx="${f(x - 2)}" cy="${f(y - 2.2)}" r="1.8"/></g><circle class="rh" cx="${f(x)}" cy="${f(y)}" r="14" data-tip="${keys[i]} ${a[keys[i]] || 0}"/>`).join('');
+  return `<svg class="radar-svg aq-radar${animate ? ' grow' : ''}" viewBox="0 0 ${size} ${size}" role="img" aria-label="能力値チャート：${keys.map(k => `${k} ${a[k] || 0}`).join('、')}" style="--cx:${cx}px;--cy:${cy}px">
+    <defs>
+      <radialGradient id="${id}g" cx="50%" cy="40%" r="65%"><stop offset="0" stop-color="#bff0ff" stop-opacity=".55"/><stop offset=".6" stop-color="#5fb8f0" stop-opacity=".32"/><stop offset="1" stop-color="#9a7cff" stop-opacity=".38"/></radialGradient>
+      <pattern id="${id}p" width="90" height="90" patternUnits="userSpaceOnUse"><image href="assets/aqua/caustics.webp" width="90" height="90"/></pattern>
+      <clipPath id="${id}c"><path d="${d}"/></clipPath>
+    </defs>
+    <circle class="rg-bg" cx="${cx}" cy="${cy}" r="${f(R)}"/>${rings}${axes}
+    <g class="rshape"><g class="rwob">
+      <path class="rarea" d="${d}" fill="url(#${id}g)"/>
+      <g clip-path="url(#${id}c)"><rect class="rcaus" x="-90" y="-90" width="${size + 180}" height="${size + 180}" fill="url(#${id}p)"/></g>
+      <path class="rline" d="${d}"/>${dots}
+    </g></g>${labels}</svg>`;
 }
 /* グラフのツールチップ */
 (() => {
