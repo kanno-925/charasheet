@@ -17,10 +17,26 @@ function aquaScene() {
     addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (AQ.on) aquaBuild(); }, 200); });
   }
   if (el) el.hidden = !on;
+  if (on) aquaMenuSetup();
   if (on === AQ.on) return;
   AQ.on = on;
   cancelAnimationFrame(AQ.raf);
   if (on) { aquaBuild(); AQ.raf = requestAnimationFrame(aquaTick); }
+}
+
+/* 上の帯：画像のように「ホーム・バックアップ・テーマ」と歯車だけ見せ、残りは ☰ の中へ。一覧の「＋ 新規作成」もここでつなぐ */
+function aquaMenuSetup() {
+  if ($('aq-menu')) return;
+  const bar = document.querySelector('.bar'); if (!bar) return;
+  const b = document.createElement('button');
+  b.className = 'aq-menu-btn'; b.id = 'aq-menu'; b.type = 'button'; b.setAttribute('aria-label', 'メニュー'); b.setAttribute('aria-expanded', 'false');
+  b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14"/></svg>';
+  bar.appendChild(b);
+  const set = open => { bar.classList.toggle('aq-open', open); b.setAttribute('aria-expanded', String(open)); };
+  b.addEventListener('click', e => { e.stopPropagation(); set(!bar.classList.contains('aq-open')); });
+  document.addEventListener('click', e => { if (bar.classList.contains('aq-open') && !e.target.closest('.bar-actions')) set(false); });
+  bar.querySelector('.bar-actions')?.addEventListener('click', e => { if (e.target.closest('.btn')) set(false); });
+  $('shelf-new')?.addEventListener('click', () => $('btn-new').click());
 }
 
 /* 決まった並びの乱数（毎回同じ遺跡の形になるように） */
@@ -36,10 +52,10 @@ function aquaBuild() {
 
   // 水の色：上は光の入る明るい青、下ほど深い藍
   const lg = g.createLinearGradient(0, 0, 0, H);
-  lg.addColorStop(0, '#3b9de0'); lg.addColorStop(.16, '#1b6dbc'); lg.addColorStop(.42, '#0d4793'); lg.addColorStop(.72, '#082e68'); lg.addColorStop(1, '#04173c');
+  lg.addColorStop(0, '#1f74c4'); lg.addColorStop(.14, '#1052a6'); lg.addColorStop(.4, '#0a367f'); lg.addColorStop(.7, '#07245e'); lg.addColorStop(1, '#04163d');
   g.fillStyle = lg; g.fillRect(0, 0, W, H);
   const sg = g.createRadialGradient(W * .42, -H * .08, 0, W * .42, -H * .08, Math.max(W, H) * .8);
-  sg.addColorStop(0, 'rgba(210,248,255,.55)'); sg.addColorStop(.35, 'rgba(140,215,255,.18)'); sg.addColorStop(1, 'rgba(140,215,255,0)');
+  sg.addColorStop(0, 'rgba(225,252,255,.5)'); sg.addColorStop(.35, 'rgba(150,225,255,.14)'); sg.addColorStop(1, 'rgba(140,215,255,0)');
   g.fillStyle = sg; g.fillRect(0, 0, W, H);
 
   // 水面のゆらぎ（上のほうの明るいもよう）
@@ -53,19 +69,19 @@ function aquaBuild() {
 
   const s = Math.min(W, H * .75) / 400;   // 遺跡の大きさの目安
   // 遠くの遺跡（霧の向こう）
-  aqRuins(g, R, { x: W * .55, base: H * .78, s: s * .8, col: 'rgba(40,110,185,.35)', hi: 'rgba(150,215,255,.10)' });
-  aqColumn(g, { x: W * .08, base: H * .74, w: 16 * s, h: 150 * s, broken: 0.7, col: 'rgba(40,110,185,.35)', hi: 'rgba(150,215,255,.10)' }, R);
+  aqRuins(g, R, { x: W * .55, base: H * .78, s: s * .8, col: 'rgba(90,165,225,.38)', hi: 'rgba(200,240,255,.18)' });
+  aqColumn(g, { x: W * .08, base: H * .74, w: 16 * s, h: 150 * s, broken: 0.7, col: 'rgba(90,165,225,.38)', hi: 'rgba(200,240,255,.16)' }, R);
   // 霧
   const fg = g.createLinearGradient(0, H * .35, 0, H);
-  fg.addColorStop(0, 'rgba(20,80,160,0)'); fg.addColorStop(1, 'rgba(10,50,120,.45)');
+  fg.addColorStop(0, 'rgba(40,110,190,0)'); fg.addColorStop(1, 'rgba(20,70,150,.35)');
   g.fillStyle = fg; g.fillRect(0, 0, W, H);
   // 近くの遺跡（右側に大きく）
-  aqRuins(g, R, { x: W * .78, base: H * .9, s: s * 1.15, col: 'rgba(14,58,125,.82)', hi: 'rgba(120,200,255,.18)' });
-  aqColumn(g, { x: W * .2, base: H * .93, w: 22 * s, h: 190 * s, broken: .55, col: 'rgba(14,58,125,.75)', hi: 'rgba(120,200,255,.16)' }, R);
-  aqColumn(g, { x: W * .33, base: H * .95, w: 18 * s, h: 80 * s, broken: .9, col: 'rgba(14,58,125,.7)', hi: 'rgba(120,200,255,.14)' }, R);
+  aqRuins(g, R, { x: W * .8, base: H * .88, s: s * 1.3, col: 'rgba(30,95,170,.78)', hi: 'rgba(190,240,255,.32)' });
+  aqColumn(g, { x: W * .2, base: H * .93, w: 22 * s, h: 190 * s, broken: .55, col: 'rgba(30,95,170,.72)', hi: 'rgba(190,240,255,.28)' }, R);
+  aqColumn(g, { x: W * .33, base: H * .95, w: 18 * s, h: 80 * s, broken: .9, col: 'rgba(30,95,170,.68)', hi: 'rgba(190,240,255,.24)' }, R);
 
   // 海の底：岩
-  g.fillStyle = 'rgba(4,22,56,.95)';
+  g.fillStyle = 'rgba(10,40,95,.95)';
   g.beginPath(); g.moveTo(0, H);
   for (let x = 0; x <= W; x += W / 24) g.lineTo(x, H - (14 + R() * 26) * s - Math.max(0, Math.sin(x / W * Math.PI * 2.2)) * 30 * s);
   g.lineTo(W, H); g.closePath(); g.fill();
@@ -75,16 +91,16 @@ function aquaBuild() {
     g.beginPath(); g.ellipse(x, H - r * .4, r * 1.4, r, 0, Math.PI, 0); g.fill();
   }
   // さんご（左下と右下に、ピンクと紫）
-  [[W * .06, '#d58fd8'], [W * .16, '#9d8cff'], [W * .9, '#e4a0d4'], [W * .97, '#8fb6ff'], [W * .5, '#b993ff']].forEach(([x, col], i) => {
-    aqCoral(g, R, x, H - 6 * s, (i === 4 ? 26 : 40) * s, col);
+  [[W * .04, '#ff9fe0'], [W * .13, '#b7a2ff'], [W * .22, '#ff8fd0'], [W * .86, '#ffb0e4'], [W * .95, '#9fc4ff'], [W * .5, '#c9a8ff']].forEach(([x, col], i) => {
+    aqCoral(g, R, x, H - 6 * s, (i === 5 ? 28 : 46) * s, col);
   });
   // さんごの近くに小さな光る粒
   g.save(); g.globalCompositeOperation = 'lighter';
-  for (let i = 0; i < 40; i++) { const x = (R() < .5 ? R() * .25 : .75 + R() * .25) * W, y = H - R() * 70 * s; g.fillStyle = `rgba(255,200,240,${.15 + R() * .25})`; g.beginPath(); g.arc(x, y, .6 + R() * 1.4, 0, 6.3); g.fill(); }
+  for (let i = 0; i < 90; i++) { const x = (R() < .5 ? R() * .3 : .7 + R() * .3) * W, y = H - R() * 90 * s; g.fillStyle = `rgba(255,${200 + R() * 55},245,${.2 + R() * .35})`; g.beginPath(); g.arc(x, y, .6 + R() * 1.4, 0, 6.3); g.fill(); }
   g.restore();
   // いちばん下を暗く
   const bg2 = g.createLinearGradient(0, H * .8, 0, H);
-  bg2.addColorStop(0, 'rgba(2,12,34,0)'); bg2.addColorStop(1, 'rgba(2,12,34,.55)');
+  bg2.addColorStop(0, 'rgba(4,20,56,0)'); bg2.addColorStop(1, 'rgba(4,20,56,.4)');
   g.fillStyle = bg2; g.fillRect(0, H * .8, W, H * .2);
   AQ.base = b;
 
@@ -94,11 +110,11 @@ function aquaBuild() {
   AQ.dust = Array.from({ length: Math.round(W * H / 6000) }, () => ({ x: r2() * W, y: r2() * H, r: .4 + r2() * 1.2, vx: (r2() - .5) * .05, vy: -.02 - r2() * .05, ph: r2() * 6.3 }));
   AQ.bub = Array.from({ length: 16 }, () => aqBubble(true));
   AQ.fish = [];
-  for (let sc = 0; sc < 2; sc++) {   // 魚の群れ 2つ
-    const dir = sc ? -1 : 1, cy = H * (.2 + r2() * .35), cx = r2() * W, n = 7 + Math.round(r2() * 6), sz = (5 + r2() * 3) * s;
+  for (let sc = 0; sc < 4; sc++) {   // 魚の群れ 4つ（小さな魚がたくさん）
+    const dir = sc % 2 ? -1 : 1, cy = H * (.12 + sc * .15 + r2() * .1), cx = r2() * W, n = 9 + Math.round(r2() * 8), sz = (3.5 + r2() * 3) * s;
     for (let i = 0; i < n; i++) AQ.fish.push({ x: cx + (r2() - .5) * 90 * s, y: cy + (r2() - .5) * 50 * s, dir, v: (.12 + r2() * .05) * s * 2, sz: sz * (.8 + r2() * .4), ph: r2() * 6.3, school: sc });
   }
-  AQ.jelly = Array.from({ length: W > 500 ? 3 : 2 }, (_, i) => ({ x: W * (i === 0 ? .82 : i === 1 ? .12 : .55), y: H * (.12 + i * .28), sz: (i === 0 ? 30 : 18 + r2() * 8) * s, ph: r2() * 6.3, vy: (.05 + r2() * .04) * s, sway: r2() * 6.3 }));
+  AQ.jelly = Array.from({ length: W > 500 ? 3 : 2 }, (_, i) => ({ x: W * (i === 0 ? .84 : i === 1 ? .1 : .55), y: H * (i === 0 ? .1 : .3 + i * .2), sz: (i === 0 ? 38 : 16 + r2() * 8) * s, ph: r2() * 6.3, vy: (.05 + r2() * .04) * s, sway: r2() * 6.3 }));
 }
 function aqBubble(fresh) {
   const r = Math.random;
@@ -197,7 +213,7 @@ function aquaTick(t) {
     if (!still) { f.x += f.v * f.dir * dt; f.y += Math.sin(t * .001 + f.ph) * .08 * dt; if (f.dir > 0 && f.x > W + 40) f.x = -40 - Math.random() * 60; if (f.dir < 0 && f.x < -40) f.x = W + 40 + Math.random() * 60; }
     const tail = Math.sin(t * .012 + f.ph) * .35;
     g.save(); g.translate(f.x, f.y); g.scale(f.dir, 1);
-    g.fillStyle = 'rgba(160,215,255,.55)';
+    g.fillStyle = f.school % 2 ? 'rgba(200,235,255,.6)' : 'rgba(150,205,255,.55)';
     g.beginPath(); g.ellipse(0, 0, f.sz, f.sz * .38, 0, 0, 6.3); g.fill();
     g.beginPath(); g.moveTo(-f.sz * .85, 0); g.lineTo(-f.sz * 1.5, -f.sz * (.42 + tail * .3)); g.lineTo(-f.sz * 1.5, f.sz * (.42 - tail * .3)); g.closePath(); g.fill();
     g.fillStyle = 'rgba(230,250,255,.5)'; g.fillRect(f.sz * .25, -f.sz * .2, f.sz * .5, f.sz * .12);
@@ -249,6 +265,10 @@ const AQ_ICON = {
   sex: '<circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c.8-3.6 3.4-5.6 6.5-5.6s5.7 2 6.5 5.6"/>',
   home: '<path d="M4 11.5 12 4.5l8 7M6.5 10v9h11v-9"/>',
   more: '<rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M8.5 8h7M8.5 11.5h7M8.5 15h4.5"/>',
+  star: '<path d="M12 3.5l2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 17l-5.3 2.8 1.1-5.9-4.4-4.1 6-.8z"/>',
+  atom: '<circle cx="12" cy="12" r="1.6"/><ellipse cx="12" cy="12" rx="8.5" ry="3.4"/><ellipse cx="12" cy="12" rx="8.5" ry="3.4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="8.5" ry="3.4" transform="rotate(-60 12 12)"/>',
+  bag: '<path d="M6 8.5h12l-1 11H7z"/><path d="M9 8.5V7a3 3 0 0 1 6 0v1.5"/><circle cx="12" cy="13.5" r="1.8"/>',
+  leaf: '<path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19c3-4 6-7 10-10"/>',
 };
 const aqIcon = (k, cls = '') => `<svg class="aq-ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${AQ_ICON[k] || ''}</svg>`;
 function aquaHtml(c) {
@@ -258,8 +278,8 @@ function aquaHtml(c) {
     <div class="hub-top aq-tools">${toolsHtml(c)}</div>
     <div class="aq-sheet">
       <i class="aq-wave-top" aria-hidden="true"></i>
-      <div class="aq-title">${aqIcon('shell', 'aq-shell')}<div><b data-hub="name"></b><small>— Character Status —</small></div><span class="aq-sys">${esc(S.short)}</span></div>
-      <nav class="aq-tabs" aria-label="項目">${SECTIONS.map((s, i) => `<button class="aq-tab" type="button" data-open="${s.key}" style="--i:${i}">${icon(s.key)}<span>${s.jp}</span></button>`).join('')}</nav>
+      <div class="aq-title">${aqIcon('shell', 'aq-shell')}<div><b data-hub="name"></b><small>— Character Status —</small></div></div>
+      <nav class="aq-tabs" aria-label="項目">${[['abilities', 'star', 'ステータス'], ['skills', 'atom', '技能'], ['items', 'bag', '所持品'], ['story', 'leaf', 'メモ']].map(([k, ic, l], i) => `<button class="aq-tab ${i ? '' : 'on'}" type="button" data-open="${k}">${aqIcon(ic)}<span>${l}</span></button>`).join('')}</nav>
       <div class="aq-main">
         <button class="aq-portrait ${src ? 'has' : ''}" type="button" data-stage aria-label="立ち絵を表示">${src ? `<img src="${esc(imgSrc(src))}" alt="" draggable="false" onerror="this.remove()">` : tokenHtml(c)}<i class="aq-glint" aria-hidden="true"></i></button>
         <div class="aq-bars">${[['hp', 'heart', 'HP'], ['mp', 'drop', 'MP'], ['san', 'brain', 'SAN']].map(([k, ic, l]) => `
@@ -275,7 +295,7 @@ function aquaHtml(c) {
           <span class="aq-pf">${aqIcon('sex')}<span><i>性別</i><b>${esc(p.sex || '—')}</b></span></span>
         </button>
       </div>
-      <button class="aq-more" type="button" data-open="skills">${aqIcon('more')}<span>技能を見る</span><span class="aq-go" aria-hidden="true">›</span></button>
+      <button class="aq-more" type="button" data-open="profile">${aqIcon('more')}<span>詳細を見る</span><span class="aq-go" aria-hidden="true">›</span></button>
     </div>`;
 }
 

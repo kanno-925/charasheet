@@ -134,6 +134,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* shelf */
 .shelf { display: flex; flex-direction: column; gap: 6px; }
+.pl-aq, .shelf-new, .ci-lv, .ci-go, .aq-menu-btn { display: none; }   /* アクアリウムテーマのときだけ出す（19-aqua.css） */
 .shelf-list { display: flex; flex-direction: column; gap: 6px; }
 .char-item { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 10px; align-items: center; text-align: left; width: 100%; border: 1px solid transparent; background: transparent; padding: 8px 10px; border-radius: 999px; cursor: pointer; transition: background .15s; }
 .char-item:hover { background: var(--paper); }
@@ -2534,6 +2535,189 @@ body.ue-on .ue-panel { cursor: auto; }
   :root[data-look~="aqua"] .hero-title { margin-left: 4px; }
   :root[data-look~="aqua"] .brand::before { width: 38px; height: 38px; }
 }
+
+/* =====================================================================
+   ここから下：見本の画像に寄せる調整（上の決まりを上書きする）
+   ===================================================================== */
+:root[data-look~="aqua"] {
+  /* ガラスに「上からの光のつや」を足し、ふちを明るく太く */
+  --aq-bg: linear-gradient(180deg, rgb(255 255 255 / .2), rgb(255 255 255 / 0) 34%),
+           linear-gradient(165deg, rgb(160 230 255 / .28), rgb(80 160 235 / .12) 38%, rgb(30 90 180 / .2) 72%, rgb(140 210 255 / .26));
+  --aq-edge: rgb(215 248 255 / .78);
+  --aq-sh: inset 0 2px 0 rgb(255 255 255 / .7), inset 0 0 28px rgb(160 230 255 / .38), inset 0 -14px 26px rgb(10 45 120 / .3), 0 0 22px rgb(120 210 255 / .45), 0 18px 36px -16px rgb(0 15 50 / .7);
+  --aq-r: 30px 38px 28px 36px / 36px 28px 38px 30px;
+  /* ふちのまわりの小さな泡（カードの左右に） */
+  --aq-bubbles: radial-gradient(circle at 3% 22%, rgb(235 252 255 / .9) 0 1.6px, transparent 2.4px), radial-gradient(circle at 5% 34%, rgb(235 252 255 / .7) 0 1.1px, transparent 1.8px),
+                radial-gradient(circle at 2% 70%, rgb(235 252 255 / .8) 0 2.2px, transparent 3px), radial-gradient(circle at 97% 80%, rgb(235 252 255 / .85) 0 1.8px, transparent 2.6px),
+                radial-gradient(circle at 95% 66%, rgb(235 252 255 / .6) 0 1.2px, transparent 2px), radial-gradient(circle at 98% 18%, rgb(235 252 255 / .7) 0 1.4px, transparent 2.2px);
+}
+
+/* ---- 上の帯：大きな筆記体の題名、アイコンつきの3つのボタンと歯車、右上に ☰ ---- */
+:root[data-look~="aqua"] .bar { position: relative; padding-right: 64px; }
+:root[data-look~="aqua"] .brand { gap: 12px; }
+:root[data-look~="aqua"] .brand::before { width: 60px; height: 60px; }
+:root[data-look~="aqua"] .brand-text small::before { content: "Call of Cthulhu"; display: block; font-size: 40px; line-height: 1.05; color: #f2fbff; text-shadow: 0 0 14px rgb(150 225 255 / .9), 0 2px 6px rgb(0 30 80 / .5); }
+:root[data-look~="aqua"] .brand h1 { font-size: 14px; font-weight: 500; letter-spacing: .32em; margin-top: 2px; }
+:root[data-look~="aqua"] .brand h1::after { content: "  TRPG Character Manager"; font-family: "Zen Old Mincho", serif; font-size: 13px; letter-spacing: .06em; color: #d6f1ff; white-space: pre; }
+:root[data-look~="aqua"] .aq-menu-btn { display: grid; place-items: center; position: absolute; right: 0; top: 18px; width: 52px; height: 52px; padding: 0; cursor: pointer; border-radius: 50%;
+  border: 1.5px solid var(--aq-edge); background: var(--aq-bg); box-shadow: var(--aq-sh); color: #fff; }
+:root[data-look~="aqua"] .aq-menu-btn svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; filter: drop-shadow(0 0 4px rgb(160 230 255 / .9)); }
+:root[data-look~="aqua"] .bar.aq-open .aq-menu-btn { box-shadow: var(--aq-sh-hot); }
+:root[data-look~="aqua"] .bar-actions { gap: 10px; align-items: center; }
+:root[data-look~="aqua"] .bar-actions .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; font-size: 15px; letter-spacing: .16em; font-weight: 500; }
+:root[data-look~="aqua"] .bar-actions .btn::before { content: ""; width: 20px; height: 20px; flex: none; background: currentColor; filter: drop-shadow(0 0 4px rgb(160 230 255 / .9));
+  -webkit-mask: var(--ic) center / contain no-repeat; mask: var(--ic) center / contain no-repeat; }
+:root[data-look~="aqua"] #btn-new::before, :root[data-look~="aqua"] #btn-account::before { display: none; }
+:root[data-look~="aqua"] #btn-select { --ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3 2.5 11.2l1.3 1.5L5 11.7V21h5.5v-6h3v6H19v-9.3l1.2 1 1.3-1.5z'/%3E%3C/svg%3E"); }
+:root[data-look~="aqua"] #btn-export { --ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1.5c.6 5.6 3.9 8.9 9.5 9.5v2c-5.6.6-8.9 3.9-9.5 9.5h-2c-.6-5.6-3.9-8.9-9.5-9.5v-2C6.1 10.4 9.4 7.1 10 1.5z' transform='translate(1 0)'/%3E%3C/svg%3E"); }
+:root[data-look~="aqua"] #btn-theme { --ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='M12 20.5c-4.6 0-8.3-3.2-8.3-7.4 0-4.6 3.7-9.1 8.3-9.1s8.3 4.5 8.3 9.1c0 4.2-3.7 7.4-8.3 7.4z'/%3E%3Cpath d='M12 20.5V4M12 20.5 6.6 6.6M12 20.5l5.4-13.9M12 20.5 4.3 10.4M12 20.5l7.7-10.1'/%3E%3C/svg%3E"); }
+:root[data-look~="aqua"] #btn-friends { --ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='9' cy='8' r='3.6'/%3E%3Ccircle cx='17' cy='9' r='2.8'/%3E%3Cpath d='M2 20c.6-4.4 3.4-6.8 7-6.8s6.4 2.4 7 6.8zM15.5 13.3c3.4-.3 5.9 1.8 6.5 5.7h-4.6c-.3-2.4-.9-4.2-1.9-5.7z'/%3E%3C/svg%3E"); }
+:root[data-look~="aqua"] #btn-import { --ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3v12M7 10l5 5 5-5M4 19h16'/%3E%3C/svg%3E"); }
+/* 歯車（アカウント）：丸いボタン。文字は隠すが、読み上げには残る */
+:root[data-look~="aqua"] #btn-account { position: relative; width: 50px; height: 50px; padding: 0; justify-content: center; font-size: 0; letter-spacing: 0; border-radius: 50%; }
+:root[data-look~="aqua"] #btn-account::after { content: ""; width: 24px; height: 24px; background: currentColor; filter: drop-shadow(0 0 4px rgb(160 230 255 / .9));
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8'%3E%3Ccircle cx='12' cy='12' r='3.2'/%3E%3Cpath d='M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7'/%3E%3Ccircle cx='12' cy='12' r='6.6'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8'%3E%3Ccircle cx='12' cy='12' r='3.2'/%3E%3Cpath d='M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7'/%3E%3Ccircle cx='12' cy='12' r='6.6'/%3E%3C/svg%3E") center / contain no-repeat; }
+:root[data-look~="aqua"] #btn-account .sync-dot { position: absolute; right: 4px; top: 4px; }
+/* ふだんは隠し、☰ をおしたときだけ出すボタン */
+:root[data-look~="aqua"] .bar:not(.aq-open) :is(#btn-friends, #btn-new, #btn-import) { display: none; }
+:root[data-look~="aqua"] .bar.aq-open .bar-actions { flex-wrap: wrap; }
+
+/* ---- はじめの見出し：画像と同じ一文を、手書きのように傾けて ---- */
+:root[data-look~="aqua"] .hero :is(.eyebrow, .hero-lead, .hero-tags) { display: none; }
+:root[data-look~="aqua"] .hero { min-height: 0; padding-block: 10px 6px; }
+:root[data-look~="aqua"] .hero-title { font-size: 0; transform: rotate(-7deg); transform-origin: 0 100%; margin: 26px 0 0 70px; }
+:root[data-look~="aqua"] .hero-title::before { content: "その記録は、\A　　きっと、また ——"; white-space: pre; display: block; font-size: clamp(26px, 5.4vw, 42px); font-weight: 400; letter-spacing: .24em; line-height: 1.6; }
+:root[data-look~="aqua"] .hero-title::after { width: min(380px, 70vw); margin-top: -8px; }
+
+/* ---- 探索者の一覧：「キャラクター一覧」の見出し、＋ 新規作成、大きなガラスのカード ---- */
+:root[data-look~="aqua"] .shelf { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px 10px; align-content: start; }
+:root[data-look~="aqua"] .shelf .panel-label { display: flex; align-items: center; gap: 12px; margin: 0; padding: 12px 20px 12px 16px; font-size: 0; letter-spacing: 0;
+  border-radius: var(--aq-r); border: 1.5px solid var(--aq-edge); background: var(--aq-bg); box-shadow: var(--aq-sh); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+:root[data-look~="aqua"] .shelf .panel-label::before { width: 40px; height: 40px; margin: 0; filter: drop-shadow(0 0 6px rgb(160 230 255 / .9)); }
+:root[data-look~="aqua"] .shelf .panel-label > span { display: none; }
+:root[data-look~="aqua"] .pl-aq { display: flex; flex-direction: column; font-family: var(--f-display); font-weight: 500; font-size: 22px; letter-spacing: .14em; color: #fff; text-shadow: 0 0 12px rgb(150 225 255 / .8); line-height: 1.3; }
+:root[data-look~="aqua"] .pl-aq small { font-family: "Zen Old Mincho", serif; font-size: 14px; letter-spacing: .06em; color: #cfeeff; font-weight: 400; }
+:root[data-look~="aqua"] .shelf-new { display: inline-flex; align-items: center; gap: 6px; padding: 12px 22px; cursor: pointer; font: inherit; font-size: 16px; letter-spacing: .14em; color: #fff; white-space: nowrap;
+  border-radius: 24px 28px 23px 27px / 27px 23px 28px 24px; border: 1.5px solid var(--aq-edge); background: var(--aq-bg); box-shadow: var(--aq-sh); text-shadow: 0 0 10px rgb(150 225 255 / .8); }
+:root[data-look~="aqua"] .shelf-new:hover { box-shadow: var(--aq-sh-hot); }
+:root[data-look~="aqua"] .shelf-list { grid-column: 1 / -1; flex-direction: column; gap: 12px; overflow-x: visible; }
+:root[data-look~="aqua"] .char-item { grid-template-columns: 74px minmax(0, 1fr) auto auto; gap: 16px; padding: 12px 16px 12px 12px; border-radius: var(--aq-r); border: 1.5px solid var(--aq-edge);
+  background: var(--aq-bubbles), var(--aq-bg); box-shadow: var(--aq-sh); color: #fff; }
+:root[data-look~="aqua"] .char-item::after { display: none; }
+:root[data-look~="aqua"] .char-item:hover, :root[data-look~="aqua"] .char-item.active { border-color: rgb(235 252 255 / .95); box-shadow: var(--aq-sh-hot); background: var(--aq-bubbles), var(--aq-bg); }
+:root[data-look~="aqua"] .char-item .token { width: 74px; height: 74px; font-size: 28px; border-width: 3px; box-shadow: 0 0 18px rgb(150 225 255 / .85), 0 0 0 3px rgb(150 225 255 / .25), inset 0 0 12px rgb(255 255 255 / .4); }
+:root[data-look~="aqua"] .char-item .nm { font-size: 22px; letter-spacing: .16em; text-shadow: 0 0 10px rgb(150 225 255 / .75); }
+:root[data-look~="aqua"] .char-item .sys { font-size: 14px; color: #d4eefb; margin-top: 4px; letter-spacing: .06em; }
+:root[data-look~="aqua"] .ci-lv { display: inline-block; padding: 5px 14px; border-radius: 16px 18px 15px 17px; border: 1.5px solid rgb(205 245 255 / .65); font-family: "Zen Old Mincho", serif; font-size: 14px; color: #fff; white-space: nowrap;
+  background: rgb(120 200 255 / .14); box-shadow: inset 0 1px 0 rgb(255 255 255 / .4), 0 0 8px rgb(120 210 255 / .35); }
+:root[data-look~="aqua"] .ci-go { display: block; font-size: 30px; line-height: 1; color: #eaf8ff; text-shadow: 0 0 8px rgb(150 225 255 / .8); }
+@media (min-width: 761px) {
+  :root[data-look~="aqua"] .shelf { grid-template-columns: minmax(0, 1fr); }
+  :root[data-look~="aqua"] .shelf-new { justify-self: end; }
+  :root[data-look~="aqua"] .char-item { grid-template-columns: 52px minmax(0, 1fr) auto; gap: 10px; }
+  :root[data-look~="aqua"] .char-item .token { width: 52px; height: 52px; font-size: 20px; }
+  :root[data-look~="aqua"] .char-item .nm { font-size: 17px; }
+  :root[data-look~="aqua"] .ci-lv { display: none; }
+}
+@media (max-width: 760px) {
+  :root[data-look~="aqua"] .shelf-list { flex-direction: column; max-height: 290px; overflow-y: auto; padding: 4px 2px; }
+  :root[data-look~="aqua"] .char-item { width: 100%; min-width: 0; }
+}
+
+/* ---- キャラシ：波打つ上のふち、大きな4つのタブ、大きな肖像 ---- */
+:root[data-look~="aqua"] .aq-sheet { border-top-color: transparent; padding-top: 34px; }
+.aq-wave-top { top: -14px; left: 0; right: 0; height: 30px; opacity: 1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 30' fill='none' stroke-linecap='round'%3E%3Cpath d='M0 16C20 4 38 4 58 14s40 12 62 2 42-12 80-2' stroke='%23eafaff' stroke-width='2'/%3E%3Cpath d='M0 20C24 10 40 10 62 18s44 8 64 0 40-8 74 0' stroke='%23bdeeff' stroke-width='1' opacity='.6'/%3E%3C/svg%3E");
+  background-size: 200px 30px; }
+.aq-title { gap: 16px; }
+.aq-shell { width: 58px; height: 58px; }
+.aq-title b { font-size: clamp(28px, 6vw, 38px); letter-spacing: .2em; }
+.aq-title small { font-family: "Zen Old Mincho", serif; font-size: 17px; letter-spacing: .08em; }
+.aq-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; overflow: visible; padding: 0; }
+.aq-tab { justify-content: center; padding: 11px 6px; font-size: 15px; gap: 6px; }
+.aq-tab .aq-ic { width: 20px; height: 20px; }
+.aq-tab:first-child { background: linear-gradient(180deg, rgb(170 235 255 / .2), rgb(60 140 220 / .1)); border-color: rgb(195 242 255 / .45); box-shadow: inset 0 1.5px 0 rgb(255 255 255 / .5), 0 0 8px rgb(110 200 255 / .2); }
+.aq-tab.on { background: linear-gradient(180deg, rgb(180 240 255 / .55), rgb(70 160 235 / .4)); border-color: rgb(235 252 255 / .95); box-shadow: var(--aq-sh-hot); }
+.aq-tab.on .aq-ic { fill: currentColor; fill-opacity: .9; }
+.aq-main { grid-template-columns: minmax(0, 44%) minmax(0, 1fr); }
+.aq-portrait { border-radius: 16px; }
+.aq-bars { gap: 16px; }
+.aq-tr { height: 10px; }
+.aq-more { padding: 14px 40px; font-size: 17px; letter-spacing: .2em; min-width: min(420px, 100%); }
+.aq-more .aq-ic { width: 26px; height: 26px; }
+@media (max-width: 760px) {
+  :root[data-look~="aqua"] .bar { padding-right: 58px; }
+  :root[data-look~="aqua"] .brand::before { width: 50px; height: 50px; }
+  :root[data-look~="aqua"] .brand-text small::before { font-size: 34px; }
+  :root[data-look~="aqua"] .brand h1 { font-size: 0; letter-spacing: 0; }
+  :root[data-look~="aqua"] .brand h1::after { content: "TRPG Character Manager"; font-size: 13px; }
+  :root[data-look~="aqua"] .aq-menu-btn { top: 14px; width: 46px; height: 46px; }
+  :root[data-look~="aqua"] .bar-actions .btn { padding: 10px 14px; font-size: 13px; letter-spacing: .1em; gap: 6px; }
+  :root[data-look~="aqua"] .bar-actions .btn::before { width: 17px; height: 17px; }
+  :root[data-look~="aqua"] #btn-account { width: 44px; height: 44px; flex: none; }
+  :root[data-look~="aqua"] .hero-title { margin: 22px 0 0 36px; }
+  :root[data-look~="aqua"] .pl-aq { font-size: 19px; }
+  :root[data-look~="aqua"] .shelf-new { padding: 10px 16px; font-size: 15px; }
+  .aq-tabs { gap: 5px; }
+  .aq-tab { font-size: 12.5px; padding: 9px 2px; gap: 3px; letter-spacing: .02em; }
+  .aq-tab .aq-ic { width: 16px; height: 16px; }
+  .aq-shell { width: 46px; height: 46px; }
+  .aq-title small { font-size: 13px; }
+  .aq-main { grid-template-columns: minmax(0, 46%) minmax(0, 1fr); gap: 12px; }
+  .aq-more { padding: 12px 20px; font-size: 15px; }
+}
+
+/* ---- 大きさを見本に近づける（少し小さく・すっきり）、ガラスはもう少しすきとおらせる ---- */
+:root[data-look~="aqua"] {
+  --aq-bg: linear-gradient(180deg, rgb(255 255 255 / .18), rgb(255 255 255 / 0) 30%),
+           linear-gradient(165deg, rgb(150 225 255 / .2), rgb(70 150 230 / .07) 40%, rgb(20 70 160 / .14) 72%, rgb(130 205 255 / .2));
+}
+:root[data-look~="aqua"] .shelf .panel-label { padding: 9px 16px 9px 12px; gap: 10px; }
+:root[data-look~="aqua"] .shelf .panel-label::before { width: 32px; height: 32px; }
+:root[data-look~="aqua"] .pl-aq { font-size: 18px; white-space: nowrap; }
+:root[data-look~="aqua"] .pl-aq small { font-size: 12.5px; }
+:root[data-look~="aqua"] .shelf-new { padding: 10px 18px; font-size: 14.5px; }
+:root[data-look~="aqua"] .char-item { grid-template-columns: 60px minmax(0, 1fr) auto auto; gap: 14px; padding: 9px 14px 9px 10px; }
+:root[data-look~="aqua"] .char-item .token { width: 60px; height: 60px; font-size: 24px; }
+:root[data-look~="aqua"] .char-item .nm { font-size: 19px; }
+:root[data-look~="aqua"] .char-item .sys { font-size: 12.5px; margin-top: 2px; }
+:root[data-look~="aqua"] .ci-lv { padding: 3px 12px; font-size: 13px; }
+:root[data-look~="aqua"] .ci-go { font-size: 26px; }
+.aq-tab { letter-spacing: .02em; white-space: nowrap; }
+.aq-main { grid-template-columns: minmax(0, 36%) minmax(0, 1fr); }
+@media (max-width: 760px) {
+  :root[data-look~="aqua"] .bar-actions { gap: 6px; overflow: visible; }
+  :root[data-look~="aqua"] .bar-actions .btn { padding: 8px 10px; font-size: 12px; letter-spacing: .04em; gap: 4px; }
+  :root[data-look~="aqua"] .bar-actions .btn::before { width: 15px; height: 15px; }
+  :root[data-look~="aqua"] #btn-account { width: 38px; height: 38px; margin-left: auto; }
+  :root[data-look~="aqua"] #btn-account::after { width: 20px; height: 20px; }
+  :root[data-look~="aqua"] .bar:not(.aq-open) .bar-actions { flex-wrap: nowrap; }
+  :root[data-look~="aqua"] .brand-text small::before { font-size: 30px; }
+  :root[data-look~="aqua"] .brand::before { width: 46px; height: 46px; }
+  .aq-tab { font-size: 12px; padding: 9px 2px; }
+  .aq-tab .aq-ic { width: 14px; height: 14px; }
+  .aq-title b { font-size: 26px; }
+  .aq-shell { width: 42px; height: 42px; }
+  .aq-main { grid-template-columns: minmax(0, 36%) minmax(0, 1fr); }
+  .aq-bars { gap: 12px; }
+}
+
+/* ---- 見本のように：ガラスは紺色にすきとおり、ふちだけ明るく光る ---- */
+:root[data-look~="aqua"] {
+  --aq-bg: linear-gradient(180deg, rgb(255 255 255 / .16), rgb(255 255 255 / 0) 28%),
+           linear-gradient(165deg, rgb(120 200 255 / .16), rgb(20 65 155 / .2) 40%, rgb(8 35 100 / .32) 75%, rgb(100 180 255 / .18));
+}
+:root[data-look~="aqua"] :is(.koma, .modal, .sao-win, details.out, .peek, .toast, .dcard, .aq-sheet, .bgm) { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+/* 「探索者一覧」は見本のように「ホーム」と表示（押すと探索者をえらぶ画面へ） */
+:root[data-look~="aqua"] #btn-select { font-size: 0; letter-spacing: 0; }
+:root[data-look~="aqua"] #btn-select::after { content: "ホーム"; font-size: 15px; letter-spacing: .16em; }
+@media (max-width: 760px) {
+  :root[data-look~="aqua"] .bar { padding-right: 0; }
+  :root[data-look~="aqua"] .brand { margin-right: 54px; }
+  :root[data-look~="aqua"] .bar-actions .btn { padding: 8px 11px; letter-spacing: .02em; }
+  :root[data-look~="aqua"] #btn-select::after { font-size: 12px; letter-spacing: .04em; }
+}
 </style>
 </head>
 <body>
@@ -2657,7 +2841,8 @@ body.ue-on .ue-panel { cursor: auto; }
 
   <div class="layout">
     <nav class="shelf" aria-label="探索者一覧">
-      <p class="panel-label">INVESTIGATORS <span>探索者</span><span class="touch-hint">長押しで詳細</span></p>
+      <p class="panel-label">INVESTIGATORS <span>探索者</span><span class="touch-hint">長押しで詳細</span><b class="pl-aq">キャラクター一覧<small>Character List</small></b></p>
+      <button class="shelf-new" id="shelf-new" type="button">＋ 新規作成</button>
       <div class="shelf-list" id="shelf"></div>
     </nav>
 
@@ -3601,6 +3786,7 @@ function renderShelf() {
     <button class="char-item ${c.id === state.activeId ? 'active' : ''}" type="button" data-id="${c.id}">
       ${tokenHtml(c)}
       <span style="min-width:0"><span class="nm">${esc(c.profile.name || '名無し')}</span><span class="sys">${esc(SYS[c.system].short)}${c.profile.occupation ? ' ・ ' + esc(c.profile.occupation) : ''}</span></span>
+      <span class="ci-lv" title="通過したシナリオの数">通過 ${c.scenarios.filter(x => String(x.name || '').trim()).length}</span><span class="ci-go" aria-hidden="true">›</span>
     </button>`).join('');
 }
 
@@ -7880,10 +8066,26 @@ function aquaScene() {
     addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (AQ.on) aquaBuild(); }, 200); });
   }
   if (el) el.hidden = !on;
+  if (on) aquaMenuSetup();
   if (on === AQ.on) return;
   AQ.on = on;
   cancelAnimationFrame(AQ.raf);
   if (on) { aquaBuild(); AQ.raf = requestAnimationFrame(aquaTick); }
+}
+
+/* 上の帯：画像のように「ホーム・バックアップ・テーマ」と歯車だけ見せ、残りは ☰ の中へ。一覧の「＋ 新規作成」もここでつなぐ */
+function aquaMenuSetup() {
+  if ($('aq-menu')) return;
+  const bar = document.querySelector('.bar'); if (!bar) return;
+  const b = document.createElement('button');
+  b.className = 'aq-menu-btn'; b.id = 'aq-menu'; b.type = 'button'; b.setAttribute('aria-label', 'メニュー'); b.setAttribute('aria-expanded', 'false');
+  b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14"/></svg>';
+  bar.appendChild(b);
+  const set = open => { bar.classList.toggle('aq-open', open); b.setAttribute('aria-expanded', String(open)); };
+  b.addEventListener('click', e => { e.stopPropagation(); set(!bar.classList.contains('aq-open')); });
+  document.addEventListener('click', e => { if (bar.classList.contains('aq-open') && !e.target.closest('.bar-actions')) set(false); });
+  bar.querySelector('.bar-actions')?.addEventListener('click', e => { if (e.target.closest('.btn')) set(false); });
+  $('shelf-new')?.addEventListener('click', () => $('btn-new').click());
 }
 
 /* 決まった並びの乱数（毎回同じ遺跡の形になるように） */
@@ -7899,10 +8101,10 @@ function aquaBuild() {
 
   // 水の色：上は光の入る明るい青、下ほど深い藍
   const lg = g.createLinearGradient(0, 0, 0, H);
-  lg.addColorStop(0, '#3b9de0'); lg.addColorStop(.16, '#1b6dbc'); lg.addColorStop(.42, '#0d4793'); lg.addColorStop(.72, '#082e68'); lg.addColorStop(1, '#04173c');
+  lg.addColorStop(0, '#1f74c4'); lg.addColorStop(.14, '#1052a6'); lg.addColorStop(.4, '#0a367f'); lg.addColorStop(.7, '#07245e'); lg.addColorStop(1, '#04163d');
   g.fillStyle = lg; g.fillRect(0, 0, W, H);
   const sg = g.createRadialGradient(W * .42, -H * .08, 0, W * .42, -H * .08, Math.max(W, H) * .8);
-  sg.addColorStop(0, 'rgba(210,248,255,.55)'); sg.addColorStop(.35, 'rgba(140,215,255,.18)'); sg.addColorStop(1, 'rgba(140,215,255,0)');
+  sg.addColorStop(0, 'rgba(225,252,255,.5)'); sg.addColorStop(.35, 'rgba(150,225,255,.14)'); sg.addColorStop(1, 'rgba(140,215,255,0)');
   g.fillStyle = sg; g.fillRect(0, 0, W, H);
 
   // 水面のゆらぎ（上のほうの明るいもよう）
@@ -7916,19 +8118,19 @@ function aquaBuild() {
 
   const s = Math.min(W, H * .75) / 400;   // 遺跡の大きさの目安
   // 遠くの遺跡（霧の向こう）
-  aqRuins(g, R, { x: W * .55, base: H * .78, s: s * .8, col: 'rgba(40,110,185,.35)', hi: 'rgba(150,215,255,.10)' });
-  aqColumn(g, { x: W * .08, base: H * .74, w: 16 * s, h: 150 * s, broken: 0.7, col: 'rgba(40,110,185,.35)', hi: 'rgba(150,215,255,.10)' }, R);
+  aqRuins(g, R, { x: W * .55, base: H * .78, s: s * .8, col: 'rgba(90,165,225,.38)', hi: 'rgba(200,240,255,.18)' });
+  aqColumn(g, { x: W * .08, base: H * .74, w: 16 * s, h: 150 * s, broken: 0.7, col: 'rgba(90,165,225,.38)', hi: 'rgba(200,240,255,.16)' }, R);
   // 霧
   const fg = g.createLinearGradient(0, H * .35, 0, H);
-  fg.addColorStop(0, 'rgba(20,80,160,0)'); fg.addColorStop(1, 'rgba(10,50,120,.45)');
+  fg.addColorStop(0, 'rgba(40,110,190,0)'); fg.addColorStop(1, 'rgba(20,70,150,.35)');
   g.fillStyle = fg; g.fillRect(0, 0, W, H);
   // 近くの遺跡（右側に大きく）
-  aqRuins(g, R, { x: W * .78, base: H * .9, s: s * 1.15, col: 'rgba(14,58,125,.82)', hi: 'rgba(120,200,255,.18)' });
-  aqColumn(g, { x: W * .2, base: H * .93, w: 22 * s, h: 190 * s, broken: .55, col: 'rgba(14,58,125,.75)', hi: 'rgba(120,200,255,.16)' }, R);
-  aqColumn(g, { x: W * .33, base: H * .95, w: 18 * s, h: 80 * s, broken: .9, col: 'rgba(14,58,125,.7)', hi: 'rgba(120,200,255,.14)' }, R);
+  aqRuins(g, R, { x: W * .8, base: H * .88, s: s * 1.3, col: 'rgba(30,95,170,.78)', hi: 'rgba(190,240,255,.32)' });
+  aqColumn(g, { x: W * .2, base: H * .93, w: 22 * s, h: 190 * s, broken: .55, col: 'rgba(30,95,170,.72)', hi: 'rgba(190,240,255,.28)' }, R);
+  aqColumn(g, { x: W * .33, base: H * .95, w: 18 * s, h: 80 * s, broken: .9, col: 'rgba(30,95,170,.68)', hi: 'rgba(190,240,255,.24)' }, R);
 
   // 海の底：岩
-  g.fillStyle = 'rgba(4,22,56,.95)';
+  g.fillStyle = 'rgba(10,40,95,.95)';
   g.beginPath(); g.moveTo(0, H);
   for (let x = 0; x <= W; x += W / 24) g.lineTo(x, H - (14 + R() * 26) * s - Math.max(0, Math.sin(x / W * Math.PI * 2.2)) * 30 * s);
   g.lineTo(W, H); g.closePath(); g.fill();
@@ -7938,16 +8140,16 @@ function aquaBuild() {
     g.beginPath(); g.ellipse(x, H - r * .4, r * 1.4, r, 0, Math.PI, 0); g.fill();
   }
   // さんご（左下と右下に、ピンクと紫）
-  [[W * .06, '#d58fd8'], [W * .16, '#9d8cff'], [W * .9, '#e4a0d4'], [W * .97, '#8fb6ff'], [W * .5, '#b993ff']].forEach(([x, col], i) => {
-    aqCoral(g, R, x, H - 6 * s, (i === 4 ? 26 : 40) * s, col);
+  [[W * .04, '#ff9fe0'], [W * .13, '#b7a2ff'], [W * .22, '#ff8fd0'], [W * .86, '#ffb0e4'], [W * .95, '#9fc4ff'], [W * .5, '#c9a8ff']].forEach(([x, col], i) => {
+    aqCoral(g, R, x, H - 6 * s, (i === 5 ? 28 : 46) * s, col);
   });
   // さんごの近くに小さな光る粒
   g.save(); g.globalCompositeOperation = 'lighter';
-  for (let i = 0; i < 40; i++) { const x = (R() < .5 ? R() * .25 : .75 + R() * .25) * W, y = H - R() * 70 * s; g.fillStyle = `rgba(255,200,240,${.15 + R() * .25})`; g.beginPath(); g.arc(x, y, .6 + R() * 1.4, 0, 6.3); g.fill(); }
+  for (let i = 0; i < 90; i++) { const x = (R() < .5 ? R() * .3 : .7 + R() * .3) * W, y = H - R() * 90 * s; g.fillStyle = `rgba(255,${200 + R() * 55},245,${.2 + R() * .35})`; g.beginPath(); g.arc(x, y, .6 + R() * 1.4, 0, 6.3); g.fill(); }
   g.restore();
   // いちばん下を暗く
   const bg2 = g.createLinearGradient(0, H * .8, 0, H);
-  bg2.addColorStop(0, 'rgba(2,12,34,0)'); bg2.addColorStop(1, 'rgba(2,12,34,.55)');
+  bg2.addColorStop(0, 'rgba(4,20,56,0)'); bg2.addColorStop(1, 'rgba(4,20,56,.4)');
   g.fillStyle = bg2; g.fillRect(0, H * .8, W, H * .2);
   AQ.base = b;
 
@@ -7957,11 +8159,11 @@ function aquaBuild() {
   AQ.dust = Array.from({ length: Math.round(W * H / 6000) }, () => ({ x: r2() * W, y: r2() * H, r: .4 + r2() * 1.2, vx: (r2() - .5) * .05, vy: -.02 - r2() * .05, ph: r2() * 6.3 }));
   AQ.bub = Array.from({ length: 16 }, () => aqBubble(true));
   AQ.fish = [];
-  for (let sc = 0; sc < 2; sc++) {   // 魚の群れ 2つ
-    const dir = sc ? -1 : 1, cy = H * (.2 + r2() * .35), cx = r2() * W, n = 7 + Math.round(r2() * 6), sz = (5 + r2() * 3) * s;
+  for (let sc = 0; sc < 4; sc++) {   // 魚の群れ 4つ（小さな魚がたくさん）
+    const dir = sc % 2 ? -1 : 1, cy = H * (.12 + sc * .15 + r2() * .1), cx = r2() * W, n = 9 + Math.round(r2() * 8), sz = (3.5 + r2() * 3) * s;
     for (let i = 0; i < n; i++) AQ.fish.push({ x: cx + (r2() - .5) * 90 * s, y: cy + (r2() - .5) * 50 * s, dir, v: (.12 + r2() * .05) * s * 2, sz: sz * (.8 + r2() * .4), ph: r2() * 6.3, school: sc });
   }
-  AQ.jelly = Array.from({ length: W > 500 ? 3 : 2 }, (_, i) => ({ x: W * (i === 0 ? .82 : i === 1 ? .12 : .55), y: H * (.12 + i * .28), sz: (i === 0 ? 30 : 18 + r2() * 8) * s, ph: r2() * 6.3, vy: (.05 + r2() * .04) * s, sway: r2() * 6.3 }));
+  AQ.jelly = Array.from({ length: W > 500 ? 3 : 2 }, (_, i) => ({ x: W * (i === 0 ? .84 : i === 1 ? .1 : .55), y: H * (i === 0 ? .1 : .3 + i * .2), sz: (i === 0 ? 38 : 16 + r2() * 8) * s, ph: r2() * 6.3, vy: (.05 + r2() * .04) * s, sway: r2() * 6.3 }));
 }
 function aqBubble(fresh) {
   const r = Math.random;
@@ -8060,7 +8262,7 @@ function aquaTick(t) {
     if (!still) { f.x += f.v * f.dir * dt; f.y += Math.sin(t * .001 + f.ph) * .08 * dt; if (f.dir > 0 && f.x > W + 40) f.x = -40 - Math.random() * 60; if (f.dir < 0 && f.x < -40) f.x = W + 40 + Math.random() * 60; }
     const tail = Math.sin(t * .012 + f.ph) * .35;
     g.save(); g.translate(f.x, f.y); g.scale(f.dir, 1);
-    g.fillStyle = 'rgba(160,215,255,.55)';
+    g.fillStyle = f.school % 2 ? 'rgba(200,235,255,.6)' : 'rgba(150,205,255,.55)';
     g.beginPath(); g.ellipse(0, 0, f.sz, f.sz * .38, 0, 0, 6.3); g.fill();
     g.beginPath(); g.moveTo(-f.sz * .85, 0); g.lineTo(-f.sz * 1.5, -f.sz * (.42 + tail * .3)); g.lineTo(-f.sz * 1.5, f.sz * (.42 - tail * .3)); g.closePath(); g.fill();
     g.fillStyle = 'rgba(230,250,255,.5)'; g.fillRect(f.sz * .25, -f.sz * .2, f.sz * .5, f.sz * .12);
@@ -8112,6 +8314,10 @@ const AQ_ICON = {
   sex: '<circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c.8-3.6 3.4-5.6 6.5-5.6s5.7 2 6.5 5.6"/>',
   home: '<path d="M4 11.5 12 4.5l8 7M6.5 10v9h11v-9"/>',
   more: '<rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M8.5 8h7M8.5 11.5h7M8.5 15h4.5"/>',
+  star: '<path d="M12 3.5l2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 17l-5.3 2.8 1.1-5.9-4.4-4.1 6-.8z"/>',
+  atom: '<circle cx="12" cy="12" r="1.6"/><ellipse cx="12" cy="12" rx="8.5" ry="3.4"/><ellipse cx="12" cy="12" rx="8.5" ry="3.4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="8.5" ry="3.4" transform="rotate(-60 12 12)"/>',
+  bag: '<path d="M6 8.5h12l-1 11H7z"/><path d="M9 8.5V7a3 3 0 0 1 6 0v1.5"/><circle cx="12" cy="13.5" r="1.8"/>',
+  leaf: '<path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19c3-4 6-7 10-10"/>',
 };
 const aqIcon = (k, cls = '') => `<svg class="aq-ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${AQ_ICON[k] || ''}</svg>`;
 function aquaHtml(c) {
@@ -8121,8 +8327,8 @@ function aquaHtml(c) {
     <div class="hub-top aq-tools">${toolsHtml(c)}</div>
     <div class="aq-sheet">
       <i class="aq-wave-top" aria-hidden="true"></i>
-      <div class="aq-title">${aqIcon('shell', 'aq-shell')}<div><b data-hub="name"></b><small>— Character Status —</small></div><span class="aq-sys">${esc(S.short)}</span></div>
-      <nav class="aq-tabs" aria-label="項目">${SECTIONS.map((s, i) => `<button class="aq-tab" type="button" data-open="${s.key}" style="--i:${i}">${icon(s.key)}<span>${s.jp}</span></button>`).join('')}</nav>
+      <div class="aq-title">${aqIcon('shell', 'aq-shell')}<div><b data-hub="name"></b><small>— Character Status —</small></div></div>
+      <nav class="aq-tabs" aria-label="項目">${[['abilities', 'star', 'ステータス'], ['skills', 'atom', '技能'], ['items', 'bag', '所持品'], ['story', 'leaf', 'メモ']].map(([k, ic, l], i) => `<button class="aq-tab ${i ? '' : 'on'}" type="button" data-open="${k}">${aqIcon(ic)}<span>${l}</span></button>`).join('')}</nav>
       <div class="aq-main">
         <button class="aq-portrait ${src ? 'has' : ''}" type="button" data-stage aria-label="立ち絵を表示">${src ? `<img src="${esc(imgSrc(src))}" alt="" draggable="false" onerror="this.remove()">` : tokenHtml(c)}<i class="aq-glint" aria-hidden="true"></i></button>
         <div class="aq-bars">${[['hp', 'heart', 'HP'], ['mp', 'drop', 'MP'], ['san', 'brain', 'SAN']].map(([k, ic, l]) => `
@@ -8138,7 +8344,7 @@ function aquaHtml(c) {
           <span class="aq-pf">${aqIcon('sex')}<span><i>性別</i><b>${esc(p.sex || '—')}</b></span></span>
         </button>
       </div>
-      <button class="aq-more" type="button" data-open="skills">${aqIcon('more')}<span>技能を見る</span><span class="aq-go" aria-hidden="true">›</span></button>
+      <button class="aq-more" type="button" data-open="profile">${aqIcon('more')}<span>詳細を見る</span><span class="aq-go" aria-hidden="true">›</span></button>
     </div>`;
 }
 
