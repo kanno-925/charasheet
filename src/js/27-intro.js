@@ -1,5 +1,7 @@
 /* ================= オープニング ================= */
 (function intro() {
+  // 前に使っていたテーマの見た目を、保存データの読み込みを待たずに先に当てる（最初の画面がそのテーマで出るように）
+  try { const lk = localStorage.getItem('charasheet-kobo.look'); if (lk != null && !document.documentElement.dataset.look) document.documentElement.dataset.look = lk; } catch (e) { /* */ }
   const el = $('intro'); if (!el) return;
   document.documentElement.style.overflow = 'hidden';
   // 魔法陣：七芒星・六角形・ルーン

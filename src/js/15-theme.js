@@ -31,6 +31,7 @@ function applyTheme() {
   const t = themeVals();
   Object.entries(t).forEach(([k, v]) => document.documentElement.style.setProperty('--' + k, v));
   document.documentElement.dataset.look = presetOf().look;
+  try { localStorage.setItem('charasheet-kobo.look', presetOf().look); } catch (e) { /* */ }
   applyBg();
   waScene();
   dotScene();

@@ -116,7 +116,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* shelf */
 .shelf { display: flex; flex-direction: column; gap: 6px; }
-.pl-aq, .shelf-new, .ci-lv, .ci-go, .aq-menu-btn { display: none; }   /* アクアリウムテーマのときだけ出す（19-aqua.css） */
+.pl-aq, .shelf-new, .ci-lv, .ci-go, .aq-menu-btn, .aq-load { display: none; }   /* アクアリウムテーマのときだけ出す（19-aqua.css） */
 .shelf-list { display: flex; flex-direction: column; gap: 6px; }
 .char-item { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 10px; align-items: center; text-align: left; width: 100%; border: 1px solid transparent; background: transparent; padding: 8px 10px; border-radius: 999px; cursor: pointer; transition: background .15s; }
 .char-item:hover { background: var(--paper); }

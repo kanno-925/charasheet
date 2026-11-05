@@ -15,6 +15,7 @@ src/                     ソースコード（ここを編集します）
 assets/                  画像・音（テーマごとにフォルダを分けています）
   book/                  魔導書テーマ（本・机・紙・インクの画像、ページめくりと書きこみの音）
   wa/                    和風テーマ（景色の絵）
+  aqua/                  アクアリウムテーマ（水底の絵 scene.webp・切りかえのぼやけた水 bokeh.webp）
 supabase/                サーバー（Supabase）の設定SQL。番号順に実行します
 docs/history.md          これまでの変更のあゆみ
 build.py                 src/ と assets/ から公開用ファイルを作るスクリプト
