@@ -3214,6 +3214,8 @@ async function load() {
   }
   if (!state.chars.length) state.chars = [sample()];
   if (!state.chars.some(c => c.id === state.activeId)) state.activeId = state.chars[0].id;
+  // 削除したテーマ（深淵・古書・ネオン・森）を使っていた人は、近未来にもどす（そのテーマ用に変えた色も消す）
+  if (state.themePreset && !THEME_PRESETS[state.themePreset]) { state.themePreset = 'sky'; state.theme = {}; }
   loaded = true;
   if (idbOk && (!fromIdb || idbLegacy || best !== fromIdb)) saveNow();   // 新しい形で IndexedDB に書いておく
 }
@@ -4675,15 +4677,12 @@ const THEME_ROWS = [
 ];
 const hexToRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 const rgbToHex = a => '#' + a.map(v => Math.max(0, Math.min(255, Math.round(v) || 0)).toString(16).padStart(2, '0')).join('');
+/* テーマは 近未来・和風・魔導書・ドット の4つ（深淵・古書・ネオン・森は 2026-11-05 に削除） */
 const THEME_PRESETS = {
   sky:    { name: '近未来', sub: '白と空色', look: '', vals: {} },
-  abyss:  { name: '深淵', sub: 'ダーク・クトゥルフ', look: 'dark mincho', vals: { bg: '#0a1013', solid: '#141d21', ink: '#dbe7e2', sky: '#3fae94', cyan: '#71cfc0', amber: '#d4ae62' } },
-  tome:   { name: '古書', sub: 'セピアの羊皮紙', look: 'mincho', vals: { bg: '#e6dac1', solid: '#f6efdd', ink: '#3a2817', sky: '#8a4a26', cyan: '#b07a3a', amber: '#c0562a' } },
   sakura: { name: '和風', sub: '和紙と墨と金、舞う桜', look: 'mincho wa', vals: { bg: '#ebdfc6', solid: '#f7efdd', ink: '#2e2520', sky: '#5a3c2c', cyan: '#b08d4a', amber: '#b08d4a' } },
-  neon:   { name: 'ネオン', sub: '夜のサイバー', look: 'dark', vals: { bg: '#0b0918', solid: '#16122b', ink: '#ece8ff', sky: '#a159f5', cyan: '#22c8e8', amber: '#f2569e' } },
   book:   { name: '魔導書', sub: '古本に万年筆で書きこむ記録', look: 'dark mincho book', vals: { bg: '#140c07', solid: '#22160d', ink: '#efe0c4', sky: '#7a5a8c', cyan: '#c9a04e', amber: '#c9a04e' } },
   dot:    { name: 'ドット', sub: '星降る夜のピクセル', look: 'dark dot', vals: { bg: '#0b0e30', solid: '#141a4c', ink: '#e8eeff', sky: '#86a8ff', cyan: '#a8d8ff', amber: '#ffd36b' } },
-  forest: { name: '森', sub: '深緑とランタン', look: '', vals: { bg: '#dfe7dc', solid: '#f5f8f1', ink: '#1c2a1f', sky: '#2f7d4f', cyan: '#5aa78a', amber: '#d98a1f' } },
 };
 const presetOf = () => THEME_PRESETS[state.themePreset] || THEME_PRESETS.sky;
 const themeVals = () => ({ ...THEME_DEFAULT, ...presetOf().vals, ...(state.theme || {}) });
