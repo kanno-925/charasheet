@@ -25,7 +25,7 @@
 /* 見本の絵の背景（少し暗め）。ゆっくり近づいたり離れたりして、水の中でただよっている感じに */
 .aq-bg::before { content: ""; position: absolute; inset: -3%; background: url("../assets/aqua/scene.webp") 50% 50% / cover no-repeat; animation: aq-drift 38s ease-in-out infinite alternate; }
 @keyframes aq-drift { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.05) translate(-1.2%, .8%); } }
-@media (max-aspect-ratio: 1/1) { .aq-bg::before { background-position: 88% 50%; } }
+@media (max-aspect-ratio: 1/1) { .aq-bg::before { background-position: 62% 50%; } }
 @media (prefers-reduced-motion: reduce) { .aq-bg::before { animation: none; } }
 .aq-bg[hidden] { display: none; }
 .aq-bg canvas { position: relative; width: 100%; height: 100%; display: block; }
@@ -449,7 +449,7 @@
 /* ---- はじめの画面：見本の「Loading…」の画面 ---- */
 :root[data-look~="aqua"] .intro { background: #061a44; }
 :root[data-look~="aqua"] .intro::before { content: ""; position: absolute; inset: -3%; background: url("../assets/aqua/scene.webp") 50% 50% / cover no-repeat; animation: aq-drift 38s ease-in-out infinite alternate; }
-@media (max-aspect-ratio: 1/1) { :root[data-look~="aqua"] .intro::before { background-position: 88% 50%; } }
+@media (max-aspect-ratio: 1/1) { :root[data-look~="aqua"] .intro::before { background-position: 62% 50%; } }
 :root[data-look~="aqua"] .intro :is(.intro-dust, .intro-fog, .intro-circle, .intro-eyebrow, .intro-lead, .intro-foot) { display: none; }
 :root[data-look~="aqua"] .intro-body { position: relative; gap: 0; }
 :root[data-look~="aqua"] .intro-title { font-size: 0; margin: 0; }
@@ -484,3 +484,6 @@
 }
 :root[data-look~="aqua"]:not(.sel-has-bg) .select { background: rgb(4 23 60 / .08); }
 @media (max-width: 400px) { .aq-tab { font-size: 11.5px; letter-spacing: 0; gap: 2px; } .aq-tab .aq-ic { width: 13px; height: 13px; } }
+/* はじめの画面：にぎやかな絵の上でも文字が読めるよう、うしろをうすく暗く */
+:root[data-look~="aqua"] .intro-body::before { content: ""; position: absolute; inset: -6% -14%; z-index: -1; pointer-events: none; border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 50%, rgb(3 18 50 / .55), rgb(3 18 50 / .25) 55%, transparent 72%); }
