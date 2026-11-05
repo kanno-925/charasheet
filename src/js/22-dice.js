@@ -66,3 +66,54 @@ function diceCardCheck(name, target, sys) {
     if (cls === 'crit' && !reduceMotion.matches) fxAt(vd, true);
   });
 }
+
+/* ================= ダイスの上限回数 =================
+   ・キャラごとに上限を決められる（c.dice = { limit: '空欄なら上限なし', used: 振った回数 }）
+   ・そのキャラでグループに参加していて、キーパーが上限を決めているときは、そちらが優先（数はグループごとに c.diceG[グループID] に記録）
+   ・数えるのは「能力値を振る」ボタン（まとめて＝1回、1つずつ＝1回ずつ） */
+function diceInfo(c) {
+  c.dice = c.dice || { limit: '', used: 0 };
+  let best = null;
+  if (typeof G !== 'undefined' && me) (G.list || []).forEach(g => {
+    const mine = (g.members || []).find(m => m.user_id === me.id);
+    if (!mine || mine.status !== 'joined' || mine.char_id !== c.id) return;
+    const kps = (g.members || []).filter(m => m.role === 'kp' && m.status === 'joined' && m.dice_limit != null && m.dice_limit !== '');
+    if (!kps.length) return;
+    const limit = Math.min(...kps.map(m => +m.dice_limit));
+    const reset = Math.max(0, ...kps.map(m => m.dice_reset ? Date.parse(m.dice_reset) || 0 : 0));
+    const rec = (c.diceG || {})[g.id];
+    const used = rec && (!reset || (Date.parse(rec.since) || 0) >= reset) ? rec.n : 0;
+    if (!best || limit - used < best.limit - best.used) best = { group: g, limit, used, reset };
+  });
+  if (best) return { ...best, left: Math.max(0, best.limit - best.used) };
+  const lim = String(c.dice.limit ?? '').trim();
+  const limit = lim === '' ? null : Math.max(0, num(lim));
+  const used = c.dice.used || 0;
+  return { group: null, limit, used, left: limit == null ? Infinity : Math.max(0, limit - used) };
+}
+/* 1回分使う。上限に達していたら false */
+function diceSpend(c) {
+  const d = diceInfo(c);
+  if (d.left <= 0) {
+    toast(d.group ? `ダイスの上限（${d.limit}回）に達しました。グループ「${d.group.data.name || '無題'}」のキーパーがリセットすると、また振れます。` : `ダイスの上限（${d.limit}回）に達しました。能力値の画面の「回数をリセット」か上限を変えると、また振れます。`);
+    return false;
+  }
+  if (d.group) {
+    c.diceG = c.diceG || {};
+    const rec = c.diceG[d.group.id], valid = rec && (!d.reset || (Date.parse(rec.since) || 0) >= d.reset);
+    c.diceG[d.group.id] = { n: d.used + 1, since: valid ? rec.since : new Date().toISOString() };
+  } else c.dice.used = (c.dice.used || 0) + 1;
+  return true;
+}
+function diceBoxHtml(c) {
+  const d = diceInfo(c);
+  const count = d.limit == null ? `振った回数 <b>${d.used}</b>（上限なし）` : `残り <b class="${d.left ? '' : 'zero'}">${d.left}</b> / ${d.limit}回`;
+  if (d.group) return `<span class="dice-box" data-dicebox><span class="db-c">${count}</span><small class="db-src">「${esc(d.group.data.name || '無題')}」のキーパーが決めた上限</small></span>`;
+  return `<span class="dice-box" data-dicebox><span class="db-c">${count}</span>
+    <label class="db-lim">上限<input class="inp num" type="text" inputmode="numeric" data-p="dice.limit" value="${esc(c.dice.limit ?? '')}" placeholder="なし" aria-label="ダイスを振れる上限回数（空欄なら上限なし）">回</label>
+    ${d.used ? '<button class="btn small ghost" type="button" data-act="dice-reset">回数をリセット</button>' : ''}</span>`;
+}
+function refreshDiceBox() {
+  const c = active(); if (!c) return;
+  document.querySelectorAll('[data-dicebox] .db-c').forEach(el => { el.innerHTML = diceBoxHtml(c).match(/<span class="db-c">([\s\S]*?)<\/span>/)[1]; });
+}

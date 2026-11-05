@@ -42,3 +42,14 @@
 .dc-row > b { font-family: var(--f-latin); }
 .dc-row small { font-family: var(--f-mono); color: var(--muted); font-size: 10px; }
 @media (max-width: 760px) { .dice-tray { right: 12px; left: 12px; width: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 92px); } .dcard { padding: 10px 12px; } .dc-total.big { font-size: 32px; } .dc-body { margin-top: 4px; } }
+/* ダイスの上限回数 */
+.dice-box { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 12.5px; color: var(--muted); }
+.dice-box .db-c b { color: var(--ink); font-size: 15px; }
+.dice-box .db-c b.zero { color: var(--danger, #d64545); }
+.dice-box .db-lim { display: inline-flex; align-items: center; gap: 4px; }
+.dice-box .db-lim .inp { width: 4.2em; padding: 3px 6px; text-align: right; }
+.dice-box .db-src { color: var(--sky); }
+.gc-dice { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 8px; font-size: 13px; }
+.gc-dice label { display: inline-flex; align-items: center; gap: 6px; }
+.gc-dice .inp { width: 4.5em; padding: 4px 6px; text-align: right; }
+.gc-role.dice { background: color-mix(in srgb, var(--amber) 22%, transparent); color: var(--ink); }

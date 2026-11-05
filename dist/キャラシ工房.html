@@ -1031,6 +1031,17 @@ label.btn { display: inline-block; }
 .dc-row > b { font-family: var(--f-latin); }
 .dc-row small { font-family: var(--f-mono); color: var(--muted); font-size: 10px; }
 @media (max-width: 760px) { .dice-tray { right: 12px; left: 12px; width: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 92px); } .dcard { padding: 10px 12px; } .dc-total.big { font-size: 32px; } .dc-body { margin-top: 4px; } }
+/* ダイスの上限回数 */
+.dice-box { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 12.5px; color: var(--muted); }
+.dice-box .db-c b { color: var(--ink); font-size: 15px; }
+.dice-box .db-c b.zero { color: var(--danger, #d64545); }
+.dice-box .db-lim { display: inline-flex; align-items: center; gap: 4px; }
+.dice-box .db-lim .inp { width: 4.2em; padding: 3px 6px; text-align: right; }
+.dice-box .db-src { color: var(--sky); }
+.gc-dice { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 8px; font-size: 13px; }
+.gc-dice label { display: inline-flex; align-items: center; gap: 6px; }
+.gc-dice .inp { width: 4.5em; padding: 4px 6px; text-align: right; }
+.gc-role.dice { background: color-mix(in srgb, var(--amber) 22%, transparent); color: var(--ink); }
 
 /* ===== book theme: an old grimoire on a wooden desk (textures cut from reference photos in assets/book/) ===== */
 
@@ -4032,7 +4043,7 @@ function sectionBody(key, c) {
         </tr>`;
       }).join('');
       return `<section class="sec">
-        ${bar('現在値 ＝ 初期値 ＋ 増減 ＋ 一時的増減。各行のサイコロで1つずつ振れます', '<button class="btn small die-all" type="button" data-act="roll"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="3.5"/><circle cx="7" cy="7" r="1.2"/><circle cx="13" cy="13" r="1.2"/><circle cx="10" cy="10" r="1.2"/></svg>全部まとめて振る</button>')}
+        ${bar('現在値 ＝ 初期値 ＋ 増減 ＋ 一時的増減。各行のサイコロで1つずつ振れます', '<button class="btn small die-all" type="button" data-act="roll"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="3.5"/><circle cx="7" cy="7" r="1.2"/><circle cx="13" cy="13" r="1.2"/><circle cx="10" cy="10" r="1.2"/></svg>全部まとめて振る</button>' + diceBoxHtml(c) + '')}
         <div class="ab-viz">
           <figure class="chart-fig radar-fig"><figcaption>能力値チャート <span>現在値</span></figcaption><div class="radar" id="ab-radar"></div></figure>
           <div class="derived">
@@ -4799,6 +4810,7 @@ function onEdit(e) {
   const t = e.target; if (!t.dataset.p) return;
   setPath(active(), t.dataset.p, t.type === 'checkbox' ? t.checked : t.value);
   touch();
+  if (t.dataset.p.startsWith('dice.')) refreshDiceBox();
 }
 const onBoth = (ev, fn) => [$('sheet'), $('panel')].forEach(el => el.addEventListener(ev, fn));
 onBoth('input', e => { if (e.target.type !== 'checkbox' && e.target.tagName !== 'SELECT') onEdit(e); });
@@ -4874,7 +4886,9 @@ onBoth('click', e => {
     case 'add-scenario': c.scenarios.push({ name: '', date: '', note: '', friends: [] }); focus = pid(`scenarios.${c.scenarios.length - 1}.name`); break;
     case 'roll': {
       const filled = Object.values(c.abilities).some(v => v.base !== '');
+      if (diceInfo(c).left <= 0) { diceSpend(c); return; }
       if (filled && !arm(b, 'もう一度押すと全部振り直し')) return;
+      if (!diceSpend(c)) return;
       const res = SYS[c.system].abil.map(([k, dice, expr, jp]) => { const r = rollDetail(expr); c.abilities[k].base = String(r.total); return { k: jp || k, ...r }; });
       c.hp = ''; c.mp = ''; c.san = '';
       fxAt(b, true);
@@ -4883,6 +4897,7 @@ onBoth('click', e => {
     }
     case 'roll-one': {
       const def = SYS[c.system].abil.find(([k]) => k === b.dataset.k); if (!def) return;
+      if (!diceSpend(c)) return;
       const r = rollDetail(def[2]);
       c.abilities[def[0]].base = String(r.total);
       if (['CON', 'SIZ'].includes(def[0])) c.hp = '';
@@ -4897,6 +4912,11 @@ onBoth('click', e => {
       fxAt(b, false);
       diceCardCheck(skillLabel(sk) || '技能', target, c.system);
       return;
+    }
+    case 'dice-reset': {
+      if (!arm(b, 'もう一度押すとリセット')) return;
+      c.dice.used = 0; toast('ダイスを振った回数をリセットしました。');
+      break;
     }
     case 'dup': {
       if (!canAddChar()) return;
@@ -6507,6 +6527,57 @@ function diceCardCheck(name, target, sys) {
   });
 }
 
+/* ================= ダイスの上限回数 =================
+   ・キャラごとに上限を決められる（c.dice = { limit: '空欄なら上限なし', used: 振った回数 }）
+   ・そのキャラでグループに参加していて、キーパーが上限を決めているときは、そちらが優先（数はグループごとに c.diceG[グループID] に記録）
+   ・数えるのは「能力値を振る」ボタン（まとめて＝1回、1つずつ＝1回ずつ） */
+function diceInfo(c) {
+  c.dice = c.dice || { limit: '', used: 0 };
+  let best = null;
+  if (typeof G !== 'undefined' && me) (G.list || []).forEach(g => {
+    const mine = (g.members || []).find(m => m.user_id === me.id);
+    if (!mine || mine.status !== 'joined' || mine.char_id !== c.id) return;
+    const kps = (g.members || []).filter(m => m.role === 'kp' && m.status === 'joined' && m.dice_limit != null && m.dice_limit !== '');
+    if (!kps.length) return;
+    const limit = Math.min(...kps.map(m => +m.dice_limit));
+    const reset = Math.max(0, ...kps.map(m => m.dice_reset ? Date.parse(m.dice_reset) || 0 : 0));
+    const rec = (c.diceG || {})[g.id];
+    const used = rec && (!reset || (Date.parse(rec.since) || 0) >= reset) ? rec.n : 0;
+    if (!best || limit - used < best.limit - best.used) best = { group: g, limit, used, reset };
+  });
+  if (best) return { ...best, left: Math.max(0, best.limit - best.used) };
+  const lim = String(c.dice.limit ?? '').trim();
+  const limit = lim === '' ? null : Math.max(0, num(lim));
+  const used = c.dice.used || 0;
+  return { group: null, limit, used, left: limit == null ? Infinity : Math.max(0, limit - used) };
+}
+/* 1回分使う。上限に達していたら false */
+function diceSpend(c) {
+  const d = diceInfo(c);
+  if (d.left <= 0) {
+    toast(d.group ? `ダイスの上限（${d.limit}回）に達しました。グループ「${d.group.data.name || '無題'}」のキーパーがリセットすると、また振れます。` : `ダイスの上限（${d.limit}回）に達しました。能力値の画面の「回数をリセット」か上限を変えると、また振れます。`);
+    return false;
+  }
+  if (d.group) {
+    c.diceG = c.diceG || {};
+    const rec = c.diceG[d.group.id], valid = rec && (!d.reset || (Date.parse(rec.since) || 0) >= d.reset);
+    c.diceG[d.group.id] = { n: d.used + 1, since: valid ? rec.since : new Date().toISOString() };
+  } else c.dice.used = (c.dice.used || 0) + 1;
+  return true;
+}
+function diceBoxHtml(c) {
+  const d = diceInfo(c);
+  const count = d.limit == null ? `振った回数 <b>${d.used}</b>（上限なし）` : `残り <b class="${d.left ? '' : 'zero'}">${d.left}</b> / ${d.limit}回`;
+  if (d.group) return `<span class="dice-box" data-dicebox><span class="db-c">${count}</span><small class="db-src">「${esc(d.group.data.name || '無題')}」のキーパーが決めた上限</small></span>`;
+  return `<span class="dice-box" data-dicebox><span class="db-c">${count}</span>
+    <label class="db-lim">上限<input class="inp num" type="text" inputmode="numeric" data-p="dice.limit" value="${esc(c.dice.limit ?? '')}" placeholder="なし" aria-label="ダイスを振れる上限回数（空欄なら上限なし）">回</label>
+    ${d.used ? '<button class="btn small ghost" type="button" data-act="dice-reset">回数をリセット</button>' : ''}</span>`;
+}
+function refreshDiceBox() {
+  const c = active(); if (!c) return;
+  document.querySelectorAll('[data-dicebox] .db-c').forEach(el => { el.innerHTML = diceBoxHtml(c).match(/<span class="db-c">([\s\S]*?)<\/span>/)[1]; });
+}
+
 /* ================= アイコンの調整（拡大・位置） ================= */
 let iconEd = null;
 function renderIconPreview() {
@@ -6766,7 +6837,9 @@ async function loadGroups() {
     const ids = (data || []).map(r => r.id);
     let mem = [];
     if (ids.length) {
-      const r = await sb.from('group_members').select('group_id,user_id,status,role,char_id,char_name,invited_by').in('group_id', ids);
+      const cols = 'group_id,user_id,status,role,char_id,char_name,invited_by';
+      let r = G.noDice ? { error: { message: 'dice' } } : await sb.from('group_members').select(cols + ',dice_limit,dice_reset').in('group_id', ids);
+      if (r.error && /dice/.test(r.error.message || '')) { G.noDice = true; r = await sb.from('group_members').select(cols).in('group_id', ids); } // SQL 09 を実行していないとき
       if (r.error) throw r.error;
       mem = r.data || [];
     }
@@ -6845,6 +6918,7 @@ function groupCardHtml(g, kind) {
     <div class="gc-row"><span class="gc-role pl">探索者</span><div class="gc-pls">${chips || '<span class="gc-none">未定</span>'}</div></div>
     ${pending.length ? `<div class="gc-row"><span class="gc-role wait">招待中</span><div class="gc-pls">${pending.map(n => `<span class="gc-wait">${esc(n)}</span>`).join('')}</div></div>` : ''}
     ${roomRow(g, owner || (mine && mine.status === 'joined'))}
+    ${diceRowHtml(g, mine)}
     ${d.note ? `<p class="gc-note">${esc(d.note)}</p>` : ''}
   </article>`;
 }
@@ -7054,6 +7128,40 @@ async function unsetGroupChar(charId) {
     if (error) throw error;
   } catch (e) { console.warn('group char unset failed', e); }
 }
+
+/* ---- ダイスの上限（キーパーが決める） ---- */
+function diceRowHtml(g, mine) {
+  const kps = (g.members || []).filter(m => m.role === 'kp' && m.status === 'joined' && m.dice_limit != null);
+  const lim = kps.length ? Math.min(...kps.map(m => +m.dice_limit)) : null;
+  if (mine && mine.status === 'joined' && mine.role === 'kp') {
+    return `<div class="gc-dice"><span class="gc-role dice">ダイス</span>
+      <label>能力値ダイスの上限<input class="inp" type="text" inputmode="numeric" id="gd-${esc(g.id)}" value="${mine.dice_limit ?? ''}" placeholder="なし" aria-label="ダイスの上限回数（空欄で上限なし）">回</label>
+      <button class="btn small" type="button" data-gdice-save="${esc(g.id)}">決める</button>
+      <button class="btn small ghost" type="button" data-gdice-reset="${esc(g.id)}">みんなの回数をリセット</button></div>`;
+  }
+  return lim != null ? `<div class="gc-dice"><span class="gc-role dice">ダイス</span><span>能力値ダイスは <b>${lim}回</b> まで（キーパーが設定）</span></div>` : '';
+}
+async function saveGroupDice(gid, patch, okMsg) {
+  try {
+    if (G.noDice) throw { message: 'dice_limit' };
+    const { error } = await sb.from('group_members').update(patch).eq('group_id', gid).eq('user_id', me.id);
+    if (error) throw error;
+    await loadGroups(); renderSelect(); renderSheet(); toast(okMsg);
+  } catch (e) {
+    toast(/dice/.test(e.message || '') ? 'サーバーの追加設定（supabase/09-dice-limit.sql）がまだのようです。Supabase の SQL Editor で実行してください。' : 'ダイスの上限を保存できませんでした：' + jaErr(e));
+  }
+}
+$('select').addEventListener('click', e => {
+  const s = e.target.closest('[data-gdice-save]');
+  if (s) {
+    const gid = s.dataset.gdiceSave, raw = toHalf(($('gd-' + gid) || {}).value || '').trim();
+    if (raw !== '' && !/^\d{1,3}$/.test(raw)) { toast('上限は 0〜999 の数字で入れてください（空欄で上限なし）。'); return; }
+    saveGroupDice(gid, { dice_limit: raw === '' ? null : +raw }, raw === '' ? 'ダイスの上限をなしにしました。' : `ダイスの上限を ${raw} 回にしました。参加している探索者のキャラに反映されます。`);
+    return;
+  }
+  const r = e.target.closest('[data-gdice-reset]');
+  if (r) { if (!arm(r, 'もう一度押すとリセット')) return; saveGroupDice(r.dataset.gdiceReset, { dice_reset: new Date().toISOString() }, 'みんなのダイスの回数をリセットしました。'); }
+});
 
 /* ================= 探索者をえらぶ画面 ================= */
 let selPress = null, selLong = false, selResizeT = null;

@@ -20,7 +20,9 @@ async function loadGroups() {
     const ids = (data || []).map(r => r.id);
     let mem = [];
     if (ids.length) {
-      const r = await sb.from('group_members').select('group_id,user_id,status,role,char_id,char_name,invited_by').in('group_id', ids);
+      const cols = 'group_id,user_id,status,role,char_id,char_name,invited_by';
+      let r = G.noDice ? { error: { message: 'dice' } } : await sb.from('group_members').select(cols + ',dice_limit,dice_reset').in('group_id', ids);
+      if (r.error && /dice/.test(r.error.message || '')) { G.noDice = true; r = await sb.from('group_members').select(cols).in('group_id', ids); } // SQL 09 を実行していないとき
       if (r.error) throw r.error;
       mem = r.data || [];
     }
@@ -99,6 +101,7 @@ function groupCardHtml(g, kind) {
     <div class="gc-row"><span class="gc-role pl">探索者</span><div class="gc-pls">${chips || '<span class="gc-none">未定</span>'}</div></div>
     ${pending.length ? `<div class="gc-row"><span class="gc-role wait">招待中</span><div class="gc-pls">${pending.map(n => `<span class="gc-wait">${esc(n)}</span>`).join('')}</div></div>` : ''}
     ${roomRow(g, owner || (mine && mine.status === 'joined'))}
+    ${diceRowHtml(g, mine)}
     ${d.note ? `<p class="gc-note">${esc(d.note)}</p>` : ''}
   </article>`;
 }
@@ -308,3 +311,37 @@ async function unsetGroupChar(charId) {
     if (error) throw error;
   } catch (e) { console.warn('group char unset failed', e); }
 }
+
+/* ---- ダイスの上限（キーパーが決める） ---- */
+function diceRowHtml(g, mine) {
+  const kps = (g.members || []).filter(m => m.role === 'kp' && m.status === 'joined' && m.dice_limit != null);
+  const lim = kps.length ? Math.min(...kps.map(m => +m.dice_limit)) : null;
+  if (mine && mine.status === 'joined' && mine.role === 'kp') {
+    return `<div class="gc-dice"><span class="gc-role dice">ダイス</span>
+      <label>能力値ダイスの上限<input class="inp" type="text" inputmode="numeric" id="gd-${esc(g.id)}" value="${mine.dice_limit ?? ''}" placeholder="なし" aria-label="ダイスの上限回数（空欄で上限なし）">回</label>
+      <button class="btn small" type="button" data-gdice-save="${esc(g.id)}">決める</button>
+      <button class="btn small ghost" type="button" data-gdice-reset="${esc(g.id)}">みんなの回数をリセット</button></div>`;
+  }
+  return lim != null ? `<div class="gc-dice"><span class="gc-role dice">ダイス</span><span>能力値ダイスは <b>${lim}回</b> まで（キーパーが設定）</span></div>` : '';
+}
+async function saveGroupDice(gid, patch, okMsg) {
+  try {
+    if (G.noDice) throw { message: 'dice_limit' };
+    const { error } = await sb.from('group_members').update(patch).eq('group_id', gid).eq('user_id', me.id);
+    if (error) throw error;
+    await loadGroups(); renderSelect(); renderSheet(); toast(okMsg);
+  } catch (e) {
+    toast(/dice/.test(e.message || '') ? 'サーバーの追加設定（supabase/09-dice-limit.sql）がまだのようです。Supabase の SQL Editor で実行してください。' : 'ダイスの上限を保存できませんでした：' + jaErr(e));
+  }
+}
+$('select').addEventListener('click', e => {
+  const s = e.target.closest('[data-gdice-save]');
+  if (s) {
+    const gid = s.dataset.gdiceSave, raw = toHalf(($('gd-' + gid) || {}).value || '').trim();
+    if (raw !== '' && !/^\d{1,3}$/.test(raw)) { toast('上限は 0〜999 の数字で入れてください（空欄で上限なし）。'); return; }
+    saveGroupDice(gid, { dice_limit: raw === '' ? null : +raw }, raw === '' ? 'ダイスの上限をなしにしました。' : `ダイスの上限を ${raw} 回にしました。参加している探索者のキャラに反映されます。`);
+    return;
+  }
+  const r = e.target.closest('[data-gdice-reset]');
+  if (r) { if (!arm(r, 'もう一度押すとリセット')) return; saveGroupDice(r.dataset.gdiceReset, { dice_reset: new Date().toISOString() }, 'みんなのダイスの回数をリセットしました。'); }
+});

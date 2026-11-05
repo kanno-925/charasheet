@@ -8,6 +8,7 @@ function onEdit(e) {
   const t = e.target; if (!t.dataset.p) return;
   setPath(active(), t.dataset.p, t.type === 'checkbox' ? t.checked : t.value);
   touch();
+  if (t.dataset.p.startsWith('dice.')) refreshDiceBox();
 }
 const onBoth = (ev, fn) => [$('sheet'), $('panel')].forEach(el => el.addEventListener(ev, fn));
 onBoth('input', e => { if (e.target.type !== 'checkbox' && e.target.tagName !== 'SELECT') onEdit(e); });
@@ -83,7 +84,9 @@ onBoth('click', e => {
     case 'add-scenario': c.scenarios.push({ name: '', date: '', note: '', friends: [] }); focus = pid(`scenarios.${c.scenarios.length - 1}.name`); break;
     case 'roll': {
       const filled = Object.values(c.abilities).some(v => v.base !== '');
+      if (diceInfo(c).left <= 0) { diceSpend(c); return; }
       if (filled && !arm(b, 'もう一度押すと全部振り直し')) return;
+      if (!diceSpend(c)) return;
       const res = SYS[c.system].abil.map(([k, dice, expr, jp]) => { const r = rollDetail(expr); c.abilities[k].base = String(r.total); return { k: jp || k, ...r }; });
       c.hp = ''; c.mp = ''; c.san = '';
       fxAt(b, true);
@@ -92,6 +95,7 @@ onBoth('click', e => {
     }
     case 'roll-one': {
       const def = SYS[c.system].abil.find(([k]) => k === b.dataset.k); if (!def) return;
+      if (!diceSpend(c)) return;
       const r = rollDetail(def[2]);
       c.abilities[def[0]].base = String(r.total);
       if (['CON', 'SIZ'].includes(def[0])) c.hp = '';
@@ -106,6 +110,11 @@ onBoth('click', e => {
       fxAt(b, false);
       diceCardCheck(skillLabel(sk) || '技能', target, c.system);
       return;
+    }
+    case 'dice-reset': {
+      if (!arm(b, 'もう一度押すとリセット')) return;
+      c.dice.used = 0; toast('ダイスを振った回数をリセットしました。');
+      break;
     }
     case 'dup': {
       if (!canAddChar()) return;
