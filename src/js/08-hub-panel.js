@@ -295,7 +295,7 @@ function sectionBody(key, c) {
         : 'EDU×20';
       return `<section class="sec">
         ${bar('左のチェックを入れた技能が職業技能です')}
-        <figure class="chart-fig sk-fig"><figcaption>技能グラフ <span class="legend"><i class="sw sw-init"></i>初期値<i class="sw sw-add"></i>振ったポイント</span></figcaption><div id="sk-chart"></div></figure>
+        <figure class="chart-fig sk-fig"><figcaption>技能グラフ ${SK_LEGEND}</figcaption><div id="sk-chart"></div></figure>
         <div class="points">
           <span class="pt" data-pt="job">職業P（${jobFormula}） 残り <b data-out="jobLeft"></b> / <span data-out="jobPt"></span></span>
           <span class="pt" data-pt="hobby">興味P（INT×${is7 ? 2 : 10}） 残り <b data-out="hobbyLeft"></b> / <span data-out="hobbyPt"></span></span>

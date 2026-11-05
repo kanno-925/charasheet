@@ -372,3 +372,10 @@
 :root[data-look~="aqua"] .sw-add { background: #4ec3f2; border-radius: 50%; box-shadow: 0 0 6px rgb(120 210 255 / .8); }
 :root[data-look~="aqua"] .chart-tip { background: rgb(5 26 64 / .9); color: #fff; border: 1px solid rgb(190 235 255 / .4); border-radius: 12px; box-shadow: 0 0 12px rgb(120 210 255 / .4); text-shadow: var(--aq-glow); }
 @media (prefers-reduced-motion: reduce) { .aq-radar *, :root[data-look~="aqua"] .sk-row, :root[data-look~="aqua"] .sk-tr .seg-a { animation: none !important; } }
+
+/* 技能グラフの内訳の色（泡の模様はそのまま、色だけずらす） */
+:root[data-look~="aqua"] .sk-tr .seg-a { border-radius: 0; }
+:root[data-look~="aqua"] .sk-tr i:last-child { border-radius: 0 99px 99px 0; }
+:root[data-look~="aqua"] .sk-tr .seg-h, :root[data-look~="aqua"] .sw-h { filter: hue-rotate(150deg) saturate(1.3); }
+:root[data-look~="aqua"] .sk-tr .seg-g, :root[data-look~="aqua"] .sw-g { filter: hue-rotate(-70deg) saturate(1.2); }
+:root[data-look~="aqua"] .sw-j, :root[data-look~="aqua"] .sw-h, :root[data-look~="aqua"] .sw-g { background: #4ec3f2; border-radius: 50%; }

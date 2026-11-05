@@ -540,8 +540,8 @@ async function load() {
       if (old) { const s = JSON.parse(old); if (Array.isArray(s.chars)) state.chars = s.chars.filter(x => !x.sample).map(migrateV1); }
     } catch (e) { /* storage unavailable */ }
   }
-  if (!state.chars.length) state.chars = [sample()];
-  if (!state.chars.some(c => c.id === state.activeId)) state.activeId = state.chars[0].id;
+  if (!best && !state.chars.length) state.chars = [sample()];   // 見本は、はじめて開いたときだけ（全部消した人には出さない）
+  if (!state.chars.some(c => c.id === state.activeId)) state.activeId = state.chars.length ? state.chars[0].id : null;
   // 削除したテーマ（深淵・古書・ネオン・森）を使っていた人は、近未来にもどす（そのテーマ用に変えた色も消す）
   if (state.themePreset && !THEME_PRESETS[state.themePreset]) { state.themePreset = 'sky'; state.theme = {}; }
   loaded = true;
@@ -995,7 +995,7 @@ function sectionBody(key, c) {
         : 'EDU×20';
       return `<section class="sec">
         ${bar('左のチェックを入れた技能が職業技能です')}
-        <figure class="chart-fig sk-fig"><figcaption>技能グラフ <span class="legend"><i class="sw sw-init"></i>初期値<i class="sw sw-add"></i>振ったポイント</span></figcaption><div id="sk-chart"></div></figure>
+        <figure class="chart-fig sk-fig"><figcaption>技能グラフ ${SK_LEGEND}</figcaption><div id="sk-chart"></div></figure>
         <div class="points">
           <span class="pt" data-pt="job">職業P（${jobFormula}） 残り <b data-out="jobLeft"></b> / <span data-out="jobPt"></span></span>
           <span class="pt" data-pt="hobby">興味P（INT×${is7 ? 2 : 10}） 残り <b data-out="hobbyLeft"></b> / <span data-out="hobbyPt"></span></span>
@@ -1426,6 +1426,7 @@ function setBookTab(key) {
 
 function renderSheet() {
   const c = active();
+  if (!c) { $('sheet').className = 'sheet'; $('sheet').innerHTML = '<p class="empty no-char">探索者がいません。「＋ 新しい探索者」から作るか、「読み込み」でいあきゃらなどから写してください。</p>'; return; }
   const book = isBook();
   $('sheet').classList.toggle('is-book', book);
   if (book) sfxPreload();
@@ -1605,7 +1606,8 @@ function gotoPanel(key) {
 }
 
 function updateComputed() {
-  const c = active(), d = compute(c), a = d.a;
+  const c = active(); if (!c) return;
+  const d = compute(c), a = d.a;
   const o = {
     hpMax: d.hpMax, mpMax: d.mpMax, sanMax: d.sanMax, sanStart: d.sanStart, indef: d.indef,
     idea: d.idea, luck: d.luck, know: d.know, db: d.db, build: d.build, mov: d.mov,
@@ -1654,6 +1656,7 @@ function ringHtml(s) {
   </div>`;
 }
 function renderOutput() {
+  if (!active()) return;
   const c = active(), json = toCcfolia(c), d = json.data;
   const h = `${tokenHtml(c)}<div style="min-width:0"><div class="koma-name">${esc(d.name)}</div><div class="koma-sub">イニシアティブ ${esc(d.initiative)}（DEX）</div></div>`;
   if (h !== headHtml) { $('koma-head').innerHTML = h; headHtml = h; }
@@ -1714,7 +1717,7 @@ document.addEventListener('pointerdown', e => { if (e.button === 0) fx(e.clientX
 
 function renderAll() { applyBg(); if (!$('select').hidden) renderSelect(); $('copy-status').textContent = ''; renderShelf(); renderSheet(); renderOutput(); enter($('sheet')); enter(document.querySelector('.koma')); }
 function touch() {
-  const c = active(); c.updatedAt = Date.now(); delete c.sample;
+  const c = active(); if (!c) return; c.updatedAt = Date.now(); delete c.sample;
   save(); renderShelf(); renderOutput(); updateComputed();
   const tk = document.querySelector('.hub-core .token, .bk-portrait .token');
   if (tk) tk.outerHTML = tokenHtml(c);
@@ -1842,9 +1845,11 @@ onBoth('click', e => {
       if (c.bgm?.src === 'idb') AudioDB.del(c.id).catch(() => {});
       if (bgmFor === c.id) stopBgm();
       state.chars = state.chars.filter(x => x.id !== c.id);
-      if (!state.chars.length) state.chars.push(blank('coc6'));
-      state.activeId = state.chars[0].id;
-      save(); renderAll(); return;
+      state.activeId = state.chars.length ? state.chars[0].id : null;
+      unsetGroupChar(c.id);
+      save(); renderAll();
+      if (!state.chars.length) { selTab = 'mine'; showSelect(); toast('探索者をすべて削除しました。「＋ 新しい探索者」から作れます。'); }
+      return;
     }
     default: return;
   }
@@ -2074,7 +2079,7 @@ let bgSlot = 'all';
 const bgGet = slot => slot === 'sel' ? state.selBgImage : slot === 'char' ? (active() || {}).bgImage : state.bgImage;
 function bgSet(slot, v) {
   if (slot === 'sel') state.selBgImage = v;
-  else if (slot === 'char') { const c = active(); c.bgImage = v; c.updatedAt = Date.now(); }
+  else if (slot === 'char') { const c = active(); if (!c) return; c.bgImage = v; c.updatedAt = Date.now(); }
   else state.bgImage = v;
 }
 function renderBgControls() {
@@ -2496,16 +2501,24 @@ function radarSvg(c, a, size, animate) {
   return `<svg class="radar-svg${animate ? ' grow' : ''}" viewBox="0 0 ${size} ${size}" role="img" aria-label="能力値チャート：${keys.map(k => `${k} ${a[k] || 0}`).join('、')}" style="--cx:${cx}px;--cy:${cy}px">
     ${grid}${axes}<g class="rshape"><polygon class="rarea" points="${pts.map(p => p.map(v => v.toFixed(1)).join(',')).join(' ')}"/>${dots}</g>${labels}</svg>`;
 }
+/* 技能グラフの色の見本 */
+const SK_LEGEND = '<span class="legend"><i class="sw sw-init"></i>初期値<i class="sw sw-j"></i>職業P<i class="sw sw-h"></i>興味P<i class="sw sw-g"></i>成長・その他</span>';
 function skillBarsHtml(c, a, animate) {
   const list = c.skills.filter(s => s.name && skillTotal(s, a) !== skillInit(s, a))
-    .map(s => ({ n: skillLabel(s), t: skillTotal(s, a), i: Math.min(skillInit(s, a), skillTotal(s, a)) }))
+    .map(s => {
+      const t = skillTotal(s, a), i = Math.max(0, Math.min(skillInit(s, a), t));
+      // 振ったポイントを 職業P・興味P・成長とその他 に分ける（足して合計をこえないように順に切りつめる）
+      let left = t - i; const j = Math.max(0, Math.min(num(s.job), left)); left -= j;
+      const h = Math.max(0, Math.min(num(s.hobby), left)); left -= h;
+      return { n: skillLabel(s), t, i, j, h, g: Math.max(0, left) };
+    })
     .sort((x, y) => y.t - x.t).slice(0, 16);
   if (!list.length) return '<p class="empty">ポイントを振ると、ここに技能のグラフが出ます。</p>';
   const max = Math.max(100, ...list.map(x => x.t));
   return `<div class="sk-bars${animate ? ' grow' : ''}">${list.map((x, k) => `
-    <div class="sk-row" style="--k:${k}" data-tip="${esc(x.n)}　初期値 ${x.i} ＋ 振ったポイント ${x.t - x.i} ＝ ${x.t}">
+    <div class="sk-row" style="--k:${k}" data-tip="${esc(x.n)}　初期値 ${x.i}${x.j ? ` ＋ 職業P ${x.j}` : ''}${x.h ? ` ＋ 興味P ${x.h}` : ''}${x.g ? ` ＋ 成長・その他 ${x.g}` : ''} ＝ ${x.t}">
       <span class="sk-n">${esc(x.n)}</span>
-      <span class="sk-tr"><i class="seg-i" style="width:${(x.i / max * 100).toFixed(2)}%"></i><i class="seg-a" style="width:${((x.t - x.i) / max * 100).toFixed(2)}%"></i></span>
+      <span class="sk-tr">${[['seg-i', x.i], ['seg-a seg-j', x.j], ['seg-a seg-h', x.h], ['seg-a seg-g', x.g]].filter(([, v]) => v > 0).map(([cl, v]) => `<i class="${cl}" style="width:${(v / max * 100).toFixed(2)}%"></i>`).join('')}</span>
       <b class="sk-v">${x.t}</b>
     </div>`).join('')}
     <div class="sk-row sk-axisrow" aria-hidden="true"><span></span><span class="sk-axis">${[0, 25, 50, 75, 100].filter(v => v <= max).map(v => `<span style="left:${(v / max * 100).toFixed(2)}%">${v}</span>`).join('')}</span><span></span></div>
@@ -2978,7 +2991,7 @@ async function pullAndMerge() {
   });
   const real = state.chars.filter(c => !c.sample);
   if (real.length && state.chars.some(c => c.sample)) state.chars = real;
-  if (!state.chars.some(c => c.id === state.activeId)) state.activeId = state.chars[0].id;
+  if (!state.chars.some(c => c.id === state.activeId)) state.activeId = state.chars.length ? state.chars[0].id : null;
   saveNow();
   renderAll();
   await flushSync();
@@ -3046,8 +3059,7 @@ async function logout() {
   if (uid) {
     state.chars = state.chars.filter(c => c.owner !== uid);
     state.friends = friendsOf().filter(f => !f.uid);
-    if (!state.chars.length) state.chars = [sample()];
-    state.activeId = state.chars[0].id;
+    state.activeId = state.chars.length ? state.chars[0].id : null;
   }
   me = null; online = null; lastSynced.clear(); G.list = []; G.err = ''; acctTab = 'login';
   saveNow(); setSync('off'); renderAll(); renderAccount();
@@ -3335,7 +3347,7 @@ function sheetViewHtml(c) {
         ${c.system === 'coc7' ? `<div class="dv"><span class="lbl">ビルド</span><span class="val">${d.build}</span></div><div class="dv"><span class="lbl">MOV</span><span class="val">${d.mov}</span></div>` : ''}
       </div>
     </div>
-    <figure class="chart-fig"><figcaption>技能グラフ <span class="legend"><i class="sw sw-init"></i>初期値<i class="sw sw-add"></i>振ったポイント</span></figcaption>${skillBarsHtml(c, a, true)}</figure>
+    <figure class="chart-fig"><figcaption>技能グラフ ${SK_LEGEND}</figcaption>${skillBarsHtml(c, a, true)}</figure>
     ${list(c.weapons || [], w => `<div class="sv-item"><b>${esc(w.name)}</b><span>成功率 ${esc(w.rate || '—')} ・ ダメージ ${esc(w.damage || '—')}${w.range ? ' ・ 射程 ' + esc(w.range) : ''}</span></div>`) ? `<div class="sv-sec"><h4>武器</h4>${list(c.weapons || [], w => `<div class="sv-item"><b>${esc(w.name)}</b><span>成功率 ${esc(w.rate || '—')} ・ ダメージ ${esc(w.damage || '—')}${w.range ? ' ・ 射程 ' + esc(w.range) : ''}</span></div>`)}</div>` : ''}
     ${list(c.items || [], it => `<span class="sv-chip">${esc(it.name)}${it.count ? ' ×' + esc(it.count) : ''}</span>`) ? `<div class="sv-sec"><h4>所持品</h4><div class="sv-chips">${list(c.items || [], it => `<span class="sv-chip">${esc(it.name)}${it.count ? ' ×' + esc(it.count) : ''}</span>`)}</div></div>` : ''}
     ${list(c.scenarios || [], sc => `<span class="sv-chip">「${esc(sc.name)}」${sc.date ? ' ' + esc(sc.date) : ''}</span>`) ? `<div class="sv-sec"><h4>通過シナリオ</h4><div class="sv-chips">${list(c.scenarios || [], sc => `<span class="sv-chip">「${esc(sc.name)}」${sc.date ? ' ' + esc(sc.date) : ''}</span>`)}</div></div>` : ''}
@@ -3965,6 +3977,16 @@ function openMemberChar(user, charId) {
     if (idx >= 0) document.querySelector(`#fview-body [data-fv="${idx}"]`)?.click();
     else toast('このキャラシは非公開か、見つかりませんでした。');
   });
+}
+
+/* 探索者を消したとき、その探索者を使っているグループの参加情報を「未設定」にもどす */
+async function unsetGroupChar(charId) {
+  (G.list || []).forEach(g => (g.members || []).forEach(m => { if (me && m.user_id === me.id && m.char_id === charId) { m.char_id = null; m.char_name = null; } }));
+  if (!sbClient() || !me) return;
+  try {
+    const { error } = await sb.from('group_members').update({ char_id: null, char_name: null }).eq('user_id', me.id).eq('char_id', charId);
+    if (error) throw error;
+  } catch (e) { console.warn('group char unset failed', e); }
 }
 
 /* ================= 探索者をえらぶ画面 ================= */

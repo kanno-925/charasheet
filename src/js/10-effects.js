@@ -29,7 +29,7 @@ document.addEventListener('pointerdown', e => { if (e.button === 0) fx(e.clientX
 
 function renderAll() { applyBg(); if (!$('select').hidden) renderSelect(); $('copy-status').textContent = ''; renderShelf(); renderSheet(); renderOutput(); enter($('sheet')); enter(document.querySelector('.koma')); }
 function touch() {
-  const c = active(); c.updatedAt = Date.now(); delete c.sample;
+  const c = active(); if (!c) return; c.updatedAt = Date.now(); delete c.sample;
   save(); renderShelf(); renderOutput(); updateComputed();
   const tk = document.querySelector('.hub-core .token, .bk-portrait .token');
   if (tk) tk.outerHTML = tokenHtml(c);

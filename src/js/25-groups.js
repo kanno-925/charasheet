@@ -298,3 +298,13 @@ function openMemberChar(user, charId) {
     else toast('このキャラシは非公開か、見つかりませんでした。');
   });
 }
+
+/* 探索者を消したとき、その探索者を使っているグループの参加情報を「未設定」にもどす */
+async function unsetGroupChar(charId) {
+  (G.list || []).forEach(g => (g.members || []).forEach(m => { if (me && m.user_id === me.id && m.char_id === charId) { m.char_id = null; m.char_name = null; } }));
+  if (!sbClient() || !me) return;
+  try {
+    const { error } = await sb.from('group_members').update({ char_id: null, char_name: null }).eq('user_id', me.id).eq('char_id', charId);
+    if (error) throw error;
+  } catch (e) { console.warn('group char unset failed', e); }
+}

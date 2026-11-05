@@ -120,9 +120,11 @@ onBoth('click', e => {
       if (c.bgm?.src === 'idb') AudioDB.del(c.id).catch(() => {});
       if (bgmFor === c.id) stopBgm();
       state.chars = state.chars.filter(x => x.id !== c.id);
-      if (!state.chars.length) state.chars.push(blank('coc6'));
-      state.activeId = state.chars[0].id;
-      save(); renderAll(); return;
+      state.activeId = state.chars.length ? state.chars[0].id : null;
+      unsetGroupChar(c.id);
+      save(); renderAll();
+      if (!state.chars.length) { selTab = 'mine'; showSelect(); toast('探索者をすべて削除しました。「＋ 新しい探索者」から作れます。'); }
+      return;
     }
     default: return;
   }

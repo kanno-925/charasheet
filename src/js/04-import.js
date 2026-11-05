@@ -383,8 +383,8 @@ async function load() {
       if (old) { const s = JSON.parse(old); if (Array.isArray(s.chars)) state.chars = s.chars.filter(x => !x.sample).map(migrateV1); }
     } catch (e) { /* storage unavailable */ }
   }
-  if (!state.chars.length) state.chars = [sample()];
-  if (!state.chars.some(c => c.id === state.activeId)) state.activeId = state.chars[0].id;
+  if (!best && !state.chars.length) state.chars = [sample()];   // 見本は、はじめて開いたときだけ（全部消した人には出さない）
+  if (!state.chars.some(c => c.id === state.activeId)) state.activeId = state.chars.length ? state.chars[0].id : null;
   // 削除したテーマ（深淵・古書・ネオン・森）を使っていた人は、近未来にもどす（そのテーマ用に変えた色も消す）
   if (state.themePreset && !THEME_PRESETS[state.themePreset]) { state.themePreset = 'sky'; state.theme = {}; }
   loaded = true;

@@ -56,7 +56,7 @@ let bgSlot = 'all';
 const bgGet = slot => slot === 'sel' ? state.selBgImage : slot === 'char' ? (active() || {}).bgImage : state.bgImage;
 function bgSet(slot, v) {
   if (slot === 'sel') state.selBgImage = v;
-  else if (slot === 'char') { const c = active(); c.bgImage = v; c.updatedAt = Date.now(); }
+  else if (slot === 'char') { const c = active(); if (!c) return; c.bgImage = v; c.updatedAt = Date.now(); }
   else state.bgImage = v;
 }
 function renderBgControls() {

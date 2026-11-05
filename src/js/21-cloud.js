@@ -115,7 +115,7 @@ async function pullAndMerge() {
   });
   const real = state.chars.filter(c => !c.sample);
   if (real.length && state.chars.some(c => c.sample)) state.chars = real;
-  if (!state.chars.some(c => c.id === state.activeId)) state.activeId = state.chars[0].id;
+  if (!state.chars.some(c => c.id === state.activeId)) state.activeId = state.chars.length ? state.chars[0].id : null;
   saveNow();
   renderAll();
   await flushSync();
@@ -183,8 +183,7 @@ async function logout() {
   if (uid) {
     state.chars = state.chars.filter(c => c.owner !== uid);
     state.friends = friendsOf().filter(f => !f.uid);
-    if (!state.chars.length) state.chars = [sample()];
-    state.activeId = state.chars[0].id;
+    state.activeId = state.chars.length ? state.chars[0].id : null;
   }
   me = null; online = null; lastSynced.clear(); G.list = []; G.err = ''; acctTab = 'login';
   saveNow(); setSync('off'); renderAll(); renderAccount();
@@ -472,7 +471,7 @@ function sheetViewHtml(c) {
         ${c.system === 'coc7' ? `<div class="dv"><span class="lbl">ビルド</span><span class="val">${d.build}</span></div><div class="dv"><span class="lbl">MOV</span><span class="val">${d.mov}</span></div>` : ''}
       </div>
     </div>
-    <figure class="chart-fig"><figcaption>技能グラフ <span class="legend"><i class="sw sw-init"></i>初期値<i class="sw sw-add"></i>振ったポイント</span></figcaption>${skillBarsHtml(c, a, true)}</figure>
+    <figure class="chart-fig"><figcaption>技能グラフ ${SK_LEGEND}</figcaption>${skillBarsHtml(c, a, true)}</figure>
     ${list(c.weapons || [], w => `<div class="sv-item"><b>${esc(w.name)}</b><span>成功率 ${esc(w.rate || '—')} ・ ダメージ ${esc(w.damage || '—')}${w.range ? ' ・ 射程 ' + esc(w.range) : ''}</span></div>`) ? `<div class="sv-sec"><h4>武器</h4>${list(c.weapons || [], w => `<div class="sv-item"><b>${esc(w.name)}</b><span>成功率 ${esc(w.rate || '—')} ・ ダメージ ${esc(w.damage || '—')}${w.range ? ' ・ 射程 ' + esc(w.range) : ''}</span></div>`)}</div>` : ''}
     ${list(c.items || [], it => `<span class="sv-chip">${esc(it.name)}${it.count ? ' ×' + esc(it.count) : ''}</span>`) ? `<div class="sv-sec"><h4>所持品</h4><div class="sv-chips">${list(c.items || [], it => `<span class="sv-chip">${esc(it.name)}${it.count ? ' ×' + esc(it.count) : ''}</span>`)}</div></div>` : ''}
     ${list(c.scenarios || [], sc => `<span class="sv-chip">「${esc(sc.name)}」${sc.date ? ' ' + esc(sc.date) : ''}</span>`) ? `<div class="sv-sec"><h4>通過シナリオ</h4><div class="sv-chips">${list(c.scenarios || [], sc => `<span class="sv-chip">「${esc(sc.name)}」${sc.date ? ' ' + esc(sc.date) : ''}</span>`)}</div></div>` : ''}

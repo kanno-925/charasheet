@@ -375,6 +375,7 @@ function setBookTab(key) {
 
 function renderSheet() {
   const c = active();
+  if (!c) { $('sheet').className = 'sheet'; $('sheet').innerHTML = '<p class="empty no-char">探索者がいません。「＋ 新しい探索者」から作るか、「読み込み」でいあきゃらなどから写してください。</p>'; return; }
   const book = isBook();
   $('sheet').classList.toggle('is-book', book);
   if (book) sfxPreload();
@@ -554,7 +555,8 @@ function gotoPanel(key) {
 }
 
 function updateComputed() {
-  const c = active(), d = compute(c), a = d.a;
+  const c = active(); if (!c) return;
+  const d = compute(c), a = d.a;
   const o = {
     hpMax: d.hpMax, mpMax: d.mpMax, sanMax: d.sanMax, sanStart: d.sanStart, indef: d.indef,
     idea: d.idea, luck: d.luck, know: d.know, db: d.db, build: d.build, mov: d.mov,
@@ -603,6 +605,7 @@ function ringHtml(s) {
   </div>`;
 }
 function renderOutput() {
+  if (!active()) return;
   const c = active(), json = toCcfolia(c), d = json.data;
   const h = `${tokenHtml(c)}<div style="min-width:0"><div class="koma-name">${esc(d.name)}</div><div class="koma-sub">イニシアティブ ${esc(d.initiative)}（DEX）</div></div>`;
   if (h !== headHtml) { $('koma-head').innerHTML = h; headHtml = h; }

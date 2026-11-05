@@ -40,3 +40,12 @@
 @keyframes bars-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .chart-tip { position: fixed; z-index: 130; pointer-events: none; background: var(--ink); color: var(--solid); font-size: 12px; padding: 5px 10px; border-radius: 8px; box-shadow: var(--shadow); white-space: nowrap; font-family: var(--f-body); }
 @media (max-width: 560px) { .sk-row { grid-template-columns: minmax(5em, 7.5em) minmax(0, 1fr) 2.2em; gap: 6px; } }
+
+/* 振ったポイントの内訳：職業P・興味P・成長とその他で色を分ける */
+:root { --seg-j: var(--sky); --seg-h: var(--orange, #f08a24); --seg-g: var(--lime, #3fb56b); }
+.sw-j, .sk-tr .seg-j { background: var(--seg-j); }
+.sw-h, .sk-tr .seg-h { background: var(--seg-h); }
+.sw-g, .sk-tr .seg-g { background: var(--seg-g); }
+.sk-tr .seg-a { border-radius: 0; }
+.sk-tr i:last-child { border-radius: 0 4px 4px 0; }
+.legend { flex-wrap: wrap; }

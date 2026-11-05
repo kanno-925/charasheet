@@ -19,16 +19,24 @@ function radarSvg(c, a, size, animate) {
   return `<svg class="radar-svg${animate ? ' grow' : ''}" viewBox="0 0 ${size} ${size}" role="img" aria-label="能力値チャート：${keys.map(k => `${k} ${a[k] || 0}`).join('、')}" style="--cx:${cx}px;--cy:${cy}px">
     ${grid}${axes}<g class="rshape"><polygon class="rarea" points="${pts.map(p => p.map(v => v.toFixed(1)).join(',')).join(' ')}"/>${dots}</g>${labels}</svg>`;
 }
+/* 技能グラフの色の見本 */
+const SK_LEGEND = '<span class="legend"><i class="sw sw-init"></i>初期値<i class="sw sw-j"></i>職業P<i class="sw sw-h"></i>興味P<i class="sw sw-g"></i>成長・その他</span>';
 function skillBarsHtml(c, a, animate) {
   const list = c.skills.filter(s => s.name && skillTotal(s, a) !== skillInit(s, a))
-    .map(s => ({ n: skillLabel(s), t: skillTotal(s, a), i: Math.min(skillInit(s, a), skillTotal(s, a)) }))
+    .map(s => {
+      const t = skillTotal(s, a), i = Math.max(0, Math.min(skillInit(s, a), t));
+      // 振ったポイントを 職業P・興味P・成長とその他 に分ける（足して合計をこえないように順に切りつめる）
+      let left = t - i; const j = Math.max(0, Math.min(num(s.job), left)); left -= j;
+      const h = Math.max(0, Math.min(num(s.hobby), left)); left -= h;
+      return { n: skillLabel(s), t, i, j, h, g: Math.max(0, left) };
+    })
     .sort((x, y) => y.t - x.t).slice(0, 16);
   if (!list.length) return '<p class="empty">ポイントを振ると、ここに技能のグラフが出ます。</p>';
   const max = Math.max(100, ...list.map(x => x.t));
   return `<div class="sk-bars${animate ? ' grow' : ''}">${list.map((x, k) => `
-    <div class="sk-row" style="--k:${k}" data-tip="${esc(x.n)}　初期値 ${x.i} ＋ 振ったポイント ${x.t - x.i} ＝ ${x.t}">
+    <div class="sk-row" style="--k:${k}" data-tip="${esc(x.n)}　初期値 ${x.i}${x.j ? ` ＋ 職業P ${x.j}` : ''}${x.h ? ` ＋ 興味P ${x.h}` : ''}${x.g ? ` ＋ 成長・その他 ${x.g}` : ''} ＝ ${x.t}">
       <span class="sk-n">${esc(x.n)}</span>
-      <span class="sk-tr"><i class="seg-i" style="width:${(x.i / max * 100).toFixed(2)}%"></i><i class="seg-a" style="width:${((x.t - x.i) / max * 100).toFixed(2)}%"></i></span>
+      <span class="sk-tr">${[['seg-i', x.i], ['seg-a seg-j', x.j], ['seg-a seg-h', x.h], ['seg-a seg-g', x.g]].filter(([, v]) => v > 0).map(([cl, v]) => `<i class="${cl}" style="width:${(v / max * 100).toFixed(2)}%"></i>`).join('')}</span>
       <b class="sk-v">${x.t}</b>
     </div>`).join('')}
     <div class="sk-row sk-axisrow" aria-hidden="true"><span></span><span class="sk-axis">${[0, 25, 50, 75, 100].filter(v => v <= max).map(v => `<span style="left:${(v / max * 100).toFixed(2)}%">${v}</span>`).join('')}</span><span></span></div>
