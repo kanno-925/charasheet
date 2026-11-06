@@ -12,6 +12,7 @@ src/ にあるソース（index.html・css/・js/）を組み立てて、次の3
 ファイルをまたいで同じ変数・関数を使えます（順番は大事です）。
 """
 import base64
+import json
 import re
 from pathlib import Path
 
@@ -29,7 +30,15 @@ head, markup = head.strip(), markup.strip()
 META = '''<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="クトゥルフ神話TRPGのキャラクターシートを作って、ココフォリアのコマにそのまま貼り付けられるツール">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2217%22 fill=%22none%22 stroke=%22%231f6fe0%22 stroke-width=%223%22/%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%229%22 fill=%22%2312a6cf%22/%3E%3Ccircle cx=%2234%22 cy=%2211%22 r=%224%22 fill=%22%23ff8a1f%22/%3E%3C/svg%3E">'''
+<meta name="theme-color" content="#12133a">
+<meta name="apple-mobile-web-app-title" content="ORBIS">
+<meta name="application-name" content="ORBIS">
+{ICONS}'''
+# アプリのアイコン（ブラウザのタブ・スマホのホーム画面）。画像は assets/brand/
+ICONS_SITE = '''<link rel="icon" type="image/png" sizes="64x64" href="assets/brand/favicon-64.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/brand/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/brand/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">'''
 RESET = '''<style>
 html { color-scheme: light; }
 body { margin: 0; }
@@ -38,11 +47,11 @@ img { max-width: 100%; }
 </style>'''
 
 
-def page(css_part, js_part):
+def page(css_part, js_part, icons=ICONS_SITE):
     return f"""<!doctype html>
 <html lang="ja">
 <head>
-{META}
+{META.replace('{ICONS}', icons)}
 {head}
 {RESET}
 {css_part}
@@ -63,6 +72,14 @@ site = ROOT
 (site / 'js' / 'app.js').write_text(js, encoding='utf-8')
 (site / 'index.html').write_text(page('<link rel="stylesheet" href="css/app.css">', '<script src="js/app.js"></script>'), encoding='utf-8')
 
+# スマホの「ホーム画面に追加」で使う、アプリの名前とアイコン
+(site / 'manifest.webmanifest').write_text(json.dumps({
+    'name': 'ORBIS｜キャラシ工房', 'short_name': 'ORBIS', 'description': 'クトゥルフ神話TRPGのキャラクターシート',
+    'start_url': './', 'scope': './', 'display': 'browser', 'background_color': '#12133a', 'theme_color': '#12133a',
+    'icons': [{'src': 'assets/brand/icon-192.png', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any maskable'},
+              {'src': 'assets/brand/icon-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'any maskable'}],
+}, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
 # single-file versions
 dist = ROOT / 'dist'
 dist.mkdir(exist_ok=True)
@@ -80,7 +97,8 @@ def data_uri(name):
 css1 = re.sub(r'\.\./assets/([\w./-]+)', lambda m: data_uri(m.group(1)), css)
 js1 = re.sub(r'(?<=[\'"])assets/([\w./-]+)(?=[\'"])', lambda m: data_uri(m.group(1)), js)
 inline_css, inline_js = f'<style>\n{css1}</style>', f'<script>\n{js1}</script>'
-(dist / 'キャラシ工房.html').write_text(page(inline_css, inline_js), encoding='utf-8')
-(dist / 'claude-artifact.html').write_text(f'{head}\n{inline_css}\n\n{markup}\n{inline_js}\n', encoding='utf-8')
+icons1 = f'<link rel="icon" type="image/png" href="{data_uri("brand/favicon-64.png")}">\n<link rel="apple-touch-icon" href="{data_uri("brand/apple-touch-icon.png")}">'
+(dist / 'キャラシ工房.html').write_text(page(inline_css, inline_js, icons1), encoding='utf-8')
+(dist / 'claude-artifact.html').write_text(f'{head}\n{icons1}\n{inline_css}\n\n{markup}\n{inline_js}\n', encoding='utf-8')
 
 print(f'built: index.html ({len(css) // 1024}KB css, {len(js) // 1024}KB js), dist/キャラシ工房.html, dist/claude-artifact.html')
