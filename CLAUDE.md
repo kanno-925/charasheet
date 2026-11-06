@@ -1,4 +1,4 @@
-# キャラシ工房 — Claude向けメモ
+# ORBiS（旧：キャラシ工房）— Claude向けメモ
 
 クトゥルフ神話TRPG（6版・7版）のキャラシを作り、ココフォリアのコマに貼り付けられるWebアプリ。
 公開URL：https://kanno-925.github.io/charasheet/ （GitHub Pages、main に push すると反映）
@@ -8,7 +8,7 @@
 - 編集するのは `src/` だけ。直下の `index.html` / `css/app.css` / `js/app.js` と `dist/` は `python3 build.py` が作る生成物なので**直接編集しない**。
 - 変更したら必ず `python3 build.py` を実行し、生成物もいっしょに commit する（しないと公開版に反映されない）。
 - 外部ライブラリやビルドツール（npm 等）は増やさない。素のHTML/CSS/JS + build.py の構成を保つ。
-- 1ファイル版（`dist/キャラシ工房.html`）はダブルクリックで動く必要がある。画像・音は `assets/テーマ名/`（魔導書は `book/`、和風は `wa/`、アクアリウムは `aqua/`、アプリのロゴ・アイコンは `brand/`。新しいテーマならフォルダを足す）に置き、CSSでは `../assets/book/名前`、JSでは `'assets/book/名前'` の形で書く（build.py がこの形だけを埋め込む。ファイルが無いとビルドが止まる）。
+- 1ファイル版（`dist/ORBiS.html`）はダブルクリックで動く必要がある。画像・音は `assets/テーマ名/`（魔導書は `book/`、和風は `wa/`、アクアリウムは `aqua/`、アプリのロゴ・アイコンは `brand/`。新しいテーマならフォルダを足す）に置き、CSSでは `../assets/book/名前`、JSでは `'assets/book/名前'` の形で書く（build.py がこの形だけを埋め込む。ファイルが無いとビルドが止まる）。
 - 作業の最後に、決まったこと・新機能を `docs/history.md` に1〜2行で追記する。
 
 ## 仕組み

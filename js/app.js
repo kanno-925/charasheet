@@ -2800,7 +2800,7 @@ function playedWith(c) {
   (c.scenarios || []).forEach(sc => (sc.friends || []).forEach(id => count.set(id, (count.get(id) || 0) + 1)));
   return friendsOf().filter(f => count.has(f.id)).map(f => ({ f, n: count.get(f.id) })).sort((x, y) => y.n - x.n);
 }
-/* フレンドの丸：キャラシ工房のフレンドでアイコン画像があれば画像、なければ名前の1文字目 */
+/* フレンドの丸：ORBiS のフレンドでアイコン画像があれば画像、なければ名前の1文字目 */
 const fInit = f => (f.uid && avImg(f.uid)) || esc((f.name || '？').charAt(0));
 const fchip = (f, attrs, on) => `<button type="button" class="fchip ${on ? 'on' : ''}" style="--fc:${esc(f.color)}" ${attrs}><span class="fdot">${fInit(f)}</span>${esc(f.name)}</button>`;
 function scenariosHtml(c) {
@@ -2836,7 +2836,7 @@ function renderFriends() {
   $('friend-list').innerHTML = list.length ? list.map(f => {
     const st = friendStats(f.id);
     return `<div class="friend" data-fid="${f.id}">
-      <span class="fav" style="--fc:${esc(f.color)}">${fInit(f)}${f.uid ? '<i class="ol-badge" title="キャラシ工房のフレンド"></i>' : ''}</span>
+      <span class="fav" style="--fc:${esc(f.color)}">${fInit(f)}${f.uid ? '<i class="ol-badge" title="ORBiS のフレンド"></i>' : ''}</span>
       <div class="fbody">
         <div class="frow">
           <input class="inp" id="fr-name-${f.id}" data-fp="name" value="${esc(f.name)}" aria-label="フレンドの名前">
@@ -3025,8 +3025,11 @@ async function loadFriendships() {
   let added = false;
   online.friends.forEach(u => {
     const ex = friendsOf().find(f => f.uid === u.id);
-    if (ex) { if (ex.name !== u.username && u.username !== '（退会したユーザー）') { ex.name = u.username; added = true; } }
-    else { friendsOf().push({ id: 'u-' + u.id, uid: u.id, name: u.username, color: FC[friendsOf().length % FC.length], note: 'キャラシ工房のフレンド' }); added = true; }
+    if (ex) {
+      if (ex.name !== u.username && u.username !== '（退会したユーザー）') { ex.name = u.username; added = true; }
+      if (ex.note === 'キャラシ工房のフレンド') { ex.note = 'ORBiS のフレンド'; added = true; } // 前の名前のメモを新しい名前に
+    }
+    else { friendsOf().push({ id: 'u-' + u.id, uid: u.id, name: u.username, color: FC[friendsOf().length % FC.length], note: 'ORBiS のフレンド' }); added = true; }
   });
   if (added) { save(); renderSheet(); }
   renderAccountBtn(); renderGroupBadge();
@@ -3300,7 +3303,7 @@ $('online-friends').addEventListener('click', async e => {
       const r = await sb.from('friendships').delete().or(pairFilter(me.id, uid));
       if (r.error) throw r.error;
       if (b.dataset.ol === 'unfriend') {
-        state.friends = friendsOf().map(f => f.uid === uid ? Object.assign({}, f, { uid: undefined, note: f.note === 'キャラシ工房のフレンド' ? '' : f.note }) : f);
+        state.friends = friendsOf().map(f => f.uid === uid ? Object.assign({}, f, { uid: undefined, note: ['キャラシ工房のフレンド', 'ORBiS のフレンド'].includes(f.note) ? '' : f.note }) : f);
         save();
       }
     }

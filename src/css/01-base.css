@@ -272,7 +272,7 @@ pre.code { margin: 0; padding: 12px 18px; background: var(--code-bg); border-top
 .sample-tag { font-size: 11px; color: var(--orange); border: 1px dashed var(--orange); border-radius: 999px; padding: 0 8px; }
 .new-count { margin: 10px 0 0; font-size: 12px; color: var(--muted); text-align: right; }
 .sheet > .no-char { padding: 60px 20px; text-align: center; font-size: 15px; }
-/* ORBIS のロゴとアイコン（assets/brand/）。明るいテーマは濃い色、暗いテーマは光る色のロゴ */
+/* ORBiS のロゴとアイコン（assets/brand/）。明るいテーマは濃い色、暗いテーマは光る色のロゴ */
 .brand-mark { display: block; border-radius: 22%; background: url("../assets/brand/icon-192.png") center / cover no-repeat; box-shadow: 0 4px 12px -4px rgb(20 20 60 / .55), inset 0 0 0 1px rgb(230 210 175 / .5); }
 .brand h1 { line-height: 0; }
 .brand-logo { display: block; width: 104px; aspect-ratio: 420 / 218; background: url("../assets/brand/logo-dark.webp") left center / contain no-repeat; }

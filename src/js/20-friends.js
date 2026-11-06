@@ -5,7 +5,7 @@ function playedWith(c) {
   (c.scenarios || []).forEach(sc => (sc.friends || []).forEach(id => count.set(id, (count.get(id) || 0) + 1)));
   return friendsOf().filter(f => count.has(f.id)).map(f => ({ f, n: count.get(f.id) })).sort((x, y) => y.n - x.n);
 }
-/* フレンドの丸：キャラシ工房のフレンドでアイコン画像があれば画像、なければ名前の1文字目 */
+/* フレンドの丸：ORBiS のフレンドでアイコン画像があれば画像、なければ名前の1文字目 */
 const fInit = f => (f.uid && avImg(f.uid)) || esc((f.name || '？').charAt(0));
 const fchip = (f, attrs, on) => `<button type="button" class="fchip ${on ? 'on' : ''}" style="--fc:${esc(f.color)}" ${attrs}><span class="fdot">${fInit(f)}</span>${esc(f.name)}</button>`;
 function scenariosHtml(c) {
@@ -41,7 +41,7 @@ function renderFriends() {
   $('friend-list').innerHTML = list.length ? list.map(f => {
     const st = friendStats(f.id);
     return `<div class="friend" data-fid="${f.id}">
-      <span class="fav" style="--fc:${esc(f.color)}">${fInit(f)}${f.uid ? '<i class="ol-badge" title="キャラシ工房のフレンド"></i>' : ''}</span>
+      <span class="fav" style="--fc:${esc(f.color)}">${fInit(f)}${f.uid ? '<i class="ol-badge" title="ORBiS のフレンド"></i>' : ''}</span>
       <div class="fbody">
         <div class="frow">
           <input class="inp" id="fr-name-${f.id}" data-fp="name" value="${esc(f.name)}" aria-label="フレンドの名前">

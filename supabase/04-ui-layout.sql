@@ -1,5 +1,5 @@
 -- ============================================================
--- キャラシ工房：画面の編集モード（マスターだけが編集でき、全員がその画面を見る）用の設定
+-- ORBiS：画面の編集モード（マスターだけが編集でき、全員がその画面を見る）用の設定
 -- Supabase の「SQL Editor」にこのファイルの中身を全部貼り付けて「Run」を押してください。
 -- 何度実行しても大丈夫です。（01-setup.sql を実行済みであることが前提です）
 -- ============================================================
@@ -40,7 +40,7 @@ create policy "layout update admin" on public.ui_layout for update to authentica
 insert into public.ui_layout (id) values ('main') on conflict (id) do nothing;
 
 -- ===== マスターの登録 =====
--- 下の「ここにユーザー名」を、キャラシ工房での自分のユーザー名に書き換えてから実行してください（$$ は消さない）。
+-- 下の「ここにユーザー名」を、ORBiS での自分のユーザー名に書き換えてから実行してください（$$ は消さない）。
 -- （書き換えずに実行しても何も起きないので大丈夫です）
 insert into public.app_admins (user_id)
   select id from public.profiles where lower(username) = lower($$ここにユーザー名$$)

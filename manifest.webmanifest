@@ -1,6 +1,6 @@
 {
-  "name": "ORBIS｜キャラシ工房",
-  "short_name": "ORBIS",
+  "name": "ORBiS",
+  "short_name": "ORBiS",
   "description": "クトゥルフ神話TRPGのキャラクターシート",
   "start_url": "./",
   "scope": "./",

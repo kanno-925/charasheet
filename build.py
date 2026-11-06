@@ -1,9 +1,9 @@
-"""キャラシ工房のビルド。
+"""ORBiS（旧キャラシ工房）のビルド。
 
 src/ にあるソース（index.html・css/・js/）を組み立てて、次の3つを作ります。
 
   index.html, css/app.css, js/app.js   GitHub Pages で公開するもの（このフォルダの直下）
-  dist/キャラシ工房.html                ダブルクリックで開ける1ファイル版
+  dist/ORBiS.html                      ダブルクリックで開ける1ファイル版
   dist/claude-artifact.html             Claude の公開版（Artifact）用（git には入れない）
 
 使い方：  python3 build.py
@@ -31,8 +31,8 @@ META = '''<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="クトゥルフ神話TRPGのキャラクターシートを作って、ココフォリアのコマにそのまま貼り付けられるツール">
 <meta name="theme-color" content="#12133a">
-<meta name="apple-mobile-web-app-title" content="ORBIS">
-<meta name="application-name" content="ORBIS">
+<meta name="apple-mobile-web-app-title" content="ORBiS">
+<meta name="application-name" content="ORBiS">
 {ICONS}'''
 # アプリのアイコン（ブラウザのタブ・スマホのホーム画面）。画像は assets/brand/
 ICONS_SITE = '''<link rel="icon" type="image/png" sizes="64x64" href="assets/brand/favicon-64.png">
@@ -74,7 +74,7 @@ site = ROOT
 
 # スマホの「ホーム画面に追加」で使う、アプリの名前とアイコン
 (site / 'manifest.webmanifest').write_text(json.dumps({
-    'name': 'ORBIS｜キャラシ工房', 'short_name': 'ORBIS', 'description': 'クトゥルフ神話TRPGのキャラクターシート',
+    'name': 'ORBiS', 'short_name': 'ORBiS', 'description': 'クトゥルフ神話TRPGのキャラクターシート',
     'start_url': './', 'scope': './', 'display': 'browser', 'background_color': '#12133a', 'theme_color': '#12133a',
     'icons': [{'src': 'assets/brand/icon-192.png', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any maskable'},
               {'src': 'assets/brand/icon-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'any maskable'}],
@@ -98,7 +98,7 @@ css1 = re.sub(r'\.\./assets/([\w./-]+)', lambda m: data_uri(m.group(1)), css)
 js1 = re.sub(r'(?<=[\'"])assets/([\w./-]+)(?=[\'"])', lambda m: data_uri(m.group(1)), js)
 inline_css, inline_js = f'<style>\n{css1}</style>', f'<script>\n{js1}</script>'
 icons1 = f'<link rel="icon" type="image/png" href="{data_uri("brand/favicon-64.png")}">\n<link rel="apple-touch-icon" href="{data_uri("brand/apple-touch-icon.png")}">'
-(dist / 'キャラシ工房.html').write_text(page(inline_css, inline_js, icons1), encoding='utf-8')
+(dist / 'ORBiS.html').write_text(page(inline_css, inline_js, icons1), encoding='utf-8')
 (dist / 'claude-artifact.html').write_text(f'{head}\n{icons1}\n{inline_css}\n\n{markup}\n{inline_js}\n', encoding='utf-8')
 
-print(f'built: index.html ({len(css) // 1024}KB css, {len(js) // 1024}KB js), dist/キャラシ工房.html, dist/claude-artifact.html')
+print(f'built: index.html ({len(css) // 1024}KB css, {len(js) // 1024}KB js), dist/ORBiS.html, dist/claude-artifact.html')
