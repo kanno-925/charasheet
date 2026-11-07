@@ -6,5 +6,6 @@ load().catch(() => {}).finally(() => {
   renderSelect();
   ueApply();
   initCloud();
+  if (sharedToken) openSharedView(sharedToken);   // 共有リンクから開いた
 });
 if (!$('intro')) document.documentElement.style.overflow = 'hidden';

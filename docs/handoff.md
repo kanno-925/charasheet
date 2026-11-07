@@ -23,6 +23,7 @@
 | 07-avatars.sql | アカウントのアイコン画像（profiles.avatar） | 済み（確認済み） |
 | 08-group-transfer.sql | グループの代表をゆずる（transfer_group） | 済み（安全版に直して再実行・確認済み） |
 | 09-dice-limit.sql | ダイスの上限（group_members.dice_limit / dice_reset） | **未確認**（オーナーに実行したか聞く） |
+| 10-share.sql | キャラシの共有リンク（char_shares・get_shared_char。見る人はログイン不要なので anon にも実行権を付けている） | **未実行**（2026-11-07 に追加） |
 
 - SQL を渡すときの注意：オーナーがコピーで**途中で切れた**ことがある。短く・英数字だけで書き、「全部消してから貼る」「文字を選択していない状態で Run」と伝える。
 - 新しいサーバー関数は Supabase が anon（ログインしていない人）にも実行権を付ける。`revoke ... from public, anon` と、関数の中で `auth.uid() is null` を止めることを必ず入れる。

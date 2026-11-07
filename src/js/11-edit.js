@@ -62,6 +62,7 @@ onBoth('click', e => {
       break;
     }
     case 'open-friends': openFriends(); return;
+    case 'share': openShare(c); return;
     case 'bgm-play': playCharBgm(c, true); return;
     case 'bgm-remove': if (c.bgm?.src === 'idb') AudioDB.del(c.id).catch(() => {}); delete c.bgm; if (bgmFor === c.id) stopBgm(); break;
     case 'bgm-url': {

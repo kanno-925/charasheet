@@ -47,4 +47,5 @@ js/26-select.js
 js/27-intro.js
 js/28-ui-editor.js
 js/29-aqua.js
-js/30-main.js
+js/30-share.js
+js/31-main.js

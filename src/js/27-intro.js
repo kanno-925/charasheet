@@ -3,6 +3,8 @@
   // 前に使っていたテーマの見た目を、保存データの読み込みを待たずに先に当てる（最初の画面がそのテーマで出るように）
   try { const lk = localStorage.getItem('charasheet-kobo.look'); if (lk != null && !document.documentElement.dataset.look) document.documentElement.dataset.look = lk; } catch (e) { /* */ }
   const el = $('intro'); if (!el) return;
+  // 共有リンクから開いたときは、オープニングを飛ばしてすぐにキャラシを見せる
+  if (/[?&]share=[0-9a-f]{32}/.test(location.search)) { el.remove(); return; }
   document.documentElement.style.overflow = 'hidden';
   // 魔法陣：七芒星・六角形・ルーン
   const pt = (r, deg) => [300 + r * Math.cos(deg * Math.PI / 180), 300 + r * Math.sin(deg * Math.PI / 180)];

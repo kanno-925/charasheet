@@ -154,7 +154,7 @@ async function loadFriendships() {
 async function handleSession(session) {
   const uid = session && session.user ? session.user.id : null;
   if ((me ? me.id : null) === uid) return;
-  if (!uid) { me = null; online = null; lastSynced.clear(); setSync('off'); renderAccount(); renderOnline(); ueCheckAdmin(); if (!$('select').hidden && selTab === 'friends') renderSelect(); return; }
+  if (!uid) { me = null; online = null; shares = null; lastSynced.clear(); setSync('off'); renderAccount(); renderOnline(); ueCheckAdmin(); if (!$('select').hidden && selTab === 'friends') renderSelect(); return; }
   me = { id: uid, email: session.user.email, username: (session.user.user_metadata || {}).username || '' };
   renderAccountBtn(); renderAccount();
   try {
@@ -166,6 +166,7 @@ async function handleSession(session) {
     await loadFriendships();
     await loadFriendChars();
     await loadGroups();
+    await loadShares().catch(() => {});
     if (!$('select').hidden && (selTab === 'friends' || selTab === 'groups')) renderSelect();
   } catch (e) { setSync('error', jaErr(e)); }
 }
@@ -188,7 +189,7 @@ async function logout() {
     state.friends = friendsOf().filter(f => !f.uid);
     state.activeId = state.chars.length ? state.chars[0].id : null;
   }
-  me = null; online = null; lastSynced.clear(); G.list = []; G.err = ''; acctTab = 'login';
+  me = null; online = null; shares = null; lastSynced.clear(); G.list = []; G.err = ''; acctTab = 'login';
   saveNow(); setSync('off'); renderAll(); renderAccount();
   if (!$('select').hidden) renderSelect();
   stopBgm();
@@ -447,7 +448,7 @@ function renderFviewList() {
     : '<p class="empty">公開されているキャラシはまだありません。</p>';
   if (!reduceMotion.matches) $('fview-body').querySelectorAll('.fv-card').forEach((el, i) => el.animate([{ opacity: 0, transform: 'translateY(12px) scale(.9)' }, { opacity: 1, transform: 'none' }], { duration: 420, delay: i * 50, easing: 'cubic-bezier(.2, .9, .3, 1.2)', fill: 'backwards' }));
 }
-function sheetViewHtml(c) {
+function sheetViewHtml(c, shared) {   // shared：共有リンクから開いたとき（「自分の探索者に取り込む」を出す）
   const d = compute(c), a = d.a, p = c.profile, S = SYS[c.system], src = portraitSrc(c);
   const bars = [['HP', d.hp, d.hpMax, 'var(--hp), var(--orange)'], ['MP', d.mp, d.mpMax, 'var(--mp), var(--cyan)'], ['SAN', d.san, d.sanMax, 'var(--san), var(--pink)']];
   const prof = [['職業', p.occupation], ['年齢', p.age], ['誕生日', p.birthday], ['性別', p.sex], ['身長', p.height], ['体重', p.weight], ['出身', p.origin], ['髪の色', p.hair], ['瞳の色', p.eyes], ['肌の色', p.skin]].filter(([, v]) => v);
@@ -461,7 +462,7 @@ function sheetViewHtml(c) {
         ${p.kana ? `<span class="peek-kana">${esc(p.kana)}</span>` : ''}
         ${prof.length ? `<dl class="sv-prof">${prof.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>` : ''}
         <div class="pbars">${bars.map(([l, v, m, g]) => `<div class="pbar"><b>${l}</b><span class="tr"><i style="width:${m > 0 ? Math.max(0, Math.min(100, v / m * 100)) : 0}%;background:linear-gradient(90deg, ${g})"></i></span><span>${v}/${m}</span></div>`).join('')}</div>
-        <div class="sv-actions"><button class="btn primary small" type="button" data-fvcopy>ココフォリア用にコピー</button><span class="copy-status" id="fv-status" role="status"></span></div>
+        <div class="sv-actions"><button class="btn primary small" type="button" data-fvcopy>ココフォリア用にコピー</button>${shared ? '<button class="btn small" type="button" data-fvtake>自分の探索者に取り込む</button>' : ''}<span class="copy-status" id="fv-status" role="status"></span></div>
       </div>
     </div>
     <div class="sv-grid">
@@ -496,5 +497,6 @@ $('fview-body').addEventListener('click', e => {
     copyText(JSON.stringify(toCcfolia(fviewCur)), $('fv-status'), null).then(ok => { if (ok) fxAt(e.target.closest('[data-fvcopy]'), true); });
     return;
   }
+  if (e.target.closest('[data-fvtake]') && fviewCur) { takeShared(e.target.closest('[data-fvtake]')); return; }
 });
 $('fview-title').addEventListener('click', e => { if (e.target.closest('[data-fvback]')) { fviewCur = null; renderFviewList(); } });

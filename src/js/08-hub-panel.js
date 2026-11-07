@@ -33,6 +33,7 @@ function toolsHtml(c) {
   return `${c.sample ? '<span class="sample-tag">サンプル</span>' : ''}
       <span class="sys-badge">${esc(S.label)}</span>
       <button class="btn small lock-btn ${c.locked ? 'on' : ''}" type="button" data-act="lock" aria-pressed="${!!c.locked}" title="${c.locked ? 'フレンドから見えません（押すと公開）' : 'フレンドに公開中（押すと非公開）'}">${c.locked ? '<svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg>非公開' : '<svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 5.8-1"/></svg>フレンドに公開'}</button>
+      <button class="btn small share-btn" type="button" data-act="share" title="リンクを送って、ほかの人にこのキャラシを見せる"><svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><circle cx="5.5" cy="10" r="2.2"/><circle cx="14.5" cy="5" r="2.2"/><circle cx="14.5" cy="15" r="2.2"/><path d="M7.4 9l5.2-3M7.4 11l5.2 3"/></svg>共有</button>
       <button class="btn small" type="button" data-act="dup">複製</button>
       <button class="btn small danger" type="button" data-act="del">削除</button>`;
 }
