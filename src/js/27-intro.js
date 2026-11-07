@@ -1,3 +1,46 @@
+/* ================= 音量（全体・BGM・効果音・はじめの画面の曲） =================
+   端末ごとの設定なので localStorage の charasheet-kobo.vol に入れる（はじめの画面は、保存データの読み込みより先に出るため）。
+   値は 0〜100。テーマ・背景の小窓の「音量」で変える */
+const VOL_KEY = 'charasheet-kobo.vol';
+let VOL = (() => { let v = {}; try { v = JSON.parse(localStorage.getItem(VOL_KEY) || '{}') || {}; } catch (e) { v = {}; } return { master: v.master ?? 100, bgm: v.bgm ?? 100, sfx: v.sfx ?? 100, title: v.title ?? 70 }; })();
+function volSet(k, val) {
+  VOL = Object.assign({}, VOL, { [k]: Math.max(0, Math.min(100, Math.round(val))) });
+  try { localStorage.setItem(VOL_KEY, JSON.stringify(VOL)); } catch (e) { /* */ }
+  if (SFX.bus) SFX.bus.gain.value = VOL.master / 100 * VOL.sfx / 100;   // 効果音（09-book.js）
+  if (typeof applyVol === 'function') applyVol();                       // キャラの BGM（19-bgm.js）
+  titleBgmVol();                                                          // はじめの画面の曲
+}
+
+/* ================= はじめの画面の曲（ORBiS 版のとき） =================
+   ブラウザは、画面を一度も押していないうちは音を出させてくれない。そのため、まず流してみて、だめなら最初に押したときに流す。
+   探索者をえらぶ画面のあいだは流しつづけ、キャラシを開いたとき・キャラの BGM が流れたときに、ゆっくり消す。
+   はじめの画面の右上のボタンで止められる（localStorage の charasheet-kobo.titleBgm に覚える） */
+const TITLE_BGM = 'assets/brand/title-bgm.mp3';
+const TB = { a: null, k: 0, fade: 0, on: (() => { try { return localStorage.getItem('charasheet-kobo.titleBgm') !== 'off'; } catch (e) { return true; } })(), done: false };
+function titleBgmVol() { if (TB.a) TB.a.volume = Math.max(0, Math.min(1, TB.k * VOL.master / 100 * VOL.title / 100)); }
+function titleBgmFade(to, ms, then) {
+  const my = ++TB.fade, from = TB.k, t0 = performance.now();
+  const step = t => { if (my !== TB.fade) return; const p = Math.min(1, (t - t0) / ms); TB.k = from + (to - from) * p; titleBgmVol(); if (p < 1) requestAnimationFrame(step); else if (then) then(); };
+  requestAnimationFrame(step);
+}
+function titleBgmPlay() {
+  if (!TB.a || !TB.on || TB.done) return;
+  TB.a.play().then(() => { titleBgmFade(1, 2500); titleBgmBtn(); }).catch(() => { /* まだ押していない：押したときにもう一度 */ });
+}
+function titleBgmStop(ms = 1600) {
+  if (!TB.a || TB.done) return;
+  TB.done = true;
+  titleBgmFade(0, ms, () => { try { TB.a.pause(); } catch (e) { /* */ } });
+}
+function titleBgmBtn() {
+  const b = $('obi-music'); if (!b) return;
+  const playing = TB.a && !TB.a.paused && TB.on;
+  b.setAttribute('aria-pressed', String(!!playing));
+  b.setAttribute('aria-label', playing ? '音楽を止める' : '音楽を流す');
+  b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17.5V6.2l10-2.2v11.3"/><circle cx="6.6" cy="17.6" r="2.4"/><circle cx="16.6" cy="15.4" r="2.4"/>${playing ? '' : '<path d="M3.5 3.5l17 17"/>'}</svg><span>${playing ? '音楽 オン' : (TB.on ? '押すと音楽が流れます' : '音楽 オフ')}</span>`;
+  b.classList.toggle('hint', !playing && TB.on);
+}
+
 /* ================= オープニング ================= */
 (function intro() {
   // 前に使っていたテーマの見た目を、保存データの読み込みを待たずに先に当てる（最初の画面がそのテーマで出るように）
@@ -29,7 +72,25 @@
         <h2 class="obi-title" id="intro-title">物語が交わる、星の記録帳へ。</h2>
         <button class="intro-btn obi-btn" id="intro-enter" type="button"><span>ORBiS をひらく</span></button>
         <p class="obi-foot">CALL OF CTHULHU ・ CHARACTER SHEET ・ for CCFOLIA</p>
-      </div>`;
+      </div>
+      <button class="obi-music" id="obi-music" type="button"></button>`;
+    // 曲を用意して、流してみる（だめなら、最初に押したときに流す）
+    TB.a = new Audio(TITLE_BGM); TB.a.loop = true; TB.a.preload = 'auto'; TB.k = 0; titleBgmVol();
+    titleBgmBtn(); titleBgmPlay();
+    const firstTouch = e => {
+      if (e.target.closest && e.target.closest('#obi-music')) return;
+      document.removeEventListener('pointerdown', firstTouch, true); document.removeEventListener('keydown', firstTouch, true);
+      titleBgmPlay();
+    };
+    document.addEventListener('pointerdown', firstTouch, true); document.addEventListener('keydown', firstTouch, true);
+    $('obi-music').addEventListener('click', e => {
+      e.stopPropagation();
+      const playing = TB.a && !TB.a.paused && TB.on;
+      TB.on = !playing;
+      try { localStorage.setItem('charasheet-kobo.titleBgm', TB.on ? 'on' : 'off'); } catch (er) { /* */ }
+      if (TB.on) titleBgmPlay(); else titleBgmFade(0, 500, () => { TB.a.pause(); titleBgmBtn(); });
+      titleBgmBtn();
+    });
   } else {
     // 魔法陣：七芒星・六角形・ルーン
     const pt = (r, deg) => [300 + r * Math.cos(deg * Math.PI / 180), 300 + r * Math.sin(deg * Math.PI / 180)];
@@ -106,3 +167,19 @@ $('intro-pick')?.addEventListener('click', e => {
   toast(b.dataset.intro === 'classic' ? '次に開いたときから、はじめの画面は「魔法陣」になります。' : '次に開いたときから、はじめの画面は「ORBiS」になります。');
 });
 $('btn-theme').addEventListener('click', renderIntroPick);
+
+/* ---- 音量のつまみ（テーマ・背景の小窓） ---- */
+function renderVolRows() {
+  document.querySelectorAll('[data-vol]').forEach(el => { el.value = VOL[el.dataset.vol]; });
+  document.querySelectorAll('[data-volv]').forEach(el => { el.textContent = VOL[el.dataset.volv] + '%'; });
+}
+$('vol-rows')?.addEventListener('input', e => {
+  const k = e.target.dataset.vol; if (!k) return;
+  volSet(k, +e.target.value);
+  const v = document.querySelector(`[data-volv="${k}"]`); if (v) v.textContent = VOL[k] + '%';
+});
+let volPrevT = 0;
+$('vol-rows')?.addEventListener('change', e => {   // つまみをはなしたら、効果音の大きさを聞かせる
+  const k = e.target.dataset.vol; if ((k === 'sfx' || k === 'master') && performance.now() - volPrevT > 200) { volPrevT = performance.now(); if (typeof snd === 'function') snd('switch'); }
+});
+$('btn-theme').addEventListener('click', renderVolRows);

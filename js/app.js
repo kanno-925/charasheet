@@ -1069,6 +1069,12 @@ function actx() {
   }
   return SFX.ctx;
 }
+/* 効果音の出口（全体×効果音の音量）。効果音はすべてここを通る */
+function sfxOut(ctx) {
+  if (!SFX.bus) { SFX.bus = ctx.createGain(); SFX.bus.connect(ctx.destination); }
+  SFX.bus.gain.value = VOL.master / 100 * VOL.sfx / 100;
+  return SFX.bus;
+}
 function noiseBurst(ctx, at, dur, { f0, f1, q = 1, vol = .3, attack = .01, hp = 300, offset = Math.random() * 1.5 }) {
   const src = ctx.createBufferSource(); src.buffer = SFX.noise;
   const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = q;
@@ -1076,7 +1082,7 @@ function noiseBurst(ctx, at, dur, { f0, f1, q = 1, vol = .3, attack = .01, hp = 
   const hpf = ctx.createBiquadFilter(); hpf.type = 'highpass'; hpf.frequency.value = hp;
   const g = ctx.createGain();
   g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(vol, at + attack); g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
-  src.connect(bp).connect(hpf).connect(g).connect(ctx.destination);
+  src.connect(bp).connect(hpf).connect(g).connect(sfxOut(ctx));
   src.start(at, offset, dur + .05);
 }
 /* 録音した効果音（assets/book/ の mp3）。読み込めないときは上の合成音で代わりに鳴らす */
@@ -1111,7 +1117,7 @@ function sfxSample(k, delayMs, ms, vol) {
     const g = ctx.createGain(), fade = Math.min(.35, len / 3);
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .05);
     g.gain.setValueAtTime(vol, t + len - fade); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
-    src.connect(g).connect(ctx.destination); src.start(t, from, len + .05);
+    src.connect(g).connect(sfxOut(ctx)); src.start(t, from, len + .05);
   };
   if (b instanceof Promise) b.then(x => x && play(x)); else play(b);
   return true;
@@ -2753,7 +2759,7 @@ bgmAudio.preload = 'auto';
 let bgmFor = null, bgmUrl = null, bgmFade = 0, bgmMode = null, bgmCur = 0, bgmPlaying = false;
 let ytApi = null, ytReady = null, ytPlayer = null;
 const bgmVol = c => Math.max(0, Math.min(1, (c?.bgm?.volume ?? 60) / 100));
-const masterVol = () => state.bgmMuted ? 0 : (state.masterVol ?? 100) / 100;
+const masterVol = () => state.bgmMuted ? 0 : VOL.master / 100 * VOL.bgm / 100;   // 全体×BGM の音量（27-intro.js の VOL）
 function applyVol() {
   const v = Math.max(0, Math.min(1, bgmCur * masterVol()));
   if (bgmMode === 'audio') bgmAudio.volume = v;
@@ -2830,6 +2836,7 @@ function pauseRaw() {
 async function playCharBgm(c, force) {
   if (!c || !c.bgm) { stopBgm(); return; }
   if (!force && bgmFor === c.id && bgmPlaying) { renderPlayer(); return; }
+  titleBgmStop(800);   // はじめの画面の曲は、キャラの BGM と重ならないように消す
   if (bgmPlaying) await fadeTo(0, 300);
   pauseRaw();
   bgmFor = c.id; bgmCur = 0;
@@ -4482,6 +4489,7 @@ function showSelect() {
 }
 function leaveSelect(fromEl, quick) {
   hidePeek();
+  titleBgmStop();   // キャラシを開いたら、はじめの画面の曲をゆっくり消す
   const sel = $('select');
   const done = () => { sel.hidden = true; document.documentElement.style.overflow = ''; scrollTo(0, 0); renderPlayer(); };
   if (reduceMotion.matches || quick) { done(); return; }
@@ -4574,6 +4582,49 @@ function themeSelHtml(chars) {
   return '';
 }
 
+/* ================= 音量（全体・BGM・効果音・はじめの画面の曲） =================
+   端末ごとの設定なので localStorage の charasheet-kobo.vol に入れる（はじめの画面は、保存データの読み込みより先に出るため）。
+   値は 0〜100。テーマ・背景の小窓の「音量」で変える */
+const VOL_KEY = 'charasheet-kobo.vol';
+let VOL = (() => { let v = {}; try { v = JSON.parse(localStorage.getItem(VOL_KEY) || '{}') || {}; } catch (e) { v = {}; } return { master: v.master ?? 100, bgm: v.bgm ?? 100, sfx: v.sfx ?? 100, title: v.title ?? 70 }; })();
+function volSet(k, val) {
+  VOL = Object.assign({}, VOL, { [k]: Math.max(0, Math.min(100, Math.round(val))) });
+  try { localStorage.setItem(VOL_KEY, JSON.stringify(VOL)); } catch (e) { /* */ }
+  if (SFX.bus) SFX.bus.gain.value = VOL.master / 100 * VOL.sfx / 100;   // 効果音（09-book.js）
+  if (typeof applyVol === 'function') applyVol();                       // キャラの BGM（19-bgm.js）
+  titleBgmVol();                                                          // はじめの画面の曲
+}
+
+/* ================= はじめの画面の曲（ORBiS 版のとき） =================
+   ブラウザは、画面を一度も押していないうちは音を出させてくれない。そのため、まず流してみて、だめなら最初に押したときに流す。
+   探索者をえらぶ画面のあいだは流しつづけ、キャラシを開いたとき・キャラの BGM が流れたときに、ゆっくり消す。
+   はじめの画面の右上のボタンで止められる（localStorage の charasheet-kobo.titleBgm に覚える） */
+const TITLE_BGM = 'assets/brand/title-bgm.mp3';
+const TB = { a: null, k: 0, fade: 0, on: (() => { try { return localStorage.getItem('charasheet-kobo.titleBgm') !== 'off'; } catch (e) { return true; } })(), done: false };
+function titleBgmVol() { if (TB.a) TB.a.volume = Math.max(0, Math.min(1, TB.k * VOL.master / 100 * VOL.title / 100)); }
+function titleBgmFade(to, ms, then) {
+  const my = ++TB.fade, from = TB.k, t0 = performance.now();
+  const step = t => { if (my !== TB.fade) return; const p = Math.min(1, (t - t0) / ms); TB.k = from + (to - from) * p; titleBgmVol(); if (p < 1) requestAnimationFrame(step); else if (then) then(); };
+  requestAnimationFrame(step);
+}
+function titleBgmPlay() {
+  if (!TB.a || !TB.on || TB.done) return;
+  TB.a.play().then(() => { titleBgmFade(1, 2500); titleBgmBtn(); }).catch(() => { /* まだ押していない：押したときにもう一度 */ });
+}
+function titleBgmStop(ms = 1600) {
+  if (!TB.a || TB.done) return;
+  TB.done = true;
+  titleBgmFade(0, ms, () => { try { TB.a.pause(); } catch (e) { /* */ } });
+}
+function titleBgmBtn() {
+  const b = $('obi-music'); if (!b) return;
+  const playing = TB.a && !TB.a.paused && TB.on;
+  b.setAttribute('aria-pressed', String(!!playing));
+  b.setAttribute('aria-label', playing ? '音楽を止める' : '音楽を流す');
+  b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17.5V6.2l10-2.2v11.3"/><circle cx="6.6" cy="17.6" r="2.4"/><circle cx="16.6" cy="15.4" r="2.4"/>${playing ? '' : '<path d="M3.5 3.5l17 17"/>'}</svg><span>${playing ? '音楽 オン' : (TB.on ? '押すと音楽が流れます' : '音楽 オフ')}</span>`;
+  b.classList.toggle('hint', !playing && TB.on);
+}
+
 /* ================= オープニング ================= */
 (function intro() {
   // 前に使っていたテーマの見た目を、保存データの読み込みを待たずに先に当てる（最初の画面がそのテーマで出るように）
@@ -4605,7 +4656,25 @@ function themeSelHtml(chars) {
         <h2 class="obi-title" id="intro-title">物語が交わる、星の記録帳へ。</h2>
         <button class="intro-btn obi-btn" id="intro-enter" type="button"><span>ORBiS をひらく</span></button>
         <p class="obi-foot">CALL OF CTHULHU ・ CHARACTER SHEET ・ for CCFOLIA</p>
-      </div>`;
+      </div>
+      <button class="obi-music" id="obi-music" type="button"></button>`;
+    // 曲を用意して、流してみる（だめなら、最初に押したときに流す）
+    TB.a = new Audio(TITLE_BGM); TB.a.loop = true; TB.a.preload = 'auto'; TB.k = 0; titleBgmVol();
+    titleBgmBtn(); titleBgmPlay();
+    const firstTouch = e => {
+      if (e.target.closest && e.target.closest('#obi-music')) return;
+      document.removeEventListener('pointerdown', firstTouch, true); document.removeEventListener('keydown', firstTouch, true);
+      titleBgmPlay();
+    };
+    document.addEventListener('pointerdown', firstTouch, true); document.addEventListener('keydown', firstTouch, true);
+    $('obi-music').addEventListener('click', e => {
+      e.stopPropagation();
+      const playing = TB.a && !TB.a.paused && TB.on;
+      TB.on = !playing;
+      try { localStorage.setItem('charasheet-kobo.titleBgm', TB.on ? 'on' : 'off'); } catch (er) { /* */ }
+      if (TB.on) titleBgmPlay(); else titleBgmFade(0, 500, () => { TB.a.pause(); titleBgmBtn(); });
+      titleBgmBtn();
+    });
   } else {
     // 魔法陣：七芒星・六角形・ルーン
     const pt = (r, deg) => [300 + r * Math.cos(deg * Math.PI / 180), 300 + r * Math.sin(deg * Math.PI / 180)];
@@ -4682,6 +4751,22 @@ $('intro-pick')?.addEventListener('click', e => {
   toast(b.dataset.intro === 'classic' ? '次に開いたときから、はじめの画面は「魔法陣」になります。' : '次に開いたときから、はじめの画面は「ORBiS」になります。');
 });
 $('btn-theme').addEventListener('click', renderIntroPick);
+
+/* ---- 音量のつまみ（テーマ・背景の小窓） ---- */
+function renderVolRows() {
+  document.querySelectorAll('[data-vol]').forEach(el => { el.value = VOL[el.dataset.vol]; });
+  document.querySelectorAll('[data-volv]').forEach(el => { el.textContent = VOL[el.dataset.volv] + '%'; });
+}
+$('vol-rows')?.addEventListener('input', e => {
+  const k = e.target.dataset.vol; if (!k) return;
+  volSet(k, +e.target.value);
+  const v = document.querySelector(`[data-volv="${k}"]`); if (v) v.textContent = VOL[k] + '%';
+});
+let volPrevT = 0;
+$('vol-rows')?.addEventListener('change', e => {   // つまみをはなしたら、効果音の大きさを聞かせる
+  const k = e.target.dataset.vol; if ((k === 'sfx' || k === 'master') && performance.now() - volPrevT > 200) { volPrevT = performance.now(); if (typeof snd === 'function') snd('switch'); }
+});
+$('btn-theme').addEventListener('click', renderVolRows);
 
 /* ================= 画面の編集モード（部品の文字・色・画像・形・位置を変える） =================
    ・権限が「マスター」か「編集者」の人がログインすると「テーマ・背景」に「画面を編集する」が出る（Ctrl+Shift+E でも開く）
@@ -6231,7 +6316,7 @@ function sndCtx() {
   if (!sfxOn()) return null;
   const ctx = actx(); if (!ctx) return null;
   if (!SND.out) {
-    SND.out = ctx.createGain(); SND.out.gain.value = .55; SND.out.connect(ctx.destination);
+    SND.out = ctx.createGain(); SND.out.gain.value = .55; SND.out.connect(sfxOut(ctx));
     // ひびき（残響）：だんだん小さくなる雑音でひびきの形を作る
     const len = Math.round(ctx.sampleRate * 2.4), ir = ctx.createBuffer(2, len, ctx.sampleRate);
     for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }

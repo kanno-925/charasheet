@@ -12,6 +12,12 @@ function actx() {
   }
   return SFX.ctx;
 }
+/* 効果音の出口（全体×効果音の音量）。効果音はすべてここを通る */
+function sfxOut(ctx) {
+  if (!SFX.bus) { SFX.bus = ctx.createGain(); SFX.bus.connect(ctx.destination); }
+  SFX.bus.gain.value = VOL.master / 100 * VOL.sfx / 100;
+  return SFX.bus;
+}
 function noiseBurst(ctx, at, dur, { f0, f1, q = 1, vol = .3, attack = .01, hp = 300, offset = Math.random() * 1.5 }) {
   const src = ctx.createBufferSource(); src.buffer = SFX.noise;
   const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = q;
@@ -19,7 +25,7 @@ function noiseBurst(ctx, at, dur, { f0, f1, q = 1, vol = .3, attack = .01, hp = 
   const hpf = ctx.createBiquadFilter(); hpf.type = 'highpass'; hpf.frequency.value = hp;
   const g = ctx.createGain();
   g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(vol, at + attack); g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
-  src.connect(bp).connect(hpf).connect(g).connect(ctx.destination);
+  src.connect(bp).connect(hpf).connect(g).connect(sfxOut(ctx));
   src.start(at, offset, dur + .05);
 }
 /* 録音した効果音（assets/book/ の mp3）。読み込めないときは上の合成音で代わりに鳴らす */
@@ -54,7 +60,7 @@ function sfxSample(k, delayMs, ms, vol) {
     const g = ctx.createGain(), fade = Math.min(.35, len / 3);
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .05);
     g.gain.setValueAtTime(vol, t + len - fade); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
-    src.connect(g).connect(ctx.destination); src.start(t, from, len + .05);
+    src.connect(g).connect(sfxOut(ctx)); src.start(t, from, len + .05);
   };
   if (b instanceof Promise) b.then(x => x && play(x)); else play(b);
   return true;

@@ -24,3 +24,9 @@
 /* テーマ・背景の小窓：効果音とはじめの画面のボタン */
 .sfx-row, .intro-pick { display: flex; flex-wrap: wrap; gap: 8px; }
 .intro-pick .btn.on { background: linear-gradient(100deg, var(--sky), var(--cyan)); color: #fff; border-color: transparent; }
+/* 音量のつまみ */
+.vol-rows { display: flex; flex-direction: column; gap: 6px; }
+.vol-row { display: grid; grid-template-columns: 9.5em minmax(0, 1fr) 3.2em; align-items: center; gap: 10px; font-size: 13px; }
+.vol-row input { width: 100%; accent-color: var(--sky); }
+.vol-row b { text-align: right; font-variant-numeric: tabular-nums; }
+@media (max-width: 560px) { .vol-row { grid-template-columns: 7.5em minmax(0, 1fr) 3em; font-size: 12px; } }

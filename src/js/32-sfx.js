@@ -10,7 +10,7 @@ function sndCtx() {
   if (!sfxOn()) return null;
   const ctx = actx(); if (!ctx) return null;
   if (!SND.out) {
-    SND.out = ctx.createGain(); SND.out.gain.value = .55; SND.out.connect(ctx.destination);
+    SND.out = ctx.createGain(); SND.out.gain.value = .55; SND.out.connect(sfxOut(ctx));
     // ひびき（残響）：だんだん小さくなる雑音でひびきの形を作る
     const len = Math.round(ctx.sampleRate * 2.4), ir = ctx.createBuffer(2, len, ctx.sampleRate);
     for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }

@@ -40,7 +40,7 @@ bgmAudio.preload = 'auto';
 let bgmFor = null, bgmUrl = null, bgmFade = 0, bgmMode = null, bgmCur = 0, bgmPlaying = false;
 let ytApi = null, ytReady = null, ytPlayer = null;
 const bgmVol = c => Math.max(0, Math.min(1, (c?.bgm?.volume ?? 60) / 100));
-const masterVol = () => state.bgmMuted ? 0 : (state.masterVol ?? 100) / 100;
+const masterVol = () => state.bgmMuted ? 0 : VOL.master / 100 * VOL.bgm / 100;   // 全体×BGM の音量（27-intro.js の VOL）
 function applyVol() {
   const v = Math.max(0, Math.min(1, bgmCur * masterVol()));
   if (bgmMode === 'audio') bgmAudio.volume = v;
@@ -117,6 +117,7 @@ function pauseRaw() {
 async function playCharBgm(c, force) {
   if (!c || !c.bgm) { stopBgm(); return; }
   if (!force && bgmFor === c.id && bgmPlaying) { renderPlayer(); return; }
+  titleBgmStop(800);   // はじめの画面の曲は、キャラの BGM と重ならないように消す
   if (bgmPlaying) await fadeTo(0, 300);
   pauseRaw();
   bgmFor = c.id; bgmCur = 0;

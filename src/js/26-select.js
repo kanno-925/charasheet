@@ -184,6 +184,7 @@ function showSelect() {
 }
 function leaveSelect(fromEl, quick) {
   hidePeek();
+  titleBgmStop();   // キャラシを開いたら、はじめの画面の曲をゆっくり消す
   const sel = $('select');
   const done = () => { sel.hidden = true; document.documentElement.style.overflow = ''; scrollTo(0, 0); renderPlayer(); };
   if (reduceMotion.matches || quick) { done(); return; }

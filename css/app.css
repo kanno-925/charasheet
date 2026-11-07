@@ -638,6 +638,15 @@ label.btn { display: inline-block; }
 .obi-foot { margin: 12px 0 0; font-family: "Lexend", system-ui, sans-serif; font-size: 10.5px; letter-spacing: .22em; color: #8e98c4; animation: intro-up 1s 2.6s both; }
 .ob-intro .intro-flash { background: radial-gradient(circle, #ffffff 0%, #f6f5ff 45%, rgb(196 188 255 / .9) 62%, rgb(150 140 250 / 0) 72%); }
 @media (prefers-reduced-motion: reduce) { .ob-intro * { animation: none !important; } .obi-ring ellipse { stroke-dashoffset: 0; } }
+/* はじめの画面（ORBiS）の右上：音楽のボタン（まだ流れていないときは「押すと音楽が流れます」とうっすら光る） */
+.obi-music { position: absolute; z-index: 4; right: 18px; top: 18px; display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px 8px 10px; border-radius: 999px; cursor: pointer;
+  border: 1px solid rgb(255 255 255 / .9); background: rgb(255 255 255 / .55); color: #4d63c9; font-family: "Zen Kaku Gothic New", sans-serif; font-size: 12.5px; font-weight: 600;
+  box-shadow: 0 8px 20px -12px rgb(76 86 190 / .6), inset 0 1px 0 #fff; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); animation: intro-up .8s 1s both; }
+.obi-music svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.obi-music[aria-pressed="false"]:not(.hint) { color: #8e98c4; }
+.obi-music.hint { animation: intro-up .8s 1s both, obi-hint 2.4s 2s ease-in-out infinite; }
+@keyframes obi-hint { 50% { box-shadow: 0 8px 20px -12px rgb(76 86 190 / .6), 0 0 0 6px rgb(255 255 255 / .45), inset 0 1px 0 #fff; } }
+@media (max-width: 560px) { .obi-music { right: 12px; top: 12px; font-size: 11.5px; } }
 
 /* ===== investigator select (after the intro) ===== */
 .select { position: fixed; inset: 0; z-index: 8; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
@@ -1051,6 +1060,12 @@ label.btn { display: inline-block; }
 /* テーマ・背景の小窓：効果音とはじめの画面のボタン */
 .sfx-row, .intro-pick { display: flex; flex-wrap: wrap; gap: 8px; }
 .intro-pick .btn.on { background: linear-gradient(100deg, var(--sky), var(--cyan)); color: #fff; border-color: transparent; }
+/* 音量のつまみ */
+.vol-rows { display: flex; flex-direction: column; gap: 6px; }
+.vol-row { display: grid; grid-template-columns: 9.5em minmax(0, 1fr) 3.2em; align-items: center; gap: 10px; font-size: 13px; }
+.vol-row input { width: 100%; accent-color: var(--sky); }
+.vol-row b { text-align: right; font-variant-numeric: tabular-nums; }
+@media (max-width: 560px) { .vol-row { grid-template-columns: 7.5em minmax(0, 1fr) 3em; font-size: 12px; } }
 
 /* ===== dice ===== */
 .die-btn { width: 26px; height: 26px; flex: none; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--solid); color: var(--sky); display: inline-grid; place-items: center; cursor: pointer; margin-left: 6px; padding: 0; transition: transform .3s cubic-bezier(.3, 1.6, .5, 1), background .2s, color .2s; }

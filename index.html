@@ -241,6 +241,13 @@ img { max-width: 100%; }
     <div class="theme-presets" id="theme-presets"></div>
     <div class="th-sec"><b>効果音</b><span>ボタンを押したときや、画面・窓を切りかえたときの音です。テーマごとに、そのテーマらしい音になります。</span></div>
     <div class="sfx-row"><button class="btn" type="button" id="sfx-toggle" aria-pressed="true">効果音：オン（押すとオフ）</button></div>
+    <div class="th-sec"><b>音量</b><span>すべての音の大きさです。この端末に覚えます。キャラごとの BGM の音量は、そのキャラの BGM の設定で変えられます。</span></div>
+    <div class="vol-rows" id="vol-rows">
+      <label class="vol-row"><span>全体</span><input type="range" min="0" max="100" data-vol="master" aria-label="全体の音量"><b data-volv="master"></b></label>
+      <label class="vol-row"><span>BGM（キャラの曲）</span><input type="range" min="0" max="100" data-vol="bgm" aria-label="BGMの音量"><b data-volv="bgm"></b></label>
+      <label class="vol-row"><span>効果音</span><input type="range" min="0" max="100" data-vol="sfx" aria-label="効果音の音量"><b data-volv="sfx"></b></label>
+      <label class="vol-row"><span>はじめの画面の曲</span><input type="range" min="0" max="100" data-vol="title" aria-label="はじめの画面の曲の音量"><b data-volv="title"></b></label>
+    </div>
     <div class="th-sec"><b>はじめの画面</b><span>アプリを開いたときに出る画面です。次に開いたときから変わります。</span></div>
     <div class="intro-pick" id="intro-pick" role="group" aria-label="はじめの画面"><button type="button" class="btn" data-intro="orbis">ORBiS（星空と光）</button><button type="button" class="btn" data-intro="classic">魔法陣</button></div>
     <div class="th-sec"><b>背景画像</b><span>どこの背景を変えるか選んでから、画像を選んでください。</span></div>
