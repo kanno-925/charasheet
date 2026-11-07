@@ -46,7 +46,7 @@
 
 ## 4. 残っていること・確認待ち
 
-0. **共有リンクのカード（立ち絵のプレビュー）**：SQL 11 は実行済み。オーナーに Cloudflare Workers の用意（cloudflare/share-worker.js を貼って Deploy）をお願いしている。入口のURL（https://〜.workers.dev）をもらったら、30-share.js の `SHARE_PAGE` に `https://〜.workers.dev/s/` と書いて build → main へ。
+0. **共有リンクのカード（立ち絵のプレビュー）**：動いている。中継の入口は Cloudflare Workers の `orbis-share`（https://orbis-share.masakawwwww.workers.dev 、オーナーの Cloudflare アカウント）。cloudflare/share-worker.js を変えたときは、オーナーに Cloudflare の「Edit code」で貼りかえて Deploy してもらう必要がある（自動では反映されない）。LINE などで本当にカードが出るかは、オーナーに実際に貼って確かめてもらう。
 
 1. **「なんか開けない」の報告（最後のやりとり）**：こちらでは公開サイトをPC・iPhoneのサイズ、全テーマで開けてエラーなし。キャッシュ、古い `キャラシ工房.html`（改名で消えた）、ホーム画面のアイコンからの起動などを疑い、オーナーに「端末・どこから開いたか・どうなるか・ログインしているか・スクショ」を聞いている。**返事を待っている状態**。ログイン中だけ起きる不具合の可能性もある（テストでは確かめられない）。
 2. ~~09-dice-limit.sql を実行したか確認~~ → 済み（列があることを確認）。

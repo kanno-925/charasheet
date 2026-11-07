@@ -4,8 +4,9 @@
    リンク先はいつも公開サイト（1ファイル版や Claude の公開版から作っても、送った相手が開けるように）。 */
 const SHARE_BASE = 'https://kanno-925.github.io/charasheet/';
 /* LINE・Discord・X に貼ったとき立ち絵入りのカードを出すための「中継の入口」（Cloudflare Workers。cloudflare/share-worker.js）。
-   用意できたら、そのURL（最後の /s/ まで）をここに書く。空のあいだは公開サイトのリンクのまま（カードは出ない） */
-const SHARE_PAGE = '';
+   そのURL（最後の /s/ まで）をここに書く。空にすると公開サイトのリンクにもどる（カードは出ない）。
+   前に作った ?share= の形のリンクも、そのまま開ける */
+const SHARE_PAGE = 'https://orbis-share.masakawwwww.workers.dev/s/';
 const shareUrl = token => SHARE_PAGE ? SHARE_PAGE + token : SHARE_BASE + '?share=' + token;
 let shares = null, shareErr = '', shareFor = null, shareBusy = false;   // shares：キャラID → 合言葉（読み込む前は null）
 
