@@ -22,20 +22,36 @@ function volSet(k, val) {
    はじめの画面の右上のボタンで止められる（localStorage の charasheet-kobo.titleBgm に覚える） */
 const TITLE_BGM = 'assets/brand/title-bgm.mp3';
 const TB = { a: null, k: 0, fade: 0, on: (() => { try { return localStorage.getItem('charasheet-kobo.titleBgm') !== 'off'; } catch (e) { return true; } })(), done: false };
-function titleBgmVol() { if (TB.a) TB.a.volume = Math.max(0, Math.min(1, TB.k * VOL.master / 100 * VOL.title / 100)); }
+/* 大きさ：iPhone・iPad は audio の volume を変えられないので、押したあとは Web Audio の音量つまみ（TB.g）を通して変える */
+function titleBgmVol() {
+  if (!TB.a) return;
+  const v = Math.max(0, Math.min(1, TB.k * VOL.master / 100 * VOL.title / 100));
+  if (TB.g) { TB.g.gain.value = v; TB.a.volume = 1; } else TB.a.volume = v;
+}
+function titleBgmRoute() {   // 押したとき（音を出してよいとき）に、Web Audio につなぐ
+  if (TB.g || !TB.a) return;
+  try {
+    const ctx = actx(); if (!ctx) return;
+    const src = ctx.createMediaElementSource(TB.a); TB.g = ctx.createGain();
+    src.connect(TB.g); TB.g.connect(ctx.destination); titleBgmVol();
+  } catch (e) { TB.g = null; }
+}
 function titleBgmFade(to, ms, then) {
   const my = ++TB.fade, from = TB.k, t0 = performance.now();
   const step = t => { if (my !== TB.fade) return; const p = Math.min(1, (t - t0) / ms); TB.k = from + (to - from) * p; titleBgmVol(); if (p < 1) requestAnimationFrame(step); else if (then) then(); };
   requestAnimationFrame(step);
 }
-function titleBgmPlay() {
+function titleBgmPlay(gesture) {
   if (!TB.a || !TB.on || TB.done) return;
+  if (gesture) titleBgmRoute();
   TB.a.play().then(() => { if (TB.done) { TB.a.pause(); return; } titleBgmFade(1, 2500); titleBgmBtn(); }).catch(() => { /* まだ押していない：押したときにもう一度 */ });
 }
 function titleBgmStop(ms = 1600) {
   if (!TB.a || TB.done) return;
   TB.done = true;
-  titleBgmFade(0, ms, () => { try { TB.a.pause(); } catch (e) { /* */ } });
+  const halt = () => { try { TB.a.pause(); } catch (e) { /* */ } };
+  titleBgmFade(0, ms, halt);
+  setTimeout(() => { TB.fade++; TB.k = 0; titleBgmVol(); halt(); }, ms + 250);   // 動きが止まっていても、時間が来たら必ず止める
 }
 function titleBgmBtn() {
   const b = $('obi-music'); if (!b) return;
@@ -85,7 +101,7 @@ function titleBgmBtn() {
     const firstTouch = e => {
       if (e.target.closest && e.target.closest('#obi-music')) return;
       document.removeEventListener('pointerdown', firstTouch, true); document.removeEventListener('keydown', firstTouch, true);
-      titleBgmPlay();
+      titleBgmPlay(true);
     };
     document.addEventListener('pointerdown', firstTouch, true); document.addEventListener('keydown', firstTouch, true);
     $('obi-music').addEventListener('click', e => {
@@ -93,7 +109,7 @@ function titleBgmBtn() {
       const playing = TB.a && !TB.a.paused && TB.on;
       TB.on = !playing;
       try { localStorage.setItem('charasheet-kobo.titleBgm', TB.on ? 'on' : 'off'); } catch (er) { /* */ }
-      if (TB.on) titleBgmPlay(); else titleBgmFade(0, 500, () => { TB.a.pause(); titleBgmBtn(); });
+      if (TB.on) titleBgmPlay(true); else titleBgmFade(0, 500, () => { TB.a.pause(); titleBgmBtn(); });
       titleBgmBtn();
     });
   } else {
