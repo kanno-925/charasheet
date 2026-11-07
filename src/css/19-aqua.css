@@ -419,3 +419,37 @@
 @media (max-width: 560px) { .ts-aq { gap: 22px 18px; } .ts-aq-bub .bub { width: calc(110px * var(--s, 1)); height: calc(110px * var(--s, 1)); } .ts-aq-bub .plate { min-width: 100px; max-width: 150px; } }
 :root[data-look~="aqua"] .sel-head h2 { font-family: "Pinyon Script", var(--f-display); letter-spacing: .1em; }
 :root[data-look~="aqua"] .sel-head h2::before { content: "Select  "; font-family: "Pinyon Script", cursive; font-weight: 400; color: var(--aq-cyan, #8fdcff); }
+
+/* ===== アクアリウム：左上のロゴは水の色（assets/brand/logo-aqua.webp） ===== */
+:root[data-look~="aqua"] .brand { background-image: url("../assets/brand/logo-aqua.webp"); }
+
+/* ===== アクアリウム：項目の窓は、下に「泡のボタン」が並ぶ。開いている泡が大きく光り、名前が出る ===== */
+:root[data-look~="aqua"] .sao { display: flex; flex-direction: column; gap: 10px; width: min(1080px, 100%); }
+:root[data-look~="aqua"] .sao-win { max-height: calc(100vh - 150px); }
+:root[data-look~="aqua"] .sao-menu { order: 2; flex-direction: row; justify-content: center; align-items: center; gap: 16px; padding: 6px 8px 26px; overflow: visible; }
+:root[data-look~="aqua"] .sao-item { position: relative; flex: none; width: 54px; height: 54px; padding: 0; display: grid; place-items: center; grid-template-columns: none; border-radius: 50% !important; border: 0;
+  background: radial-gradient(circle at 50% 45%, rgb(80 160 220 / .25), rgb(10 40 90 / .6)) !important;
+  box-shadow: inset 0 0 0 1.5px rgb(220 248 255 / .7), inset 0 -10px 18px rgb(140 220 255 / .25), inset 6px 8px 14px rgb(255 255 255 / .22), 0 0 16px rgb(120 210 255 / .3);
+  transform: none !important; transition: scale .4s cubic-bezier(.3, 1.6, .5, 1), box-shadow .3s; animation: ts-aq-float 5s ease-in-out infinite; }
+:root[data-look~="aqua"] .sao-item:nth-child(2n) { animation-duration: 6.2s; animation-delay: -1.5s; }
+:root[data-look~="aqua"] .sao-item:nth-child(3n) { animation-duration: 5.6s; animation-delay: -3s; }
+:root[data-look~="aqua"] .sao-item::before { content: ""; position: absolute; left: 20%; top: 14%; width: 28%; height: 18%; border-radius: 50%; transform: rotate(-30deg); background: radial-gradient(closest-side, rgb(255 255 255 / .9), transparent); }
+:root[data-look~="aqua"] .sao-item::after, :root[data-look~="aqua"] .sao-item.on::after { display: none; }
+:root[data-look~="aqua"] .sao-item .sao-ic { width: auto; height: auto; border: 0; background: none; color: #dff6ff; }
+:root[data-look~="aqua"] .sao-item .sao-lb { position: absolute; top: 100%; left: 50%; translate: -50% 0; margin-top: 6px; white-space: nowrap; font-size: 11px; color: #eaf8ff; opacity: 0; transition: opacity .3s; text-shadow: var(--aq-glow, none); }
+:root[data-look~="aqua"] .sao-item .sao-lb small { display: none; }
+:root[data-look~="aqua"] .sao-item:hover { scale: 1.1; }
+:root[data-look~="aqua"] .sao-item:hover .sao-lb { opacity: .8; }
+:root[data-look~="aqua"] .sao-item.on { scale: 1.28; box-shadow: inset 0 0 0 2px #fff, inset 0 -10px 18px rgb(140 220 255 / .35), inset 6px 8px 14px rgb(255 255 255 / .3), 0 0 26px rgb(140 225 255 / .8); }
+:root[data-look~="aqua"] .sao-item.on .sao-lb { opacity: 1; font-weight: 700; }
+@media (max-width: 760px) {
+  :root[data-look~="aqua"] .sao-menu { justify-content: flex-start; overflow-x: auto; overflow-y: visible; gap: 12px; padding: 10px 12px 28px; scrollbar-width: none; }
+  :root[data-look~="aqua"] .sao-menu::-webkit-scrollbar { display: none; }
+  :root[data-look~="aqua"] .sao-item { width: 46px; height: 46px; }
+  :root[data-look~="aqua"] .sao-win { max-height: calc(100vh - 120px); }
+}
+:root[data-look~="aqua"] .sao > * { min-width: 0; }
+:root[data-look~="aqua"] .sao-win { width: 100%; box-sizing: border-box; }
+@media (max-width: 760px) { :root[data-look~="aqua"] .sao { width: 100%; } }
+:root[data-look~="aqua"] .sao { min-width: 0; max-width: 100%; }
+:root[data-look~="aqua"] .sao-menu { min-width: 0; max-width: 100%; }

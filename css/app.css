@@ -2120,6 +2120,34 @@ body.ue-on .ue-panel { cursor: auto; }
 :root[data-look~="wa"] .hero-copy { padding: 22px 18px; background: var(--wa-washi), linear-gradient(180deg, rgb(250 244 230 / .94), rgb(242 232 210 / .92)); border: 1px solid rgb(176 141 74 / .55);
   box-shadow: inset 0 0 0 4px rgb(250 244 230 / .6), inset 0 0 0 5px rgb(176 141 74 / .35), 0 14px 30px -18px rgb(60 40 20 / .6); }
 
+/* ===== 和風：左上のロゴは墨と金（assets/brand/logo-wa.webp） ===== */
+:root[data-look~="wa"] .brand-logo { background-image: url("../assets/brand/logo-wa.webp"); filter: none; }
+
+/* ===== 和風：項目の窓は、上に「短冊」が並ぶ（右から左へ、縦書き、壱〜玖）。開いている短冊だけ赤く長く垂れる ===== */
+@counter-style wa-daiji { system: fixed; symbols: 壱 弐 参 肆 伍 陸 漆 捌 玖; }
+:root[data-look~="wa"] .sao { grid-template-columns: minmax(0, 1fr); gap: 0; width: min(1080px, 100%); align-items: stretch; }
+:root[data-look~="wa"] .sao-menu { position: relative; flex-direction: row-reverse; justify-content: center; align-items: flex-start; gap: 8px; padding: 14px 26px 0; overflow: visible; counter-reset: wa; margin-bottom: 12px; }
+:root[data-look~="wa"] .sao-menu::before { content: ""; position: absolute; left: 4%; right: 4%; top: 6px; height: 2px; background: linear-gradient(90deg, transparent, #8a6440 8%, #8a6440 92%, transparent); }   /* 短冊をつるす紐 */
+:root[data-look~="wa"] .sao-item { counter-increment: wa; flex: none; width: 46px; height: 112px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 0 6px; transform: none !important; transform-origin: 50% 0;
+  border: 1px solid rgb(176 141 74 / .55); border-radius: 1px; background: var(--wa-washi), linear-gradient(180deg, #fbf5e6, #f1e5c8); color: var(--wa-sumi); box-shadow: 0 6px 12px -8px rgb(60 40 20 / .6); transition: height .35s cubic-bezier(.3, 1.4, .5, 1), background .3s; }
+:root[data-look~="wa"] .sao-item::before { content: counter(wa, wa-daiji); width: 20px; height: 20px; flex: none; display: grid; place-items: center; font-family: var(--f-brush, serif); font-size: 12px; color: #fff4e6; background: #b8392b; border-radius: 2px; }
+:root[data-look~="wa"] .sao-item::after { content: ""; position: absolute; left: 50%; top: -9px; width: 1px; height: 9px; background: #8a6440; border: 0; translate: 0 0; filter: none; }
+:root[data-look~="wa"] .sao-item.on::after { border: 0; }
+:root[data-look~="wa"] .sao-item .sao-ic { display: none; }
+:root[data-look~="wa"] .sao-item .sao-lb { writing-mode: vertical-rl; text-orientation: upright; font-family: var(--f-body); font-size: 13px; font-weight: 700; letter-spacing: .14em; white-space: nowrap; overflow: hidden; max-height: 76px; }
+:root[data-look~="wa"] .sao-item .sao-lb small { display: none; }
+:root[data-look~="wa"] .sao-item:hover { animation: wa-swing .9s ease-in-out; box-shadow: 0 10px 16px -8px rgb(60 40 20 / .7); }
+@keyframes wa-swing { 25% { rotate: 3deg; } 60% { rotate: -2deg; } 85% { rotate: .8deg; } }
+:root[data-look~="wa"] .sao-item.on { height: 132px; background: linear-gradient(180deg, #a8352a, #7e241c); border-color: #d9b46a; color: #f6e7c8; box-shadow: 0 10px 18px -8px rgb(90 20 10 / .7); }
+:root[data-look~="wa"] .sao-item.on::before { background: #f6e7c8; color: #8a2a20; }
+@media (max-width: 760px) {
+  :root[data-look~="wa"] .sao-menu { justify-content: flex-start; overflow-x: auto; padding: 14px 10px 4px; gap: 6px; scrollbar-width: none; }
+  :root[data-look~="wa"] .sao-menu::-webkit-scrollbar { display: none; }
+  :root[data-look~="wa"] .sao-item { width: 40px; height: 96px; display: flex; grid-template-columns: none; padding: 6px 0; }
+  :root[data-look~="wa"] .sao-item.on { height: 110px; }
+  :root[data-look~="wa"] .sao-item .sao-lb { font-size: 12px; max-height: 64px; }
+}
+
 /* ===== ドットテーマ（look: dot）：星降る夜の街、光る枠、ドット文字 =====
    背景は 15-theme.js の dotScene() が低い解像度で描いて拡大している（にじまないよう pixelated）。 */
 :root[data-look~="dot"] {
@@ -2316,6 +2344,30 @@ body.ue-on .ue-panel { cursor: auto; }
 :root[data-look~="dot"] .bar-actions .btn:hover::before { visibility: visible; animation: ts-dot-blink .7s steps(2, end) infinite; }
 :root[data-look~="dot"] .bar-actions .btn:hover { color: #ffd36b; transform: none; }
 
+/* ===== ドット：左上のロゴはドット絵（assets/brand/logo-dot.webp） ===== */
+:root[data-look~="dot"] .brand-logo { background-image: url("../assets/brand/logo-dot.webp"); filter: none; image-rendering: pixelated; }
+
+/* ===== ドット：項目の窓は、上に昔のRPGの「コマンド」の窓（3×3、▶ カーソル） ===== */
+:root[data-look~="dot"] .sao { grid-template-columns: minmax(0, 1fr); gap: 16px; width: min(1080px, 100%); align-items: stretch; }
+:root[data-look~="dot"] .sao-menu { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px 18px; width: min(600px, 100%); margin: 8px auto 0; padding: 22px 16px 12px;
+  background: var(--dot-fill); border: 2px solid var(--dot-line); box-shadow: var(--dot-frame); overflow: visible; }
+:root[data-look~="dot"] .sao-menu::before { content: "コマンド"; position: absolute; top: -12px; left: 14px; padding: 0 8px; background: var(--dot-dark); color: var(--dot-hi); font-size: 13px; letter-spacing: .1em; }
+:root[data-look~="dot"] .sao-item { display: flex; align-items: center; gap: 6px; padding: 5px 6px 5px 22px; border: 0 !important; background: none !important; box-shadow: none !important; color: #d6e0ff; transform: none !important; position: relative; min-width: 0; }
+:root[data-look~="dot"] .sao-item::before { content: "▶"; position: absolute; left: 4px; top: 50%; translate: 0 -50%; color: #ffd36b; font-size: 12px; visibility: hidden; }
+:root[data-look~="dot"] .sao-item::after, :root[data-look~="dot"] .sao-item.on::after { display: none; }
+:root[data-look~="dot"] .sao-item .sao-ic { display: none; }
+:root[data-look~="dot"] .sao-item .sao-lb { font-size: 15px; font-weight: 400; letter-spacing: .06em; }
+:root[data-look~="dot"] .sao-item .sao-lb small { display: none; }
+:root[data-look~="dot"] .sao-item:hover { color: #fff; }
+:root[data-look~="dot"] .sao-item:hover::before { visibility: visible; color: rgb(255 211 107 / .6); }
+:root[data-look~="dot"] .sao-item.on { color: #ffd36b; }
+:root[data-look~="dot"] .sao-item.on::before { visibility: visible; animation: ts-dot-blink .7s steps(2, end) infinite; }
+@media (max-width: 760px) {
+  :root[data-look~="dot"] .sao-menu { display: grid; flex-direction: initial; overflow: visible; padding: 20px 10px 10px; gap: 0 8px; }
+  :root[data-look~="dot"] .sao-item { display: flex; grid-template-columns: none; padding: 6px 4px 6px 18px; }
+  :root[data-look~="dot"] .sao-item .sao-lb { font-size: 13px; }
+}
+
 /* ===== 魔導書テーマ（look: book）：本のまわりの画面も魔導書にそろえる =====
    ・暗いところ（上の帯・探索者の一覧・えらぶ画面・下の帯）は「革と金」
    ・読み書きするところ（小窓・ココフォリアのコマ・出力・チラ見せ）は「羊皮紙とインク」
@@ -2471,6 +2523,9 @@ body.ue-on .ue-panel { cursor: auto; }
 @media (max-width: 760px) {
   :root[data-look~="book"] .hero::after { width: 44vw; right: 0; opacity: .16; }
 }
+
+/* 左上のロゴは金箔（assets/brand/logo-book.webp） */
+:root[data-look~="book"] .brand-logo { background-image: url("../assets/brand/logo-book.webp"); filter: drop-shadow(0 0 6px rgb(240 190 100 / .3)); }
 
 /* ===== アクアリウムテーマ（look: aqua）：オーナーの見本の画像そのままの見た目 =====
    ・ガラスのふち・泡・アイコン・題名・見出しの文字は、見本の画像から「光だけ」を切り出した絵（assets/aqua/ui/）を使う
@@ -2893,6 +2948,40 @@ body.ue-on .ue-panel { cursor: auto; }
 @media (max-width: 560px) { .ts-aq { gap: 22px 18px; } .ts-aq-bub .bub { width: calc(110px * var(--s, 1)); height: calc(110px * var(--s, 1)); } .ts-aq-bub .plate { min-width: 100px; max-width: 150px; } }
 :root[data-look~="aqua"] .sel-head h2 { font-family: "Pinyon Script", var(--f-display); letter-spacing: .1em; }
 :root[data-look~="aqua"] .sel-head h2::before { content: "Select  "; font-family: "Pinyon Script", cursive; font-weight: 400; color: var(--aq-cyan, #8fdcff); }
+
+/* ===== アクアリウム：左上のロゴは水の色（assets/brand/logo-aqua.webp） ===== */
+:root[data-look~="aqua"] .brand { background-image: url("../assets/brand/logo-aqua.webp"); }
+
+/* ===== アクアリウム：項目の窓は、下に「泡のボタン」が並ぶ。開いている泡が大きく光り、名前が出る ===== */
+:root[data-look~="aqua"] .sao { display: flex; flex-direction: column; gap: 10px; width: min(1080px, 100%); }
+:root[data-look~="aqua"] .sao-win { max-height: calc(100vh - 150px); }
+:root[data-look~="aqua"] .sao-menu { order: 2; flex-direction: row; justify-content: center; align-items: center; gap: 16px; padding: 6px 8px 26px; overflow: visible; }
+:root[data-look~="aqua"] .sao-item { position: relative; flex: none; width: 54px; height: 54px; padding: 0; display: grid; place-items: center; grid-template-columns: none; border-radius: 50% !important; border: 0;
+  background: radial-gradient(circle at 50% 45%, rgb(80 160 220 / .25), rgb(10 40 90 / .6)) !important;
+  box-shadow: inset 0 0 0 1.5px rgb(220 248 255 / .7), inset 0 -10px 18px rgb(140 220 255 / .25), inset 6px 8px 14px rgb(255 255 255 / .22), 0 0 16px rgb(120 210 255 / .3);
+  transform: none !important; transition: scale .4s cubic-bezier(.3, 1.6, .5, 1), box-shadow .3s; animation: ts-aq-float 5s ease-in-out infinite; }
+:root[data-look~="aqua"] .sao-item:nth-child(2n) { animation-duration: 6.2s; animation-delay: -1.5s; }
+:root[data-look~="aqua"] .sao-item:nth-child(3n) { animation-duration: 5.6s; animation-delay: -3s; }
+:root[data-look~="aqua"] .sao-item::before { content: ""; position: absolute; left: 20%; top: 14%; width: 28%; height: 18%; border-radius: 50%; transform: rotate(-30deg); background: radial-gradient(closest-side, rgb(255 255 255 / .9), transparent); }
+:root[data-look~="aqua"] .sao-item::after, :root[data-look~="aqua"] .sao-item.on::after { display: none; }
+:root[data-look~="aqua"] .sao-item .sao-ic { width: auto; height: auto; border: 0; background: none; color: #dff6ff; }
+:root[data-look~="aqua"] .sao-item .sao-lb { position: absolute; top: 100%; left: 50%; translate: -50% 0; margin-top: 6px; white-space: nowrap; font-size: 11px; color: #eaf8ff; opacity: 0; transition: opacity .3s; text-shadow: var(--aq-glow, none); }
+:root[data-look~="aqua"] .sao-item .sao-lb small { display: none; }
+:root[data-look~="aqua"] .sao-item:hover { scale: 1.1; }
+:root[data-look~="aqua"] .sao-item:hover .sao-lb { opacity: .8; }
+:root[data-look~="aqua"] .sao-item.on { scale: 1.28; box-shadow: inset 0 0 0 2px #fff, inset 0 -10px 18px rgb(140 220 255 / .35), inset 6px 8px 14px rgb(255 255 255 / .3), 0 0 26px rgb(140 225 255 / .8); }
+:root[data-look~="aqua"] .sao-item.on .sao-lb { opacity: 1; font-weight: 700; }
+@media (max-width: 760px) {
+  :root[data-look~="aqua"] .sao-menu { justify-content: flex-start; overflow-x: auto; overflow-y: visible; gap: 12px; padding: 10px 12px 28px; scrollbar-width: none; }
+  :root[data-look~="aqua"] .sao-menu::-webkit-scrollbar { display: none; }
+  :root[data-look~="aqua"] .sao-item { width: 46px; height: 46px; }
+  :root[data-look~="aqua"] .sao-win { max-height: calc(100vh - 120px); }
+}
+:root[data-look~="aqua"] .sao > * { min-width: 0; }
+:root[data-look~="aqua"] .sao-win { width: 100%; box-sizing: border-box; }
+@media (max-width: 760px) { :root[data-look~="aqua"] .sao { width: 100%; } }
+:root[data-look~="aqua"] .sao { min-width: 0; max-width: 100%; }
+:root[data-look~="aqua"] .sao-menu { min-width: 0; max-width: 100%; }
 
 /* ================= ORBiS テーマ（look: orbis）＝ メインのテーマ・アプリの顔 =================
    うすい青〜むらさきの空、雲、光の軌道、四つの光の星。部品は白いすりガラス（ふちが光る）。

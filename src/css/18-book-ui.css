@@ -153,3 +153,6 @@
 @media (max-width: 760px) {
   :root[data-look~="book"] .hero::after { width: 44vw; right: 0; opacity: .16; }
 }
+
+/* 左上のロゴは金箔（assets/brand/logo-book.webp） */
+:root[data-look~="book"] .brand-logo { background-image: url("../assets/brand/logo-book.webp"); filter: drop-shadow(0 0 6px rgb(240 190 100 / .3)); }

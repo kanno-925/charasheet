@@ -193,3 +193,27 @@
 :root[data-look~="dot"] .bar-actions .btn::before { content: "▶"; position: absolute; left: 6px; color: #ffd36b; font-size: 11px; visibility: hidden; }
 :root[data-look~="dot"] .bar-actions .btn:hover::before { visibility: visible; animation: ts-dot-blink .7s steps(2, end) infinite; }
 :root[data-look~="dot"] .bar-actions .btn:hover { color: #ffd36b; transform: none; }
+
+/* ===== ドット：左上のロゴはドット絵（assets/brand/logo-dot.webp） ===== */
+:root[data-look~="dot"] .brand-logo { background-image: url("../assets/brand/logo-dot.webp"); filter: none; image-rendering: pixelated; }
+
+/* ===== ドット：項目の窓は、上に昔のRPGの「コマンド」の窓（3×3、▶ カーソル） ===== */
+:root[data-look~="dot"] .sao { grid-template-columns: minmax(0, 1fr); gap: 16px; width: min(1080px, 100%); align-items: stretch; }
+:root[data-look~="dot"] .sao-menu { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px 18px; width: min(600px, 100%); margin: 8px auto 0; padding: 22px 16px 12px;
+  background: var(--dot-fill); border: 2px solid var(--dot-line); box-shadow: var(--dot-frame); overflow: visible; }
+:root[data-look~="dot"] .sao-menu::before { content: "コマンド"; position: absolute; top: -12px; left: 14px; padding: 0 8px; background: var(--dot-dark); color: var(--dot-hi); font-size: 13px; letter-spacing: .1em; }
+:root[data-look~="dot"] .sao-item { display: flex; align-items: center; gap: 6px; padding: 5px 6px 5px 22px; border: 0 !important; background: none !important; box-shadow: none !important; color: #d6e0ff; transform: none !important; position: relative; min-width: 0; }
+:root[data-look~="dot"] .sao-item::before { content: "▶"; position: absolute; left: 4px; top: 50%; translate: 0 -50%; color: #ffd36b; font-size: 12px; visibility: hidden; }
+:root[data-look~="dot"] .sao-item::after, :root[data-look~="dot"] .sao-item.on::after { display: none; }
+:root[data-look~="dot"] .sao-item .sao-ic { display: none; }
+:root[data-look~="dot"] .sao-item .sao-lb { font-size: 15px; font-weight: 400; letter-spacing: .06em; }
+:root[data-look~="dot"] .sao-item .sao-lb small { display: none; }
+:root[data-look~="dot"] .sao-item:hover { color: #fff; }
+:root[data-look~="dot"] .sao-item:hover::before { visibility: visible; color: rgb(255 211 107 / .6); }
+:root[data-look~="dot"] .sao-item.on { color: #ffd36b; }
+:root[data-look~="dot"] .sao-item.on::before { visibility: visible; animation: ts-dot-blink .7s steps(2, end) infinite; }
+@media (max-width: 760px) {
+  :root[data-look~="dot"] .sao-menu { display: grid; flex-direction: initial; overflow: visible; padding: 20px 10px 10px; gap: 0 8px; }
+  :root[data-look~="dot"] .sao-item { display: flex; grid-template-columns: none; padding: 6px 4px 6px 18px; }
+  :root[data-look~="dot"] .sao-item .sao-lb { font-size: 13px; }
+}

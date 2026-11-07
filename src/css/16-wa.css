@@ -314,3 +314,31 @@
 @media (max-width: 760px) { :root[data-look~="wa"] .hero-title { font-size: 24px; max-height: 200px; } :root[data-look~="wa"] .hero-lead { display: none; } :root[data-look~="wa"] .hero-copy { padding: 14px 12px; } :root[data-look~="wa"] .hero .eyebrow { font-size: 9px; max-height: 200px; } }
 :root[data-look~="wa"] .hero-copy { padding: 22px 18px; background: var(--wa-washi), linear-gradient(180deg, rgb(250 244 230 / .94), rgb(242 232 210 / .92)); border: 1px solid rgb(176 141 74 / .55);
   box-shadow: inset 0 0 0 4px rgb(250 244 230 / .6), inset 0 0 0 5px rgb(176 141 74 / .35), 0 14px 30px -18px rgb(60 40 20 / .6); }
+
+/* ===== 和風：左上のロゴは墨と金（assets/brand/logo-wa.webp） ===== */
+:root[data-look~="wa"] .brand-logo { background-image: url("../assets/brand/logo-wa.webp"); filter: none; }
+
+/* ===== 和風：項目の窓は、上に「短冊」が並ぶ（右から左へ、縦書き、壱〜玖）。開いている短冊だけ赤く長く垂れる ===== */
+@counter-style wa-daiji { system: fixed; symbols: 壱 弐 参 肆 伍 陸 漆 捌 玖; }
+:root[data-look~="wa"] .sao { grid-template-columns: minmax(0, 1fr); gap: 0; width: min(1080px, 100%); align-items: stretch; }
+:root[data-look~="wa"] .sao-menu { position: relative; flex-direction: row-reverse; justify-content: center; align-items: flex-start; gap: 8px; padding: 14px 26px 0; overflow: visible; counter-reset: wa; margin-bottom: 12px; }
+:root[data-look~="wa"] .sao-menu::before { content: ""; position: absolute; left: 4%; right: 4%; top: 6px; height: 2px; background: linear-gradient(90deg, transparent, #8a6440 8%, #8a6440 92%, transparent); }   /* 短冊をつるす紐 */
+:root[data-look~="wa"] .sao-item { counter-increment: wa; flex: none; width: 46px; height: 112px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 0 6px; transform: none !important; transform-origin: 50% 0;
+  border: 1px solid rgb(176 141 74 / .55); border-radius: 1px; background: var(--wa-washi), linear-gradient(180deg, #fbf5e6, #f1e5c8); color: var(--wa-sumi); box-shadow: 0 6px 12px -8px rgb(60 40 20 / .6); transition: height .35s cubic-bezier(.3, 1.4, .5, 1), background .3s; }
+:root[data-look~="wa"] .sao-item::before { content: counter(wa, wa-daiji); width: 20px; height: 20px; flex: none; display: grid; place-items: center; font-family: var(--f-brush, serif); font-size: 12px; color: #fff4e6; background: #b8392b; border-radius: 2px; }
+:root[data-look~="wa"] .sao-item::after { content: ""; position: absolute; left: 50%; top: -9px; width: 1px; height: 9px; background: #8a6440; border: 0; translate: 0 0; filter: none; }
+:root[data-look~="wa"] .sao-item.on::after { border: 0; }
+:root[data-look~="wa"] .sao-item .sao-ic { display: none; }
+:root[data-look~="wa"] .sao-item .sao-lb { writing-mode: vertical-rl; text-orientation: upright; font-family: var(--f-body); font-size: 13px; font-weight: 700; letter-spacing: .14em; white-space: nowrap; overflow: hidden; max-height: 76px; }
+:root[data-look~="wa"] .sao-item .sao-lb small { display: none; }
+:root[data-look~="wa"] .sao-item:hover { animation: wa-swing .9s ease-in-out; box-shadow: 0 10px 16px -8px rgb(60 40 20 / .7); }
+@keyframes wa-swing { 25% { rotate: 3deg; } 60% { rotate: -2deg; } 85% { rotate: .8deg; } }
+:root[data-look~="wa"] .sao-item.on { height: 132px; background: linear-gradient(180deg, #a8352a, #7e241c); border-color: #d9b46a; color: #f6e7c8; box-shadow: 0 10px 18px -8px rgb(90 20 10 / .7); }
+:root[data-look~="wa"] .sao-item.on::before { background: #f6e7c8; color: #8a2a20; }
+@media (max-width: 760px) {
+  :root[data-look~="wa"] .sao-menu { justify-content: flex-start; overflow-x: auto; padding: 14px 10px 4px; gap: 6px; scrollbar-width: none; }
+  :root[data-look~="wa"] .sao-menu::-webkit-scrollbar { display: none; }
+  :root[data-look~="wa"] .sao-item { width: 40px; height: 96px; display: flex; grid-template-columns: none; padding: 6px 0; }
+  :root[data-look~="wa"] .sao-item.on { height: 110px; }
+  :root[data-look~="wa"] .sao-item .sao-lb { font-size: 12px; max-height: 64px; }
+}
