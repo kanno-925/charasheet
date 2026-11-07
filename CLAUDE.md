@@ -3,6 +3,10 @@
 クトゥルフ神話TRPG（6版・7版）のキャラシを作り、ココフォリアのコマに貼り付けられるWebアプリ。
 公開URL：https://kanno-925.github.io/charasheet/ （GitHub Pages、main に push すると反映）
 
+## ロゴと文字
+- ORBiS のロゴ・アイコン・題字は **`docs/brand.md`（見本 `docs/brand/orbis-logo-guide.png`）のデザインを使う**（2026-11-07 にオーナーが決定。青→紫の惑星と輪＋四つの光の星、細身の「ORBIS」）。ロゴ・アイコン・題字・共有カードなど、ロゴが出る所を作る・直すときは必ずこれに合わせる。
+- `assets/brand/` の今の画像は前の金色のデザインのまま（差しかえは未着手）。
+
 ## 作業のルール
 - オーナーは開発者ではないので、説明・コミットメッセージ・コード内コメントは**やさしい日本語**で書く。
 - 編集するのは `src/` だけ。直下の `index.html` / `css/app.css` / `js/app.js` と `dist/` は `python3 build.py` が作る生成物なので**直接編集しない**。
