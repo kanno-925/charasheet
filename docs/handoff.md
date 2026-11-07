@@ -24,7 +24,7 @@
 | 08-group-transfer.sql | グループの代表をゆずる（transfer_group） | 済み（安全版に直して再実行・確認済み） |
 | 09-dice-limit.sql | ダイスの上限（group_members.dice_limit / dice_reset） | 済み（2026-11-07 に列があることを確認） |
 | 10-share.sql | キャラシの共有リンク（char_shares・get_shared_char。見る人はログイン不要なので anon にも実行権を付けている） | 済み（2026-11-07 に確認） |
-| 11-share-card.sql | 共有リンクのカード（get_share_card・Storage の share-og） | **未実行**（2026-11-07 に追加） |
+| 11-share-card.sql | 共有リンクのカード（get_share_card・Storage の share-og） | 済み（2026-11-07 に確認） |
 
 - SQL を渡すときの注意：オーナーがコピーで**途中で切れた**ことがある。短く・英数字だけで書き、「全部消してから貼る」「文字を選択していない状態で Run」と伝える。
 - 新しいサーバー関数は Supabase が anon（ログインしていない人）にも実行権を付ける。`revoke ... from public, anon` と、関数の中で `auth.uid() is null` を止めることを必ず入れる。
@@ -46,7 +46,7 @@
 
 ## 4. 残っていること・確認待ち
 
-0. **共有リンクのカード（立ち絵のプレビュー）**：オーナーに 11-share-card.sql の実行と、Cloudflare Workers の用意（cloudflare/share-worker.js を貼って Deploy）をお願いしている。入口のURL（https://〜.workers.dev）をもらったら、30-share.js の `SHARE_PAGE` に `https://〜.workers.dev/s/` と書いて build → main へ。
+0. **共有リンクのカード（立ち絵のプレビュー）**：SQL 11 は実行済み。オーナーに Cloudflare Workers の用意（cloudflare/share-worker.js を貼って Deploy）をお願いしている。入口のURL（https://〜.workers.dev）をもらったら、30-share.js の `SHARE_PAGE` に `https://〜.workers.dev/s/` と書いて build → main へ。
 
 1. **「なんか開けない」の報告（最後のやりとり）**：こちらでは公開サイトをPC・iPhoneのサイズ、全テーマで開けてエラーなし。キャッシュ、古い `キャラシ工房.html`（改名で消えた）、ホーム画面のアイコンからの起動などを疑い、オーナーに「端末・どこから開いたか・どうなるか・ログインしているか・スクショ」を聞いている。**返事を待っている状態**。ログイン中だけ起きる不具合の可能性もある（テストでは確かめられない）。
 2. ~~09-dice-limit.sql を実行したか確認~~ → 済み（列があることを確認）。
