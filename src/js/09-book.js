@@ -385,7 +385,8 @@ function renderSheet() {
   $('sheet').classList.toggle('is-wa', !book && isWa());
   $('sheet').classList.toggle('is-dot', !book && isDot());
   $('sheet').classList.toggle('is-aqua', !book && isAqua());
-  $('sheet').innerHTML = book ? bookHtml(c) : isWa() ? waHtml(c) : isDot() ? dotHtml(c) : isAqua() ? aquaHtml(c) : hubHtml(c);
+  $('sheet').classList.toggle('is-orbis', !book && isOrbis());
+  $('sheet').innerHTML = book ? bookHtml(c) : isWa() ? waHtml(c) : isDot() ? dotHtml(c) : isAqua() ? aquaHtml(c) : isOrbis() ? orbisHtml(c) : hubHtml(c);
   if (book) { const now = pageAt(); document.querySelectorAll('#book .bk-scroll').forEach((e, i) => { if (now[i] === was[i]) e.scrollTop = kept[i] || 0; }); }
   if (panelKey && !$('panel-ov').hidden) {
     const body = $('panel-body'), st = body.scrollTop;
@@ -447,7 +448,11 @@ function openPanel(key, fromEl) {
   fillPanel(key);
   ov.hidden = false;
   scrollMenu(true);
-  if (!reduceMotion.matches && isAqua()) {
+  if (!reduceMotion.matches && isOrbis()) {
+    // 押した玉から光の円が広がるようにひらく
+    orbisPanelOpen(ov, fromEl);
+    stagger(360);
+  } else if (!reduceMotion.matches && isAqua()) {
     // 泡がふくらむようにひらく
     aquaPanelOpen(ov);
     stagger(380);
@@ -484,7 +489,7 @@ function openPanel(key, fromEl) {
 }
 function closePanel() {
   const ov = $('panel-ov'); if (ov.hidden) return;
-  const findTarget = k => document.querySelector(`#sheet [data-open="${k}"]`) || document.querySelector('#sheet .hub-core, #sheet .wa-kake, #sheet .dot-name, #sheet .aq-pic');
+  const findTarget = k => document.querySelector(`#sheet [data-open="${k}"]`) || document.querySelector('#sheet .hub-core, #sheet .wa-kake, #sheet .dot-name, #sheet .aq-pic, #sheet .ob-pic');
   let target = findTarget(panelKey);
   const done = anims => {
     const k = panelKey;
@@ -497,6 +502,11 @@ function closePanel() {
     }
   };
   if (reduceMotion.matches) return done([]);
+  if (isOrbis()) { // 押した玉にもどるように閉じる
+    const anims = orbisPanelClose(ov, target);
+    Promise.all(anims.map(a => a.finished)).then(() => done(anims));
+    return;
+  }
   if (isAqua()) { // しぼんで泡に戻る
     const anims = aquaPanelClose(ov);
     Promise.all(anims.map(a => a.finished)).then(() => done(anims));
@@ -536,6 +546,12 @@ function closePanel() {
 function gotoPanel(key) {
   if (key === panelKey) return;
   fillPanel(key);
+  if (!reduceMotion.matches && isOrbis()) { // 光がさすように、横からふわっと
+    $('panel-body').animate([{ opacity: 0, transform: 'translateX(18px)' }, { opacity: 1, transform: 'none' }], { duration: 460, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+    $('sao-line').animate([{ transform: 'scaleX(0)', opacity: 1 }, { transform: 'scaleX(1)', opacity: 0 }], { duration: 520, easing: 'ease-out' });
+    stagger(60);
+    return;
+  }
   if (!reduceMotion.matches && isAqua()) { // 水の中からゆらりと浮かびあがる
     $('panel-body').animate([{ opacity: 0, transform: 'translateY(14px)', filter: 'blur(5px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: 520, easing: 'cubic-bezier(.2, .7, .2, 1)' });
     return;
@@ -581,8 +597,8 @@ function updateComputed() {
   document.querySelectorAll('[data-ph]').forEach(el => { el.placeholder = o[el.dataset.ph]; });
   document.querySelectorAll('[data-pt]').forEach(el => el.classList.toggle('over', o[el.dataset.pt + 'Left'] < 0));
   document.querySelectorAll('[data-sum]').forEach(el => { el.textContent = sumText(c, d, el.dataset.sum); });
-  const hn = document.querySelector('[data-hub="name"]'); if (hn) hn.textContent = c.profile.name || '名無し';
-  const hk = document.querySelector('[data-hub="kana"]'); if (hk) hk.textContent = c.profile.kana;
+  document.querySelectorAll('[data-hub="name"]').forEach(el => { el.textContent = c.profile.name || '名無し'; });
+  document.querySelectorAll('[data-hub="kana"]').forEach(el => { el.textContent = c.profile.kana; });
   updateCharts(c, a);
   document.querySelectorAll('[data-bar]').forEach(el => { const k = el.dataset.bar, v = d[k], m = d[k + 'Max']; el.style.width = (m > 0 ? Math.max(0, Math.min(100, v / m * 100)) : 0) + '%'; });
   const hs = document.querySelector('[data-hub="sub"]');

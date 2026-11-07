@@ -386,7 +386,7 @@ async function load() {
   if (!best && !state.chars.length) state.chars = [sample()];   // 見本は、はじめて開いたときだけ（全部消した人には出さない）
   if (!state.chars.some(c => c.id === state.activeId)) state.activeId = state.chars.length ? state.chars[0].id : null;
   // 削除したテーマ（深淵・古書・ネオン・森）を使っていた人は、近未来にもどす（そのテーマ用に変えた色も消す）
-  if (state.themePreset && !THEME_PRESETS[state.themePreset]) { state.themePreset = 'sky'; state.theme = {}; }
+  if (state.themePreset && !THEME_PRESETS[state.themePreset]) { state.themePreset = 'orbis'; state.theme = {}; }
   loaded = true;
   if (idbOk && (!fromIdb || idbLegacy || best !== fromIdb)) saveNow();   // 新しい形で IndexedDB に書いておく
 }

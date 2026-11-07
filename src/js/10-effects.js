@@ -10,6 +10,16 @@ function fx(x, y, burst = false) {
     document.body.appendChild(e);
     setTimeout(() => e.remove(), 1400);
   };
+  if (isOrbis()) {   // ORBiS では、やわらかい光の輪と、小さな四つの星が散る
+    make('fx-ob-glow'); make('fx-ob-ring');
+    const n = burst ? 14 : 5;
+    for (let i = 0; i < n; i++) {
+      const ang = i / n * Math.PI * 2 + Math.random() * .6, dist = (burst ? 60 : 22) + Math.random() * (burst ? 90 : 34);
+      make('fx-ob-star', { '--dx': Math.cos(ang) * dist + 'px', '--dy': Math.sin(ang) * dist * .8 + 'px', '--s': (.5 + Math.random() * (burst ? 1.1 : .7)).toFixed(2), '--r': Math.round(Math.random() * 90) + 'deg', '--d': Math.round(Math.random() * 120) + 'ms' });
+    }
+    if (burst) make('fx-ob-orbit');
+    return;
+  }
   make('fx-bloom'); make('fx-ring'); make('fx-ring late');
   if (isAqua()) {   // アクアリウムでは、火花のかわりに小さな泡がのぼる
     for (let i = 0; i < (burst ? 12 : 4); i++) make('fx-bub', { '--dx': (Math.random() - .5) * (burst ? 120 : 40) + 'px', '--dy': -(50 + Math.random() * (burst ? 140 : 60)) + 'px', '--s': (.4 + Math.random() * .8).toFixed(2), '--d': Math.round(Math.random() * 200) + 'ms' });

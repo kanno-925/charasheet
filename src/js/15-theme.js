@@ -6,18 +6,19 @@ const THEME_ROWS = [
 ];
 const hexToRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 const rgbToHex = a => '#' + a.map(v => Math.max(0, Math.min(255, Math.round(v) || 0)).toString(16).padStart(2, '0')).join('');
-/* テーマは 近未来・和風・魔導書・ドット・アクアリウム（深淵・古書・ネオン・森は 2026-11-05 に削除） */
+/* テーマは ORBiS（メイン・初めて開いた人はこれ）・近未来・和風・魔導書・アクアリウム・ドット（深淵・古書・ネオン・森は 2026-11-05 に削除） */
 const THEME_PRESETS = {
+  orbis:  { name: 'ORBiS', sub: '星めぐる空と、光のガラス（メイン）', look: 'orbis', vals: { bg: '#dfe5fb', solid: '#f5f6ff', ink: '#2b3670', sky: '#5d82f0', cyan: '#9b87f5', amber: '#7c9cf6' } },
   sky:    { name: '近未来', sub: '白と空色', look: '', vals: {} },
   sakura: { name: '和風', sub: '和紙と墨と金、舞う桜', look: 'mincho wa', vals: { bg: '#ebdfc6', solid: '#f7efdd', ink: '#2e2520', sky: '#5a3c2c', cyan: '#b08d4a', amber: '#b08d4a' } },
   book:   { name: '魔導書', sub: '古本に万年筆で書きこむ記録', look: 'dark mincho book', vals: { bg: '#140c07', solid: '#22160d', ink: '#efe0c4', sky: '#7a5a8c', cyan: '#c9a04e', amber: '#c9a04e' } },
   aqua:   { name: 'アクアリウム', sub: '水底の遺跡と光、くらげ', look: 'dark aqua', vals: { bg: '#04173c', solid: '#0b2c5c', ink: '#e8f7ff', sky: '#7fd6ff', cyan: '#b4f1ff', amber: '#9fe8ff' } },
   dot:    { name: 'ドット', sub: '星降る夜のピクセル', look: 'dark dot', vals: { bg: '#0b0e30', solid: '#141a4c', ink: '#e8eeff', sky: '#86a8ff', cyan: '#a8d8ff', amber: '#ffd36b' } },
 };
-const presetOf = () => THEME_PRESETS[state.themePreset] || THEME_PRESETS.sky;
+const presetOf = () => THEME_PRESETS[state.themePreset] || THEME_PRESETS.orbis;   // 選んでいない人（初めての人）は ORBiS
 const themeVals = () => ({ ...THEME_DEFAULT, ...presetOf().vals, ...(state.theme || {}) });
 function renderPresets() {
-  const cur = state.themePreset && THEME_PRESETS[state.themePreset] ? state.themePreset : 'sky';
+  const cur = state.themePreset && THEME_PRESETS[state.themePreset] ? state.themePreset : 'orbis';
   $('theme-presets').innerHTML = Object.entries(THEME_PRESETS).map(([k, t]) => {
     const v = { ...THEME_DEFAULT, ...t.vals };
     return `<button type="button" class="tp ${k === cur ? 'on' : ''}" data-preset-theme="${k}" aria-pressed="${k === cur}">
@@ -36,6 +37,7 @@ function applyTheme() {
   waScene();
   dotScene();
   aquaScene();
+  orbisScene();
 }
 function applyBg() {
   const ac = state.chars && state.chars.find(c => c.id === state.activeId);
@@ -302,4 +304,4 @@ function dotMosaic(mid) {
   run(360, true, () => { try { mid(); } catch (e) { console.error(e); } setTimeout(() => run(420, false, () => cv.remove()), 90); });
 }
 /* テーマごとの画面切りかえ（和風は襖、ドットはモザイク、魔導書は表紙が閉じてひらく、アクアリウムは水が満ちて引く） */
-const themeSwitchFx = () => isWa() ? waDoors : isDot() ? dotMosaic : isBook() ? bookCover : isAqua() ? aquaWave : null;
+const themeSwitchFx = () => isWa() ? waDoors : isDot() ? dotMosaic : isBook() ? bookCover : isAqua() ? aquaWave : isOrbis() ? orbisWarp : null;

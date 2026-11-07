@@ -123,6 +123,14 @@ function initSlide() {
 function popSelect() {
   if (reduceMotion.matches) return;
   const stage = $('sel-stage');
+  if (isOrbis()) {   // 星のように、ひとつずつふわっと灯る
+    const d0 = obWarpBusy ? 820 : 60;
+    stage.querySelectorAll('.sel-char, .sel-row').forEach((el, i) => el.animate(
+      [{ opacity: 0, transform: 'translateY(26px) scale(.86)' }, { opacity: 1, transform: 'translateY(-3px) scale(1.02)', offset: .65 }, { opacity: 1, transform: 'none' }],
+      { duration: 820, delay: d0 + i * 60, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'backwards' }));
+    [$('sel-new'), document.querySelector('.sel-head')].forEach((el, i) => el?.animate([{ opacity: 0, transform: 'translateY(16px) scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 760, delay: d0 + i * 40, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'backwards' }));
+    return;
+  }
   if (isAqua()) {   // 泡のように下からふわりと浮かんでくる
     const d0 = aqWaveBusy ? 900 : 60;
     stage.querySelectorAll('.sel-char, .sel-row').forEach((el, i) => el.animate(
@@ -154,7 +162,7 @@ function showSelect() {
   applyBg();
   document.documentElement.style.overflow = 'hidden';
   renderSelect();
-  if (!reduceMotion.matches && !isBook() && !isAqua()) sel.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: 'ease-out' });
+  if (!reduceMotion.matches && !isBook() && !isAqua() && !isOrbis()) sel.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: 'ease-out' });
   popSelect();
 }
 function leaveSelect(fromEl, quick) {
