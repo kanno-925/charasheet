@@ -156,6 +156,7 @@ function popSelect() {
 function showSelect() {
   if (themeSwitchFx() && !showSelect.inner && !reduceMotion.matches && $('select').hidden) { themeSwitchFx()(() => { showSelect.inner = true; try { showSelect(); } finally { showSelect.inner = false; } }); return; }
   hidePeek();
+  if (!themeSwitchFx() && $('select').hidden) snd('warp');   // 切りかえの動きがないテーマ（近未来）も音だけ
   if (selTab === 'friends') setTimeout(refreshFriendView, 0);
   stopBgm(); $('bgm').hidden = true;
   const sel = $('select'); sel.hidden = false; sel.scrollTop = 0;
@@ -171,6 +172,7 @@ function leaveSelect(fromEl, quick) {
   const done = () => { sel.hidden = true; document.documentElement.style.overflow = ''; scrollTo(0, 0); renderPlayer(); };
   if (reduceMotion.matches || quick) { done(); return; }
   if (themeSwitchFx()) { themeSwitchFx()(done); return; } // 和風は襖、ドットはモザイク、魔導書は表紙で切りかえ
+  snd('warp');
   if (fromEl) {
     fxAt(fromEl, true);
     fromEl.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.5)', opacity: 0 }], { duration: 520, easing: 'cubic-bezier(.5, 0, .3, 1)', fill: 'forwards' });

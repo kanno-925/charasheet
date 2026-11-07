@@ -304,4 +304,7 @@ function dotMosaic(mid) {
   run(360, true, () => { try { mid(); } catch (e) { console.error(e); } setTimeout(() => run(420, false, () => cv.remove()), 90); });
 }
 /* テーマごとの画面切りかえ（和風は襖、ドットはモザイク、魔導書は表紙が閉じてひらく、アクアリウムは水が満ちて引く） */
-const themeSwitchFx = () => isWa() ? waDoors : isDot() ? dotMosaic : isBook() ? bookCover : isAqua() ? aquaWave : isOrbis() ? orbisWarp : null;
+const themeSwitchFx = () => {
+  const f = isWa() ? waDoors : isDot() ? dotMosaic : isBook() ? bookCover : isAqua() ? aquaWave : isOrbis() ? orbisWarp : null;
+  return f && (mid => { if (!isBook()) snd('warp'); f(mid); });   // 切りかえの音（魔導書は本の音が別にある）
+};

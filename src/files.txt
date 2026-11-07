@@ -50,4 +50,5 @@ js/28-ui-editor.js
 js/29-aqua.js
 js/30-share.js
 js/31-orbis.js
-js/32-main.js
+js/32-sfx.js
+js/33-main.js
