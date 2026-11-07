@@ -5774,10 +5774,10 @@ function takeShared(btn) {
 /* ================= ORBiS テーマ（look: orbis）：アプリの顔になるメインのテーマ =================
    見本：オーナーの画像（うすい青〜むらさきの空、雲、光の軌道、四つの光の星、雲の上のお城、すりガラスの部品）
    ・背景：CSS の空と雲＋SVG の軌道とお城＋canvas の星（またたく星・ただよう光・ときどき流れ星）
-   ・キャラシ：orbisHtml。名前の札・道具のボタン・軌道がまわる大きな丸い肖像・HP/MP/SAN・9つのガラスの玉
+   ・キャラシ：orbisHtml。名前の札・道具のボタン・軌道がまわる大きな丸い肖像・HP/MP/SAN・「星図」のガラスのパネル（ひし形の宝石・星座の線・中身の要約）
    ・スマホは下にガラスのドック（ホーム・テーマ・まん中の星＝コマをコピー・フレンド・メニュー）
    ・画面の切りかえは orbisWarp：光が集まって四つの星になり、軌道が広がって、星がはじけて新しい画面
-   ・項目の窓は、押した玉から光の円が広がるようにひらき、玉にもどるように閉じる
+   ・項目の窓は、押したパネルから光の円が広がるようにひらき、パネルにもどるように閉じる
    ・タップすると、小さな四つの星が散る
    ・初めて開いた人はこのテーマ（presetOf のいちばん最初）。ロゴのきまりは docs/brand.md */
 const isOrbis = () => (presetOf().look || '').split(' ').includes('orbis');
@@ -5968,10 +5968,35 @@ function orbisHtml(c) {
       </div>
       <div class="ob-name"><b data-hub="name"></b><span data-hub="kana"></span></div>
       <div class="ob-stats">${[['HP', 'hp'], ['MP', 'mp'], ['SAN', 'san']].map(([l, k]) => `<span class="${k}"><i>${l}</i><b data-out="${k}Cur"></b></span>`).join('')}</div>
-      <nav class="ob-grid" aria-label="項目">${SECTIONS.map((s, i) => `
-        <button class="ob-bub" type="button" data-open="${s.key}" style="--i:${i}" title="${esc(s.jp)}"><span class="ob-bub-ic">${icon(s.key)}</span><span class="ob-bub-en">${s.en}</span><b>${s.jp}</b></button>`).join('')}
+      <nav class="ob-map" aria-label="項目">${SECTIONS.map((s, i) => `
+        <button class="ob-tile t-${s.key}" type="button" data-open="${s.key}" style="--i:${i}">
+          ${obConstellation(i)}
+          <span class="ob-gem" aria-hidden="true"><i>${icon(s.key)}</i></span>
+          <span class="ob-tile-t"><small>${s.en}</small><b>${s.jp}</b></span>
+          <span class="ob-tile-v" data-sum="${s.key}"></span>
+          <span class="ob-tile-go" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="${obStarPath(10, 10, 7, .2)}"/></svg></span>
+        </button>`).join('')}
       </nav>
     </div>`;
+}
+/* パネルの背景の「星座」：点を線で結んだ形。パネルごとに形を変える（点の位置は右上の 100×60 の中） */
+const OB_CONS = [
+  [[8, 40], [30, 18], [55, 26], [78, 8], [94, 30]],
+  [[10, 12], [34, 30], [60, 16], [88, 42]],
+  [[14, 44], [30, 14], [62, 22], [80, 48], [96, 20]],
+  [[6, 20], [40, 8], [52, 40], [90, 30]],
+  [[12, 30], [36, 46], [58, 12], [84, 22]],
+  [[8, 10], [28, 36], [64, 30], [92, 8]],
+  [[10, 46], [44, 30], [70, 44], [96, 12]],
+  [[6, 26], [26, 8], [50, 24], [74, 10], [94, 40]],
+  [[12, 18], [38, 40], [66, 14], [86, 36], [98, 10]],
+];
+function obConstellation(i) {
+  const pts = OB_CONS[i % OB_CONS.length];
+  return `<svg class="ob-cons" viewBox="0 0 100 56" aria-hidden="true" preserveAspectRatio="xMaxYMin meet">
+    <polyline points="${pts.map(p => p.join(',')).join(' ')}"/>
+    ${pts.map(([x, y], k) => `<circle cx="${x}" cy="${y}" r="${k % 2 ? 1.3 : 1.9}" style="--k:${k}"/>`).join('')}
+  </svg>`;
 }
 
 /* ---- 画面の切りかえ：光が集まって星になり、はじけて新しい画面へ ----
