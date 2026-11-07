@@ -546,6 +546,7 @@ function closePanel() {
 function gotoPanel(key) {
   if (key === panelKey) return;
   fillPanel(key);
+  if (isOrbis()) obSfx('switch');
   if (!reduceMotion.matches && isOrbis()) { // 光がさすように、横からふわっと
     $('panel-body').animate([{ opacity: 0, transform: 'translateX(18px)' }, { opacity: 1, transform: 'none' }], { duration: 460, easing: 'cubic-bezier(.2, .8, .2, 1)' });
     $('sao-line').animate([{ transform: 'scaleX(0)', opacity: 1 }, { transform: 'scaleX(1)', opacity: 0 }], { duration: 520, easing: 'ease-out' });

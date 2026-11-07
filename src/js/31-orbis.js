@@ -157,6 +157,9 @@ function orbisChrome() {
   gear.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8l1.6 2.3 2.7-.7.7 2.7 2.6 1-.8 2.7 1.9 2-1.9 2 .8 2.7-2.6 1-.7 2.7-2.7-.7L12 21.2l-1.6-2.3-2.7.7-.7-2.7-2.6-1 .8-2.7L3.3 12l1.9-2-.8-2.7 2.6-1 .7-2.7 2.7.7z"/></svg>';
   gear.addEventListener('click', () => $('btn-account')?.click());
   bar.style.position = 'relative'; bar.appendChild(gear);
+  const snd = document.createElement('button'); snd.type = 'button'; snd.className = 'ob-sound'; snd.id = 'ob-sound';
+  snd.addEventListener('click', () => { state.sfx = state.sfx === false; save(); obSoundBtn(); if (state.sfx !== false) obSfx('switch'); toast(state.sfx === false ? '効果音をオフにしました。' : '効果音をオンにしました。'); });
+  bar.querySelector('.brand')?.after(snd); obSoundBtn();
   const setOpen = open => { document.documentElement.classList.toggle('ob-menu-open', open); dock.querySelector('[data-ob="menu"]').setAttribute('aria-expanded', String(open)); };
   dock.addEventListener('click', e => {
     const b = e.target.closest('.ob-dk'); if (!b) return;
@@ -235,6 +238,7 @@ let obWarpBusy = false;
 function orbisWarp(mid) {
   if (reduceMotion.matches || obWarpBusy) { mid(); return; }
   obWarpBusy = true;
+  obSfx('warp');
   const toSheet = !$('select').hidden, c = active();
   const ov = document.createElement('div'); ov.className = 'ob-warp'; ov.setAttribute('aria-hidden', 'true');
   ov.innerHTML = `<i class="ow-veil"></i><canvas class="ow-cv"></canvas>
@@ -316,6 +320,7 @@ function obOrigin(fromEl) {
   return [(r.left + r.width / 2 - w.left) + 'px', (r.top + r.height / 2 - w.top) + 'px'];
 }
 function orbisPanelOpen(ov, fromEl) {
+  obSfx('open');
   const [x, y] = obOrigin(fromEl);
   ov.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 380, easing: 'ease-out' });
   $('sao-win').animate([
@@ -330,6 +335,7 @@ function orbisPanelOpen(ov, fromEl) {
   if (fromEl) fxAt(fromEl, true);
 }
 function orbisPanelClose(ov, target) {
+  obSfx('close');
   const [x, y] = obOrigin(target);
   return [
     $('sao-win').animate([
@@ -338,4 +344,74 @@ function orbisPanelClose(ov, target) {
     ], { duration: 460, easing: 'cubic-bezier(.6, 0, .5, 1)', fill: 'forwards' }),
     ov.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, delay: 200, fill: 'forwards' }),
   ];
+}
+
+/* ---- 音：ガラスの鈴のような、やさしい音（その場で作る。音のファイルは使わない） ----
+   効果音のオン・オフは魔導書と同じ state.sfx（上の帯のスピーカーのボタン）。BGM を消音しているときも鳴らさない */
+const OBS = { out: null, wet: null, lastTap: 0 };
+const OB_NOTE = [659.25, 739.99, 830.61, 987.77, 1108.73, 1318.51, 1479.98, 1661.22, 1975.53, 2217.46];   // ミ・ファ#・ソ#・シ・ド# のくり返し（やわらかく聞こえる音の並び）
+function obAudio() {
+  if (!isOrbis() || !sfxOn()) return null;
+  const ctx = actx(); if (!ctx) return null;
+  if (!OBS.out) {
+    OBS.out = ctx.createGain(); OBS.out.gain.value = .55; OBS.out.connect(ctx.destination);
+    // ひびき（短い残響）：だんだん小さくなる雑音でひびきの形を作る
+    const len = Math.round(ctx.sampleRate * 2.4), ir = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
+    const rev = ctx.createConvolver(); rev.buffer = ir;
+    OBS.wet = ctx.createGain(); OBS.wet.gain.value = .32;
+    OBS.wet.connect(rev); rev.connect(OBS.out);
+  }
+  return ctx;
+}
+function obTone(ctx, at, freq, dur, { type = 'sine', vol = .1, attack = .004, wet = 1 } = {}) {
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, at);
+  g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(vol, at + attack); g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+  o.connect(g); g.connect(OBS.out); if (wet) { const w = ctx.createGain(); w.gain.value = wet; g.connect(w); w.connect(OBS.wet); }
+  o.start(at); o.stop(at + dur + .05);
+}
+/* 鈴：基音に、高い倍音を少しまぜる */
+const obBell = (ctx, at, f, vol = .08, dur = .9) => { obTone(ctx, at, f, dur, { vol }); obTone(ctx, at, f * 2.01, dur * .5, { vol: vol * .28 }); obTone(ctx, at, f * 3.02, dur * .3, { vol: vol * .1 }); };
+const obPick = (lo, hi) => OB_NOTE[lo + Math.floor(Math.random() * (hi - lo + 1))];
+function obSfx(kind) {
+  const ctx = obAudio(); if (!ctx) return;
+  const t = ctx.currentTime + .01;
+  switch (kind) {
+    case 'tap': {   // ボタンを押したとき：小さく「ちりん」
+      const now = performance.now(); if (now - OBS.lastTap < 70) return; OBS.lastTap = now;
+      obBell(ctx, t, obPick(5, 8), .05, .45); break;
+    }
+    case 'open':    // 窓がひらく：下から上へ、きらきら
+      [0, 2, 3, 5, 7].forEach((n, i) => obBell(ctx, t + i * .055, OB_NOTE[n], .06 - i * .006, 1.1));
+      noiseBurst(ctx, t, .42, { f0: 900, f1: 5200, q: 1.2, vol: .045, attack: .12, hp: 600 }); break;
+    case 'close':   // 窓が閉じる：上から下へ、ふわっと
+      [6, 4, 2].forEach((n, i) => obBell(ctx, t + i * .05, OB_NOTE[n], .045, .7));
+      noiseBurst(ctx, t, .32, { f0: 4200, f1: 900, q: 1.2, vol: .035, attack: .04, hp: 600 }); break;
+    case 'switch':  // 窓の中で項目を切りかえ
+      obBell(ctx, t, OB_NOTE[4], .045, .6); obBell(ctx, t + .07, OB_NOTE[6], .045, .8); break;
+    case 'copy':    // コマをコピー：「ぴん・ぽーん」と明るく
+      obBell(ctx, t, OB_NOTE[3], .07, .7); obBell(ctx, t + .11, OB_NOTE[5], .08, 1.3); obBell(ctx, t + .11, OB_NOTE[8], .03, 1); break;
+    case 'warp': {  // 画面の切りかえ：光が集まる音 → 星がはじける音
+      noiseBurst(ctx, t, .75, { f0: 300, f1: 6000, q: .9, vol: .07, attack: .55, hp: 250 });
+      [0, 3, 5].forEach(n => obTone(ctx, t, OB_NOTE[n], 1.5, { type: 'triangle', vol: .022, attack: .45 }));
+      const b = t + .74;
+      obBell(ctx, b, OB_NOTE[5], .09, 1.6); obBell(ctx, b, OB_NOTE[8], .05, 1.4);
+      for (let i = 0; i < 7; i++) obBell(ctx, b + .05 + i * .045 + Math.random() * .02, obPick(5, 9), .03, .5);
+      break;
+    }
+  }
+}
+/* ORBiS のときは、押せる物を押すと小さな音 */
+document.addEventListener('pointerdown', e => {
+  if (e.button !== 0 || !isOrbis()) return;
+  if (e.target.closest('button, a[href], summary, label.btn, [role="tab"], .char-item, .sel-char, .sel-row')) obSfx('tap');
+}, true);
+['btn-copy', 'mbar-copy'].forEach(id => $(id)?.addEventListener('click', () => setTimeout(() => obSfx('copy'), 120)));
+/* 効果音のオン・オフ（上の帯のスピーカー） */
+function obSoundBtn() {
+  const b = $('ob-sound'); if (!b) return;
+  const on = state.sfx !== false;
+  b.setAttribute('aria-pressed', String(on)); b.setAttribute('aria-label', on ? '効果音をオフにする' : '効果音をオンにする'); b.title = on ? '効果音：オン' : '効果音：オフ';
+  b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 9.5h3.2l4.3-3.8v12.6l-4.3-3.8H4.5z"/>${on ? '<path d="M15.5 9a4.2 4.2 0 0 1 0 6M17.8 6.6a7.6 7.6 0 0 1 0 10.8"/>' : '<path d="M15.5 9.5l5 5M20.5 9.5l-5 5"/>'}</svg>`;
 }
