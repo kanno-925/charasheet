@@ -4585,8 +4585,13 @@ function themeSelHtml(chars) {
 /* ================= 音量（全体・BGM・効果音・はじめの画面の曲） =================
    端末ごとの設定なので localStorage の charasheet-kobo.vol に入れる（はじめの画面は、保存データの読み込みより先に出るため）。
    値は 0〜100。テーマ・背景の小窓の「音量」で変える */
-const VOL_KEY = 'charasheet-kobo.vol';
-let VOL = (() => { let v = {}; try { v = JSON.parse(localStorage.getItem(VOL_KEY) || '{}') || {}; } catch (e) { v = {}; } return { master: v.master ?? 100, bgm: v.bgm ?? 100, sfx: v.sfx ?? 100, title: v.title ?? 70 }; })();
+const VOL_KEY = 'charasheet-kobo.vol2';   // vol2：はじめの画面の曲をはじめから小さめ（40%）にしたので、前の charasheet-kobo.vol の曲の値は使わない
+let VOL = (() => {
+  let v = null, old = {};
+  try { v = JSON.parse(localStorage.getItem(VOL_KEY) || 'null'); old = JSON.parse(localStorage.getItem('charasheet-kobo.vol') || '{}') || {}; } catch (e) { v = null; }
+  v = v || { master: old.master, bgm: old.bgm, sfx: old.sfx };
+  return { master: v.master ?? 100, bgm: v.bgm ?? 100, sfx: v.sfx ?? 100, title: v.title ?? 40 };
+})();
 function volSet(k, val) {
   VOL = Object.assign({}, VOL, { [k]: Math.max(0, Math.min(100, Math.round(val))) });
   try { localStorage.setItem(VOL_KEY, JSON.stringify(VOL)); } catch (e) { /* */ }
@@ -4597,7 +4602,7 @@ function volSet(k, val) {
 
 /* ================= はじめの画面の曲（ORBiS 版のとき） =================
    ブラウザは、画面を一度も押していないうちは音を出させてくれない。そのため、まず流してみて、だめなら最初に押したときに流す。
-   探索者をえらぶ画面のあいだは流しつづけ、キャラシを開いたとき・キャラの BGM が流れたときに、ゆっくり消す。
+   曲ははじめの画面だけ。「ORBiS をひらく」を押したら、ふわーんという音（32-sfx.js の introSwell）といっしょに消す。
    はじめの画面の右上のボタンで止められる（localStorage の charasheet-kobo.titleBgm に覚える） */
 const TITLE_BGM = 'assets/brand/title-bgm.mp3';
 const TB = { a: null, k: 0, fade: 0, on: (() => { try { return localStorage.getItem('charasheet-kobo.titleBgm') !== 'off'; } catch (e) { return true; } })(), done: false };
@@ -4609,7 +4614,7 @@ function titleBgmFade(to, ms, then) {
 }
 function titleBgmPlay() {
   if (!TB.a || !TB.on || TB.done) return;
-  TB.a.play().then(() => { titleBgmFade(1, 2500); titleBgmBtn(); }).catch(() => { /* まだ押していない：押したときにもう一度 */ });
+  TB.a.play().then(() => { if (TB.done) { TB.a.pause(); return; } titleBgmFade(1, 2500); titleBgmBtn(); }).catch(() => { /* まだ押していない：押したときにもう一度 */ });
 }
 function titleBgmStop(ms = 1600) {
   if (!TB.a || TB.done) return;
@@ -4712,6 +4717,7 @@ function titleBgmBtn() {
   };
   function enter() {
     if (entered) return; entered = true;
+    if (orbis) { titleBgmStop(1500); try { introSwell(); } catch (e) { /* */ } }   // 曲は、ふわーんという音とともに消える
     const app = document.querySelector('.app');
     if (reduceMotion.matches) { finish(); return; }
     const b = $('intro-enter').getBoundingClientRect();
@@ -6470,6 +6476,16 @@ $('sfx-toggle')?.addEventListener('click', () => {
   if (isBook()) renderSheet();
 });
 $('btn-theme').addEventListener('click', renderSfxToggle);
+
+/* はじめの画面（ORBiS）から入るときの「ふわーん」：やわらかい和音がふくらんで、空気がすうっと上がり、小さな鈴が光る */
+function introSwell() {
+  const ctx = sndCtx(); if (!ctx) return;
+  const t = ctx.currentTime + .02;
+  sNoise(ctx, t, 1.6, { f0: 500, f1: 4200, q: .7, vol: .05, attack: .55, wet: .6 });
+  [659.25, 830.61, 987.77, 1479.98].forEach((f, i) => sTone(ctx, t + i * .03, f, 2.2, { type: 'sine', vol: .028, attack: .5, wet: .7, f2: f * 1.005, glide: 2 }));
+  sTone(ctx, t, 329.63, 2.4, { type: 'triangle', vol: .03, attack: .6, wet: .5 });
+  [1318.51, 1661.22, 1975.53, 2637.02].forEach((f, i) => obBell(ctx, t + .45 + i * .09, f, .025, 1.2));
+}
 
 /* ================= 起動 ================= */
 /* 保存データの読み込み（IndexedDB）は少し時間がかかるので、終わってから画面を作る */

@@ -164,3 +164,13 @@ $('sfx-toggle')?.addEventListener('click', () => {
   if (isBook()) renderSheet();
 });
 $('btn-theme').addEventListener('click', renderSfxToggle);
+
+/* はじめの画面（ORBiS）から入るときの「ふわーん」：やわらかい和音がふくらんで、空気がすうっと上がり、小さな鈴が光る */
+function introSwell() {
+  const ctx = sndCtx(); if (!ctx) return;
+  const t = ctx.currentTime + .02;
+  sNoise(ctx, t, 1.6, { f0: 500, f1: 4200, q: .7, vol: .05, attack: .55, wet: .6 });
+  [659.25, 830.61, 987.77, 1479.98].forEach((f, i) => sTone(ctx, t + i * .03, f, 2.2, { type: 'sine', vol: .028, attack: .5, wet: .7, f2: f * 1.005, glide: 2 }));
+  sTone(ctx, t, 329.63, 2.4, { type: 'triangle', vol: .03, attack: .6, wet: .5 });
+  [1318.51, 1661.22, 1975.53, 2637.02].forEach((f, i) => obBell(ctx, t + .45 + i * .09, f, .025, 1.2));
+}
