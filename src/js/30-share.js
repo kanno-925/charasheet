@@ -45,7 +45,7 @@ function openShare(c) {
 /* ---- リンクを貼ったときに出るカードの画像（横1200×縦630の JPEG）。Storage の share-og/合言葉.jpg に置く ---- */
 const loadImg = (src, cors) => new Promise((ok, ng) => { const im = new Image(); if (cors) im.crossOrigin = 'anonymous'; im.onload = () => ok(im); im.onerror = ng; im.src = src; });
 const CARD_VER = 1;   // カードの絵柄を変えたら数字を上げる（みんなの画像が作り直される）
-const cardSig = c => { const d = compute(c), pic = c.portrait || c.profile.iconUrl || c.avatar || ''; return [CARD_VER, c.profile.name, c.profile.kana, c.profile.occupation, c.profile.age, c.profile.sex, c.system, c.profile.color, d.hpMax, d.mpMax, d.san, pic.length, pic.slice(-80)].join('|'); };
+const cardSig = c => { const d = compute(c), pic = portraitSrc(c) || c.avatar || ''; return [CARD_VER, c.profile.name, c.profile.kana, c.profile.occupation, c.profile.age, c.profile.sex, c.system, c.profile.color, d.hpMax, d.mpMax, d.san, pic.length, pic.slice(-80)].join('|'); };
 async function makeShareCard(c) {
   const W = 1200, H = 630, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const g = cv.getContext('2d'), d = compute(c), p = c.profile, S = SYS[c.system];

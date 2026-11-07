@@ -227,12 +227,13 @@ function sectionBody(key, c) {
       ${field('タグ', 'profile.tags', p.tags, { ph: '例：古書 / 眼鏡' })}
       <div class="field wide"><span class="lbl">立ち絵（真ん中のアイコンを押すと表示）</span>
         <div class="portrait-row">
-          <div class="portrait-thumb">${portraitSrc(c) ? `<img src="${esc(imgSrc(portraitSrc(c)))}" alt="立ち絵のプレビュー">` : '未設定'}</div>
+          <div class="portrait-thumb">${basePortrait(c) ? `<img src="${esc(imgSrc(basePortrait(c)))}" alt="立ち絵のプレビュー">` : '未設定'}</div>
           <div class="portrait-actions">
             <div class="row"><label class="btn small" for="f-portrait-file">画像を選ぶ</label><button class="btn small" type="button" data-act="icon-edit">アイコンを調整</button><input type="file" id="f-portrait-file" accept="image/*" hidden>${c.portrait ? '<button class="btn small danger" type="button" data-act="portrait-remove">画像を外す</button>' : ''}</div>
             <p>PNG・JPGなど。このブラウザ内に保存されます。画像を選ばない場合は、下の画像URLの画像を使います。</p>
           </div>
         </div>
+        ${portraitFacesHtml(c)}
       </div>
       <div class="field wide"><span class="lbl">BGM（このキャラを開いたときに流れる曲）</span>
         <div class="bgm-set">

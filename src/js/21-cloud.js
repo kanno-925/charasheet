@@ -456,7 +456,10 @@ function sheetViewHtml(c, shared) {   // shared：共有リンクから開いた
   const list = (arr, f) => arr.filter(x => x.name).map(f).join('');
   return `<div class="sv">
     <div class="sv-top">
-      <div class="sv-art">${src ? `<img src="${esc(imgSrc(src))}" alt="${esc(p.name || '')}の立ち絵" onerror="this.remove()">` : tokenHtml(c)}</div>
+      <div class="sv-artcol">
+        <div class="sv-art">${src ? `<img src="${esc(imgSrc(src))}" alt="${esc(p.name || '')}の立ち絵" onerror="this.remove()">` : tokenHtml(c)}</div>
+        ${(c.faces || []).some(f => f && f.src) ? `<div class="sv-faces" aria-label="差分を切りかえる">${[['基本', -1], ...c.faces.map((f, i) => [f.label || `差分${i + 1}`, i])].filter(([, i]) => i < 0 ? basePortrait(c) : c.faces[i].src).map(([l, i]) => `<button class="btn small ${(curFace(c) ? c.face : -1) === i ? 'primary' : ''}" type="button" data-fvface="${i}">${esc(l)}</button>`).join('')}</div>` : ''}
+      </div>
       <div class="sv-id">
         <span class="peek-sys">${esc(S.label)}</span>
         <h3 class="sv-name">${esc(p.name || '名無し')}</h3>
@@ -496,6 +499,14 @@ $('fview-body').addEventListener('click', e => {
   }
   if (e.target.closest('[data-fvcopy]') && fviewCur) {
     copyText(JSON.stringify(toCcfolia(fviewCur)), $('fv-status'), null).then(ok => { if (ok) fxAt(e.target.closest('[data-fvcopy]'), true); });
+    return;
+  }
+  const fb = e.target.closest('[data-fvface]');
+  if (fb && fviewCur) {   // 差分を切りかえて見る（見ているだけで、元のキャラシは変えない）
+    const i = +fb.dataset.fvface, src = i < 0 ? basePortrait(fviewCur) : (fviewCur.faces[i] || {}).src;
+    const art = $('fview-body').querySelector('.sv-art');
+    if (src && art) art.innerHTML = `<img src="${esc(imgSrc(src))}" alt="" onerror="this.remove()">`;
+    fb.parentNode.querySelectorAll('[data-fvface]').forEach(x => x.classList.toggle('primary', x === fb));
     return;
   }
   if (e.target.closest('[data-fvtake]') && fviewCur) { takeShared(e.target.closest('[data-fvtake]')); return; }

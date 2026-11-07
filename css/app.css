@@ -536,6 +536,24 @@ label.btn { display: inline-block; }
 @keyframes fx-ring { from { transform: scale(.3); opacity: .9; } to { transform: scale(6); opacity: 0; } }
 @keyframes fx-ring-big { from { transform: scale(.5); opacity: 1; } to { transform: scale(14); opacity: 0; } }
 @keyframes fx-spark { from { transform: translate(0, 0) scale(1); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(.2); opacity: 0; } }
+/* 立ち絵の差分（16-portrait.js の facesHtml） */
+.faces { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.faces .lbl small { margin-left: 8px; color: var(--muted); font-weight: 500; }
+.faces p { margin: 0; font-size: 12px; color: var(--muted); }
+.face-list { display: flex; flex-wrap: wrap; gap: 10px; }
+.face-item { position: relative; width: 96px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.face-pic { width: 96px; height: 120px; padding: 0; border-radius: 12px; border: 2px solid var(--line); background: color-mix(in srgb, var(--sky) 8%, var(--solid)); overflow: hidden; cursor: pointer; display: flex; align-items: flex-end; justify-content: center; }
+.face-pic img { width: 100%; height: 100%; object-fit: contain; object-position: bottom; }
+.face-pic i { align-self: center; font-style: normal; font-size: 12px; color: var(--muted); }
+.face-item.on .face-pic { border-color: var(--sky); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sky) 30%, transparent); }
+.face-name { font-size: 12px; font-weight: 700; line-height: 2.4; }
+.face-label { width: 100%; padding: 4px 6px; font-size: 16px; text-align: center; }
+.face-del { position: absolute; top: -6px; right: -6px; width: 24px; height: 24px; border-radius: 999px; border: 1px solid var(--line); background: var(--solid); color: var(--danger); font-weight: 800; cursor: pointer; line-height: 1; padding: 0; }
+.face-del.armed { width: auto; padding: 0 8px; font-size: 11px; }
+.faces .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.faces .face-url { flex: 1; min-width: 160px; font-size: 16px; }
+.stage-faces { position: absolute; left: 50%; bottom: 0; translate: -50% 0; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 92%; cursor: default; z-index: 2; }
+@media (max-width: 560px) { .stage-faces { bottom: calc(2% + 96px); } }
 
 /* ===== intro: dark tabletop welcome (its own single dark world) ===== */
 .intro { --i-bg: #06070c; --i-ink: #ece4d0; --i-mute: #9a937f; --i-gold: #d4ae62; --i-teal: #3fb6c2; --i-violet: #6d4bb3;
@@ -963,6 +981,8 @@ label.btn { display: inline-block; }
 .share-row a.btn { text-decoration: none; }
 .share-from { font-size: 12px; font-weight: 600; color: var(--muted); padding: 2px 10px; border-radius: 999px; border: 1px solid var(--line); }
 .fview-head > .btn { flex-shrink: 0; white-space: nowrap; }
+.sv-artcol { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.sv-faces { display: flex; flex-wrap: wrap; gap: 6px; }
 
 /* ===== theme looks ===== */
 :root[data-look~="dark"] { color-scheme: dark; --shadow: 0 12px 34px -14px rgb(0 0 0 / .75), 0 2px 6px -2px rgb(0 0 0 / .45); --gloss: rgb(255 255 255 / .12); }

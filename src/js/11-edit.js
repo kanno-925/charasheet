@@ -63,6 +63,20 @@ onBoth('click', e => {
     }
     case 'open-friends': openFriends(); return;
     case 'share': openShare(c); return;
+    case 'face-pick': pickFace(c, +b.dataset.i); return;
+    case 'face-del': {
+      if (!arm(b, '消す?')) return;
+      const i = +b.dataset.i; if (!c.faces || !c.faces[i]) return;
+      c.faces.splice(i, 1);
+      if (c.face === i) c.face = -1; else if (c.face > i) c.face--;
+      break;
+    }
+    case 'face-url': {
+      const u = ($('f-face-url').value || '').trim();
+      if (!/^https:\/\/\S+$/.test(u)) { toast('https:// で始まる画像のURLを入れてください。'); return; }
+      addFaces(c, [{ label: decodeURIComponent(u.split('/').pop().split('?')[0]).replace(/\.[^.]+$/, '').slice(0, 20) || '差分', src: u }]);
+      return;
+    }
     case 'bgm-play': playCharBgm(c, true); return;
     case 'bgm-remove': if (c.bgm?.src === 'idb') AudioDB.del(c.id).catch(() => {}); delete c.bgm; if (bgmFor === c.id) stopBgm(); break;
     case 'bgm-url': {

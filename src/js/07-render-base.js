@@ -1,7 +1,11 @@
 /* ================= 描画 ================= */
 const initial = c => (c.profile.name || '？').trim().charAt(0) || '？';
-const portraitSrc = c => c.portrait || (/^https?:\/\//.test(c.profile.iconUrl || '') ? c.profile.iconUrl : '');
-const iconSrc = c => c.icon || portraitSrc(c);
+const basePortrait = c => c.portrait || (/^https?:\/\//.test(c.profile.iconUrl || '') ? c.profile.iconUrl : '');
+/* 立ち絵の差分（表情など）：c.faces = [{ label, src }]、c.face = いま表示している差分の番号（ない・-1 なら基本の立ち絵） */
+const curFace = c => (c.faces && c.face >= 0 && c.faces[c.face] && c.faces[c.face].src) ? c.faces[c.face] : null;
+const portraitSrc = c => { const f = curFace(c); return f ? f.src : basePortrait(c); };
+const iconSrc = c => c.icon || basePortrait(c);   // アイコンは差分を切りかえても変えない
+const MAX_FACES = 20;
 const cropStyle = k => { k = k || {}; const x = k.x ?? 50, y = k.y ?? 15, z = k.z ?? 1; return `object-position:${x}% ${y}%;transform:scale(${z});transform-origin:${x}% ${y}%`; };
 const tokenHtml = c => {
   const src = c.avatar || iconSrc(c);

@@ -221,9 +221,11 @@ img { max-width: 100%; }
     <div class="stage-ring r2" aria-hidden="true"></div>
     <div class="stage-ring r1" aria-hidden="true"></div>
     <div class="stage-figure" id="stage-figure"></div>
+    <div class="stage-faces" id="stage-faces" aria-label="差分を切りかえる"></div>
     <div class="stage-plate" id="stage-plate"><small id="stage-kana"></small><b id="stage-name"></b><span id="stage-sub"></span></div>
     <div class="stage-tools">
       <label class="btn small" for="stage-file">画像を選ぶ</label><input type="file" id="stage-file" accept="image/*" hidden>
+      <label class="btn small" for="stage-face-file">＋ 差分</label><input type="file" id="stage-face-file" accept="image/*" multiple hidden>
       <button class="btn small" type="button" id="stage-profile">プロフィールを開く</button>
       <button class="btn small danger" type="button" id="stage-remove">画像を外す</button>
       <button class="sao-close" type="button" id="stage-close" aria-label="閉じる"><svg class="ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg></button>

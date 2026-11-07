@@ -672,8 +672,12 @@ function toCcfolia(c) {
 
 /* ================= 描画 ================= */
 const initial = c => (c.profile.name || '？').trim().charAt(0) || '？';
-const portraitSrc = c => c.portrait || (/^https?:\/\//.test(c.profile.iconUrl || '') ? c.profile.iconUrl : '');
-const iconSrc = c => c.icon || portraitSrc(c);
+const basePortrait = c => c.portrait || (/^https?:\/\//.test(c.profile.iconUrl || '') ? c.profile.iconUrl : '');
+/* 立ち絵の差分（表情など）：c.faces = [{ label, src }]、c.face = いま表示している差分の番号（ない・-1 なら基本の立ち絵） */
+const curFace = c => (c.faces && c.face >= 0 && c.faces[c.face] && c.faces[c.face].src) ? c.faces[c.face] : null;
+const portraitSrc = c => { const f = curFace(c); return f ? f.src : basePortrait(c); };
+const iconSrc = c => c.icon || basePortrait(c);   // アイコンは差分を切りかえても変えない
+const MAX_FACES = 20;
 const cropStyle = k => { k = k || {}; const x = k.x ?? 50, y = k.y ?? 15, z = k.z ?? 1; return `object-position:${x}% ${y}%;transform:scale(${z});transform-origin:${x}% ${y}%`; };
 const tokenHtml = c => {
   const src = c.avatar || iconSrc(c);
@@ -927,12 +931,13 @@ function sectionBody(key, c) {
       ${field('タグ', 'profile.tags', p.tags, { ph: '例：古書 / 眼鏡' })}
       <div class="field wide"><span class="lbl">立ち絵（真ん中のアイコンを押すと表示）</span>
         <div class="portrait-row">
-          <div class="portrait-thumb">${portraitSrc(c) ? `<img src="${esc(imgSrc(portraitSrc(c)))}" alt="立ち絵のプレビュー">` : '未設定'}</div>
+          <div class="portrait-thumb">${basePortrait(c) ? `<img src="${esc(imgSrc(basePortrait(c)))}" alt="立ち絵のプレビュー">` : '未設定'}</div>
           <div class="portrait-actions">
             <div class="row"><label class="btn small" for="f-portrait-file">画像を選ぶ</label><button class="btn small" type="button" data-act="icon-edit">アイコンを調整</button><input type="file" id="f-portrait-file" accept="image/*" hidden>${c.portrait ? '<button class="btn small danger" type="button" data-act="portrait-remove">画像を外す</button>' : ''}</div>
             <p>PNG・JPGなど。このブラウザ内に保存されます。画像を選ばない場合は、下の画像URLの画像を使います。</p>
           </div>
         </div>
+        ${portraitFacesHtml(c)}
       </div>
       <div class="field wide"><span class="lbl">BGM（このキャラを開いたときに流れる曲）</span>
         <div class="bgm-set">
@@ -1789,6 +1794,20 @@ onBoth('click', e => {
     }
     case 'open-friends': openFriends(); return;
     case 'share': openShare(c); return;
+    case 'face-pick': pickFace(c, +b.dataset.i); return;
+    case 'face-del': {
+      if (!arm(b, '消す?')) return;
+      const i = +b.dataset.i; if (!c.faces || !c.faces[i]) return;
+      c.faces.splice(i, 1);
+      if (c.face === i) c.face = -1; else if (c.face > i) c.face--;
+      break;
+    }
+    case 'face-url': {
+      const u = ($('f-face-url').value || '').trim();
+      if (!/^https:\/\/\S+$/.test(u)) { toast('https:// で始まる画像のURLを入れてください。'); return; }
+      addFaces(c, [{ label: decodeURIComponent(u.split('/').pop().split('?')[0]).replace(/\.[^.]+$/, '').slice(0, 20) || '差分', src: u }]);
+      return;
+    }
     case 'bgm-play': playCharBgm(c, true); return;
     case 'bgm-remove': if (c.bgm?.src === 'idb') AudioDB.del(c.id).catch(() => {}); delete c.bgm; if (bgmFor === c.id) stopBgm(); break;
     case 'bgm-url': {
@@ -2385,7 +2404,10 @@ function renderStage() {
   $('stage-name').textContent = p.name || '名無し';
   $('stage-kana').textContent = p.kana;
   $('stage-sub').textContent = [p.occupation, p.age && p.age + '歳', p.birthday && '誕生日 ' + p.birthday, p.sex].filter(Boolean).join(' / ');
-  $('stage-remove').hidden = !c.portrait;
+  $('stage-remove').hidden = !(curFace(c) || c.portrait);
+  $('stage-remove').textContent = curFace(c) ? 'この差分を消す' : '画像を外す';
+  $('stage-faces').innerHTML = stageFacesHtml(c);
+  $('stage-faces').hidden = !(c.faces || []).length;
 }
 function openStage(fromEl) {
   renderStage();
@@ -2414,8 +2436,15 @@ function closeStage() {
 $('stage-ov').addEventListener('click', e => {
   if (e.target.closest('#stage-close')) { closeStage(); return; }
   if (e.target.closest('#stage-profile')) { closeStage(); openPanel('profile', document.querySelector('#sheet [data-open="profile"]')); return; }
-  if (e.target.closest('#stage-remove')) { const c = active(); c.portrait = ''; touch(); renderSheet(); renderStage(); return; }
-  if (!e.target.closest('.stage-tools, .stage-plate, .stage-empty')) closeStage();
+  if (e.target.closest('#stage-remove')) {
+    const c = active();
+    if (curFace(c)) { if (!arm(e.target.closest('#stage-remove'), 'もう一度押すと消す')) return; c.faces.splice(c.face, 1); c.face = -1; }
+    else c.portrait = '';
+    touch(); renderSheet(); renderStage(); return;
+  }
+  const fb = e.target.closest("[data-sface]");
+  if (fb) { pickFace(active(), +fb.dataset.sface); return; }
+  if (!e.target.closest('.stage-tools, .stage-plate, .stage-empty, .stage-faces')) closeStage();
 });
 document.addEventListener('change', async e => {
   if (e.target.id === 'f-charbg-file') {
@@ -2430,13 +2459,70 @@ document.addEventListener('change', async e => {
   if (!f) return;
   try {
     const url = await loadPortrait(f);
-    const c = active(); c.portrait = url;
+    const c = active(); c.portrait = url; c.face = -1;
     if (!c.icon) c.avatar = await renderAvatar(url, Object.assign({ x: 50, y: 15, z: 1 }, c.iconCrop || {}));
     touch(); renderSheet();
     if (!$('stage-ov').hidden) renderStage();
     toast('立ち絵を設定しました。');
   } catch (err) { toast(err.message); }
 });
+
+/* ---- 立ち絵の差分（表情など） ---- */
+/* プロフィールの立ち絵の下に出す：基本＋差分の一覧（押すとその絵を表示）、名前、消す、追加 */
+function portraitFacesHtml(c) {
+  const faces = c.faces || [], cur = curFace(c) ? c.face : -1, base = basePortrait(c);
+  const thumb = src => src ? `<img src="${esc(imgSrc(src))}" alt="" loading="lazy" onerror="this.remove()">` : '<i>未設定</i>';
+  return `<div class="faces">
+    <span class="lbl">差分（表情・服装など）<small>${faces.length} / ${MAX_FACES}</small></span>
+    <div class="face-list">
+      <div class="face-item ${cur < 0 ? 'on' : ''}"><button class="face-pic" type="button" data-act="face-pick" data-i="-1" aria-pressed="${cur < 0}" title="基本の立ち絵を表示">${thumb(base)}</button><span class="face-name">基本</span></div>
+      ${faces.map((f, i) => `<div class="face-item ${cur === i ? 'on' : ''}">
+        <button class="face-pic" type="button" data-act="face-pick" data-i="${i}" aria-pressed="${cur === i}" title="この差分を表示">${thumb(f.src)}</button>
+        <input class="inp face-label" id="f-face-${i}" data-p="faces.${i}.label" value="${esc(f.label || '')}" placeholder="名前（例：笑顔）" aria-label="差分${i + 1}の名前" maxlength="20">
+        <button class="face-del" type="button" data-act="face-del" data-i="${i}" title="この差分を消す" aria-label="差分${i + 1}を消す">×</button>
+      </div>`).join('')}
+    </div>
+    <div class="row"><label class="btn small" for="f-face-file">＋ 差分を追加</label><input type="file" id="f-face-file" accept="image/*" multiple hidden><input class="inp face-url" id="f-face-url" placeholder="または画像のURL（https://…）"><button class="btn small" type="button" data-act="face-url">URLで追加</button></div>
+    <p>押した絵が立ち絵として表示されます（アイコンは変わりません）。真ん中のアイコンを押して立ち絵を大きく出したときも、下のボタンで切りかえられます。差分はこのアプリの中だけで使います（ココフォリアへは送れません）。</p>
+  </div>`;
+}
+/* 差分を選ぶ（-1 は基本の立ち絵） */
+function pickFace(c, i) {
+  c.face = (c.faces && c.faces[i]) ? i : -1;
+  c.updatedAt = Date.now(); save(); renderShelf(); renderOutput();
+  renderSheet();
+  if (!$('stage-ov').hidden) renderStage();
+}
+function addFaces(c, list) {
+  c.faces = c.faces || [];
+  const room = MAX_FACES - c.faces.length;
+  if (room <= 0) { toast(`差分は${MAX_FACES}枚までです。いらない差分を消してから追加してください。`); return false; }
+  const add = list.slice(0, room);
+  c.faces.push(...add);
+  c.face = c.faces.length - 1;
+  c.updatedAt = Date.now(); save(); renderAll();
+  if (!$('stage-ov').hidden) renderStage();
+  toast(list.length > room ? `差分は${MAX_FACES}枚までなので、${add.length}枚だけ追加しました。` : `差分を${add.length}枚追加しました。`);
+  return true;
+}
+document.addEventListener('change', async e => {
+  if (e.target.id !== 'f-face-file' && e.target.id !== 'stage-face-file') return;
+  const files = [...e.target.files]; e.target.value = '';
+  if (!files.length) return;
+  const c = active(), list = [];
+  for (const f of files) {
+    try { list.push({ label: f.name.replace(/\.[^.]+$/, '').slice(0, 20), src: await loadPortrait(f) }); }
+    catch (err) { toast(err.message); }
+  }
+  if (list.length) addFaces(c, list);
+});
+/* 立ち絵を大きく出す画面の下に、差分を切りかえるボタンを並べる */
+function stageFacesHtml(c) {
+  const faces = c.faces || [], cur = curFace(c) ? c.face : -1;
+  if (!faces.length) return '';
+  return [['基本', -1], ...faces.map((f, i) => [f.label || `差分${i + 1}`, i])]
+    .map(([l, i]) => `<button class="btn small ${cur === i ? 'primary' : ''}" type="button" data-sface="${i}" aria-pressed="${cur === i}">${esc(l)}</button>`).join('');
+}
 
 /* ================= 探索者カードのチラ見せ ================= */
 const canHover = matchMedia('(hover: hover) and (pointer: fine)');
@@ -3343,7 +3429,10 @@ function sheetViewHtml(c, shared) {   // shared：共有リンクから開いた
   const list = (arr, f) => arr.filter(x => x.name).map(f).join('');
   return `<div class="sv">
     <div class="sv-top">
-      <div class="sv-art">${src ? `<img src="${esc(imgSrc(src))}" alt="${esc(p.name || '')}の立ち絵" onerror="this.remove()">` : tokenHtml(c)}</div>
+      <div class="sv-artcol">
+        <div class="sv-art">${src ? `<img src="${esc(imgSrc(src))}" alt="${esc(p.name || '')}の立ち絵" onerror="this.remove()">` : tokenHtml(c)}</div>
+        ${(c.faces || []).some(f => f && f.src) ? `<div class="sv-faces" aria-label="差分を切りかえる">${[['基本', -1], ...c.faces.map((f, i) => [f.label || `差分${i + 1}`, i])].filter(([, i]) => i < 0 ? basePortrait(c) : c.faces[i].src).map(([l, i]) => `<button class="btn small ${(curFace(c) ? c.face : -1) === i ? 'primary' : ''}" type="button" data-fvface="${i}">${esc(l)}</button>`).join('')}</div>` : ''}
+      </div>
       <div class="sv-id">
         <span class="peek-sys">${esc(S.label)}</span>
         <h3 class="sv-name">${esc(p.name || '名無し')}</h3>
@@ -3383,6 +3472,14 @@ $('fview-body').addEventListener('click', e => {
   }
   if (e.target.closest('[data-fvcopy]') && fviewCur) {
     copyText(JSON.stringify(toCcfolia(fviewCur)), $('fv-status'), null).then(ok => { if (ok) fxAt(e.target.closest('[data-fvcopy]'), true); });
+    return;
+  }
+  const fb = e.target.closest('[data-fvface]');
+  if (fb && fviewCur) {   // 差分を切りかえて見る（見ているだけで、元のキャラシは変えない）
+    const i = +fb.dataset.fvface, src = i < 0 ? basePortrait(fviewCur) : (fviewCur.faces[i] || {}).src;
+    const art = $('fview-body').querySelector('.sv-art');
+    if (src && art) art.innerHTML = `<img src="${esc(imgSrc(src))}" alt="" onerror="this.remove()">`;
+    fb.parentNode.querySelectorAll('[data-fvface]').forEach(x => x.classList.toggle('primary', x === fb));
     return;
   }
   if (e.target.closest('[data-fvtake]') && fviewCur) { takeShared(e.target.closest('[data-fvtake]')); return; }
@@ -5386,7 +5483,7 @@ function openShare(c) {
 /* ---- リンクを貼ったときに出るカードの画像（横1200×縦630の JPEG）。Storage の share-og/合言葉.jpg に置く ---- */
 const loadImg = (src, cors) => new Promise((ok, ng) => { const im = new Image(); if (cors) im.crossOrigin = 'anonymous'; im.onload = () => ok(im); im.onerror = ng; im.src = src; });
 const CARD_VER = 1;   // カードの絵柄を変えたら数字を上げる（みんなの画像が作り直される）
-const cardSig = c => { const d = compute(c), pic = c.portrait || c.profile.iconUrl || c.avatar || ''; return [CARD_VER, c.profile.name, c.profile.kana, c.profile.occupation, c.profile.age, c.profile.sex, c.system, c.profile.color, d.hpMax, d.mpMax, d.san, pic.length, pic.slice(-80)].join('|'); };
+const cardSig = c => { const d = compute(c), pic = portraitSrc(c) || c.avatar || ''; return [CARD_VER, c.profile.name, c.profile.kana, c.profile.occupation, c.profile.age, c.profile.sex, c.system, c.profile.color, d.hpMax, d.mpMax, d.san, pic.length, pic.slice(-80)].join('|'); };
 async function makeShareCard(c) {
   const W = 1200, H = 630, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const g = cv.getContext('2d'), d = compute(c), p = c.profile, S = SYS[c.system];
