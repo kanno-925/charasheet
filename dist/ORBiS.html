@@ -2808,7 +2808,7 @@ body.ue-on .ue-panel { cursor: auto; }
 :root[data-look~="orbis"] .sheet { border-radius: 30px; }
 
 /* ---- 文字 ---- */
-:root[data-look~="orbis"] :where(h1, h2, h3, .hero-title, .sel-head h2, #panel-title, .modal h2) { font-family: var(--f-display); color: var(--ob-ink); }
+:root[data-look~="orbis"] :where(h1, h2, h3, .hero-title, .sel-head h2, #panel-title, .modal h2):not(.intro *) { font-family: var(--f-display); color: var(--ob-ink); }
 :root[data-look~="orbis"] :is(.eyebrow, .panel-label, .panel-en) { font-family: var(--f-latin); color: var(--ob-faint); letter-spacing: .22em; font-weight: 500; }
 
 /* ---- ボタン（ガラスの丸いボタン。光がすっと横切り、押すとぷにっと沈む） ---- */
