@@ -17,6 +17,7 @@ assets/                  画像・音（テーマごとにフォルダを分け�
   wa/                    和風テーマ（景色の絵）
   aqua/                  アクアリウムテーマ（水底の絵 scene.webp・ぼかした切りかえ用 bokeh.webp・水底の光の網 caustics.webp）
 supabase/                サーバー（Supabase）の設定SQL。番号順に実行します
+cloudflare/               共有リンクのカード用の「中継の入口」（Cloudflare Workers に貼る）
 docs/history.md          これまでの変更のあゆみ
 build.py                 src/ と assets/ から公開用ファイルを作るスクリプト
 CLAUDE.md                Claude に作業を頼むときのメモ
@@ -82,3 +83,6 @@ dist/ORBiS.html           ダブルクリックで開ける1ファイル版（�
 - `08-group-transfer.sql`：グループの代表をゆずる
 - `09-dice-limit.sql`：ダイスの上限回数
 - `10-share.sql`：キャラシをリンクで共有する
+- `11-share-card.sql`：共有リンクを貼ったときのカード（立ち絵のプレビュー）
+
+`cloudflare/share-worker.js` は、共有リンクのカードを出すための「中継の入口」です。Cloudflare Workers に貼り付けて使います（GitHub Pages だけではキャラごとのカードを出せないため）。

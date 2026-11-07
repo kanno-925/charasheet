@@ -2977,6 +2977,7 @@ async function flushSync() {
       const { error } = await sb.from('characters').upsert(b.rows.map(([c]) => ({ id: c.id, owner: me.id, name: c.profile.name || '', locked: !!c.locked, data: c, updated_at: new Date(c.updatedAt || Date.now()).toISOString() })));
       if (error) throw error;
       b.rows.forEach(([c, js]) => lastSynced.set(c.id, js));
+      b.rows.forEach(([c]) => { if (shares && shares[c.id]) uploadShareCard(c, shares[c.id]); });   // 共有中なら、リンクのカードの画像も新しく
     }
     const live = new Set(mine.map(c => c.id));
     const gone = [...lastSynced.keys()].filter(id => !live.has(id));
@@ -5343,7 +5344,10 @@ function aqRipple(el) {
    見る人：リンク（…/?share=合言葉）を開くと、ログインしていなくても読み取り専用で見られる。自分の探索者として取り込むこともできる。
    リンク先はいつも公開サイト（1ファイル版や Claude の公開版から作っても、送った相手が開けるように）。 */
 const SHARE_BASE = 'https://kanno-925.github.io/charasheet/';
-const shareUrl = token => SHARE_BASE + '?share=' + token;
+/* LINE・Discord・X に貼ったとき立ち絵入りのカードを出すための「中継の入口」（Cloudflare Workers。cloudflare/share-worker.js）。
+   用意できたら、そのURL（最後の /s/ まで）をここに書く。空のあいだは公開サイトのリンクのまま（カードは出ない） */
+const SHARE_PAGE = '';
+const shareUrl = token => SHARE_PAGE ? SHARE_PAGE + token : SHARE_BASE + '?share=' + token;
 let shares = null, shareErr = '', shareFor = null, shareBusy = false;   // shares：キャラID → 合言葉（読み込む前は null）
 
 async function loadShares() {
@@ -5375,7 +5379,83 @@ function openShare(c) {
   $('share-status').textContent = '';
   renderShare();
   openModal('modal-share');
-  if (me && shares === null) loadShares().then(renderShare).catch(() => {});
+  if (me && shares === null) loadShares().then(() => { renderShare(); if (shares && shares[c.id]) uploadShareCard(c, shares[c.id]); }).catch(() => {});
+  else if (me && shares && shares[c.id]) uploadShareCard(c, shares[c.id]);   // 立ち絵や名前が変わっていたら、カードの画像を作り直す
+}
+
+/* ---- リンクを貼ったときに出るカードの画像（横1200×縦630の JPEG）。Storage の share-og/合言葉.jpg に置く ---- */
+const loadImg = (src, cors) => new Promise((ok, ng) => { const im = new Image(); if (cors) im.crossOrigin = 'anonymous'; im.onload = () => ok(im); im.onerror = ng; im.src = src; });
+const CARD_VER = 1;   // カードの絵柄を変えたら数字を上げる（みんなの画像が作り直される）
+const cardSig = c => { const d = compute(c), pic = c.portrait || c.profile.iconUrl || c.avatar || ''; return [CARD_VER, c.profile.name, c.profile.kana, c.profile.occupation, c.profile.age, c.profile.sex, c.system, c.profile.color, d.hpMax, d.mpMax, d.san, pic.length, pic.slice(-80)].join('|'); };
+async function makeShareCard(c) {
+  const W = 1200, H = 630, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const g = cv.getContext('2d'), d = compute(c), p = c.profile, S = SYS[c.system];
+  const font = '"Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif';
+  try { await Promise.all(['800 80px "Zen Kaku Gothic New"', '500 30px "Zen Kaku Gothic New"', '600 40px Cinzel'].map(f => document.fonts.load(f))); } catch (e) { /* 文字の形がなくても描ける */ }
+  // 背景：深い紺に、キャラの色のぼんやりした光
+  const bg = g.createLinearGradient(0, 0, W, H); bg.addColorStop(0, '#0d1030'); bg.addColorStop(1, '#1b2f63');
+  g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  const glow = g.createRadialGradient(270, 330, 20, 270, 330, 420); glow.addColorStop(0, (p.color || '#1f7cf2') + '88'); glow.addColorStop(1, '#0d103000');
+  g.fillStyle = glow; g.fillRect(0, 0, W, H);
+  g.strokeStyle = 'rgba(160, 200, 255, .35)'; g.lineWidth = 2; g.strokeRect(18, 18, W - 36, H - 36);
+  // 左：立ち絵（なければアイコン、それもなければ頭文字の丸）
+  let pic = null;
+  const src = portraitSrc(c);
+  if (src) { try { pic = await loadImg(src, !src.startsWith('data:')); } catch (e) { pic = null; } }
+  if (pic) {
+    const bw = 470, bh = H - 60, k = Math.min(bw / pic.width, bh / pic.height), w = pic.width * k, h = pic.height * k;
+    g.drawImage(pic, 40 + (bw - w) / 2, H - 30 - h, w, h);
+  } else {
+    let av = null;
+    const a2 = c.avatar || iconSrc(c);
+    if (a2) { try { av = await loadImg(a2, !a2.startsWith('data:')); } catch (e) { av = null; } }
+    g.save(); g.beginPath(); g.arc(275, 315, 190, 0, Math.PI * 2); g.closePath();
+    g.fillStyle = p.color || '#1f7cf2'; g.fill(); g.clip();
+    if (av) { const s = Math.max(380 / av.width, 380 / av.height); g.drawImage(av, 275 - av.width * s / 2, 315 - av.height * s / 2, av.width * s, av.height * s); }
+    else { g.fillStyle = '#fff'; g.font = `800 170px ${font}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(initial(c), 275, 322); }
+    g.restore();
+    g.strokeStyle = 'rgba(255, 255, 255, .7)'; g.lineWidth = 6; g.beginPath(); g.arc(275, 315, 190, 0, Math.PI * 2); g.stroke();
+  }
+  // 右：名前・プロフィール・HP/MP/SAN
+  const X = 560, RW = W - X - 60;
+  const fit = (text, weight, size, min) => { let s = size; do { g.font = `${weight} ${s}px ${font}`; s -= 2; } while (g.measureText(text).width > RW && s > min); };
+  g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+  g.fillStyle = '#7fd8ff'; g.font = `600 26px ${font}`; g.fillText(S.label, X, 110);
+  const name = p.name || '名無し';
+  g.fillStyle = '#ffffff'; fit(name, 800, 88, 40); g.fillText(name, X, 210);
+  let y = 210;
+  if (p.kana) { g.fillStyle = 'rgba(220, 230, 255, .8)'; fit(p.kana, 500, 30, 18); g.fillText(p.kana, X, y += 50); }
+  const sub = [p.occupation, p.age && p.age + '歳', p.sex].filter(Boolean).join(' ／ ');
+  if (sub) { g.fillStyle = '#e8eeff'; fit(sub, 500, 34, 20); g.fillText(sub, X, y += 58); }
+  const stats = [['HP', d.hpMax, '#ff7a6b'], ['MP', d.mpMax, '#5cb8ff'], ['SAN', d.san, '#c08cff']];
+  stats.forEach(([l, v, col], i) => {
+    const bx = X + i * 190, by = 420;
+    g.fillStyle = 'rgba(255, 255, 255, .08)'; g.strokeStyle = col; g.lineWidth = 3;
+    g.beginPath(); g.roundRect ? g.roundRect(bx, by, 170, 96, 18) : g.rect(bx, by, 170, 96); g.fill(); g.stroke();
+    g.fillStyle = col; g.font = `700 24px ${font}`; g.fillText(l, bx + 18, by + 34);
+    g.fillStyle = '#ffffff'; g.font = `800 46px ${font}`; g.fillText(String(v), bx + 18, by + 82);
+  });
+  g.fillStyle = 'rgba(200, 220, 255, .75)'; g.font = `600 30px Cinzel, ${font}`; g.textAlign = 'right';
+  g.fillText('ORBiS', W - 50, H - 46);
+  let blob = null;
+  for (const q of [.86, .75, .62, .5]) { blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', q)); if (blob && blob.size <= 900000) break; }
+  return blob;
+}
+const cardDone = {};   // 合言葉 → 最後に送ったカードの中身の印（同じなら送り直さない）
+async function uploadShareCard(c, token) {
+  if (!sb || !me || !token) return;
+  const sig = cardSig(c), key = 'charasheet-kobo.card.' + token;
+  let prev = cardDone[token];
+  if (prev == null) { try { prev = localStorage.getItem(key); } catch (e) { prev = null; } }
+  if (prev === sig) return;
+  try {
+    const blob = await makeShareCard(c);
+    if (!blob) return;
+    const { error } = await sb.storage.from('share-og').upload(token + '.jpg', blob, { contentType: 'image/jpeg', upsert: true, cacheControl: '60' });
+    if (error) throw error;
+    cardDone[token] = sig;
+    try { localStorage.setItem(key, sig); } catch (e) { /* */ }
+  } catch (er) { console.warn('共有カードの画像を送れませんでした（supabase/11-share-card.sql を実行しているか確認）', er); }
 }
 function renderShare() {
   const body = $('share-body'), c = state.chars.find(x => x.id === shareFor);
@@ -5432,6 +5512,7 @@ $('share-body').addEventListener('click', async e => {
         else throw error;
       } else shares[c.id] = data.token;
       shareErr = '';
+      if (shares[c.id]) await uploadShareCard(c, shares[c.id]);
       $('share-status').textContent = 'リンクを作りました。コピーして送ってください。';
     } catch (er) {
       $('share-status').classList.add('warn');
@@ -5443,6 +5524,8 @@ $('share-body').addEventListener('click', async e => {
     if (!arm(b, 'もう一度押すとやめる')) return;
     shareBusy = true; renderShare();
     try {
+      const old = shares[c.id];
+      if (old) { await sb.storage.from('share-og').remove([old + '.jpg']).catch(() => {}); try { localStorage.removeItem('charasheet-kobo.card.' + old); } catch (e) { /* */ } }
       const { error } = await sb.from('char_shares').delete().eq('char_id', c.id);
       if (error) throw error;
       delete shares[c.id];

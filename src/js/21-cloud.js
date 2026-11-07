@@ -90,6 +90,7 @@ async function flushSync() {
       const { error } = await sb.from('characters').upsert(b.rows.map(([c]) => ({ id: c.id, owner: me.id, name: c.profile.name || '', locked: !!c.locked, data: c, updated_at: new Date(c.updatedAt || Date.now()).toISOString() })));
       if (error) throw error;
       b.rows.forEach(([c, js]) => lastSynced.set(c.id, js));
+      b.rows.forEach(([c]) => { if (shares && shares[c.id]) uploadShareCard(c, shares[c.id]); });   // 共有中なら、リンクのカードの画像も新しく
     }
     const live = new Set(mine.map(c => c.id));
     const gone = [...lastSynced.keys()].filter(id => !live.has(id));
