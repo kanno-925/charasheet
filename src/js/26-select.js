@@ -2,6 +2,7 @@
 let selPress = null, selLong = false, selResizeT = null;
 function renderSelect() {
   const stage = $('sel-stage');
+  stage.classList.remove('themev');
   $('sel-rest')?.remove();
   document.querySelectorAll('[data-seltab]').forEach(b => { const on = b.dataset.seltab === selTab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
   $('sel-eyebrow').textContent = { friends: 'FRIENDS', groups: 'GROUPS' }[selTab] || 'SELECT YOUR INVESTIGATOR';
@@ -11,18 +12,21 @@ function renderSelect() {
   if (selTab === 'friends') { renderFriendSelect(stage); return; }
   if (selTab === 'groups') { renderGroupSelect(stage); return; }
   if ((state.selView || 'orbit') === 'slide') {
-    stage.classList.remove('grid', 'listv'); stage.classList.add('slidev'); stage.style.height = '';
+    stage.classList.remove('grid', 'listv', 'themev'); stage.classList.add('slidev'); stage.style.height = '';
     stage.innerHTML = slideViewHtml(sortedChars());
     initSlide();
     return;
   }
   stage.classList.remove('slidev');
   if ((state.selView || 'orbit') === 'list') {
-    stage.classList.remove('grid'); stage.classList.add('listv'); stage.style.height = '';
+    stage.classList.remove('grid', 'themev'); stage.classList.add('listv'); stage.style.height = '';
     stage.innerHTML = listViewHtml(sortedChars());
     return;
   }
   stage.classList.remove('listv');
+  const tsel = themeSelHtml(sortedChars());   // 和風・ドット・アクアリウムは、そのテーマだけの並べ方
+  stage.classList.toggle('themev', !!tsel);
+  if (tsel) { stage.classList.remove('grid'); stage.style.height = ''; stage.innerHTML = tsel; return; }
   const W = stage.clientWidth || Math.min(1100, innerWidth - 32);
   const small = W < 560;
   const B = small ? 70 : 100;
@@ -123,6 +127,18 @@ function initSlide() {
 function popSelect() {
   if (reduceMotion.matches) return;
   const stage = $('sel-stage');
+  if (stage.classList.contains('themev')) {   // テーマだけの並べ方の出かた
+    const cards = [...stage.querySelectorAll('.ts-wa-card, .ts-dot-row, .ts-aq-bub, .ts-aq-new')];
+    const d0 = (typeof aqWaveBusy !== 'undefined' && aqWaveBusy) ? 900 : 120;
+    if (isWa()) cards.forEach((el, i) => {   // 掛け軸が上からするすると下りる
+      el.animate([{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)' }], { duration: 900, delay: 300 + i * 110, easing: 'cubic-bezier(.5, 0, .2, 1)', fill: 'backwards' });
+      el.animate([{ transform: 'translateY(-8px)' }, { transform: 'rotate(.8deg)', offset: .75 }, { transform: 'none' }], { duration: 1300, delay: 300 + i * 110, easing: 'ease-out', fill: 'backwards' });
+    });
+    else if (isDot()) cards.forEach((el, i) => el.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: 360, delay: 260 + i * 120, easing: 'steps(8, end)', fill: 'backwards' }));
+    else cards.forEach((el, i) => el.animate([{ opacity: 0, transform: 'translateY(60px) scale(.7)' }, { opacity: 1, transform: 'translateY(-6px) scale(1.03)', offset: .7 }, { opacity: 1, transform: 'none' }], { duration: 1000, delay: d0 + i * 90, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'backwards' }));
+    document.querySelector('.sel-head')?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 600, easing: 'ease-out' });
+    return;
+  }
   if (isOrbis()) {   // 星のように、ひとつずつふわっと灯る
     const d0 = obWarpBusy ? 820 : 60;
     stage.querySelectorAll('.sel-char, .sel-row').forEach((el, i) => el.animate(
@@ -205,7 +221,7 @@ $('select').addEventListener('click', e => {
   if (nw) { if (nw.classList.contains('sl-card') && !nw.classList.contains('center')) slideTo($('sl-track'), nw, true); else openNewChar(); return; }
   if (e.target.closest('#sel-import')) { $('btn-import').click(); return; }
   if (e.target.closest('#sel-theme')) { $('btn-theme').click(); return; }
-  const ch = e.target.closest('.sel-char, .sel-row'); if (!ch) return;
+  const ch = e.target.closest('.sel-char, .sel-row, .ts-card'); if (!ch) return;
   if (selLong) { selLong = false; return; }
   // スライド：奥にいるキャラを押したら、まず真ん中まで回してくる
   if (ch.classList.contains('sl-card') && !ch.classList.contains('center')) { slideTo($('sl-track'), ch, true); return; }
@@ -216,7 +232,7 @@ $('select').addEventListener('click', e => {
 });
 $('select').addEventListener('pointerover', e => {
   if (!canHover.matches) return;
-  const ch = e.target.closest('.sel-char:not(.sel-friend):not(.sl-card), .sel-row');
+  const ch = e.target.closest('.sel-char:not(.sel-friend):not(.sl-card), .sel-row, .ts-card');
   if (ch && ch.dataset.id !== peekId) showPeek(ch);
   if (!ch && peekId) hidePeek();
 });
@@ -234,3 +250,28 @@ $('btn-select').addEventListener('click', () => { selTab = 'mine'; showSelect();
 document.querySelector('.brand').addEventListener('click', () => { selTab = 'mine'; showSelect(); });
 document.querySelector('.brand').style.cursor = 'pointer';
 addEventListener('resize', () => { clearTimeout(selResizeT); selResizeT = setTimeout(() => { if (!$('select').hidden) renderSelect(); }, 150); });
+
+/* ---- テーマごとの「探索者をえらぶ」画面（近未来のまるい並び方とは別の形） ----
+   和風：掛け軸が右から左へ並ぶ ／ ドット：昔のRPGの「ぼうけんのしょ」 ／ アクアリウム：泡に入ったキャラが水中にうかぶ
+   押したときは .ts-card の data-id で探索者を開く（下のクリックの処理）。新しい探索者は #sel-new */
+const themeSelName = () => isWa() ? '掛け軸' : isDot() ? 'ぼうけんのしょ' : isAqua() ? '水槽' : '';
+function themeSelHtml(chars) {
+  const pic = c => { const src = portraitSrc(c); return src ? `<img src="${esc(imgSrc(src))}" alt="" draggable="false" onerror="this.remove()">` : ''; };
+  const meta = c => esc([SYS[c.system].short, c.profile.occupation].filter(Boolean).join('・'));
+  if (isWa()) return `<div class="ts-wa"><i class="ts-wa-rail" aria-hidden="true"></i><div class="ts-wa-row">
+      <button class="ts-wa-card new" type="button" id="sel-new" style="--i:0"><i class="rod"></i><span class="paper"><b class="tate">新しき探索者</b><span class="stamp">新</span></span><i class="rod low"></i></button>
+      ${chars.map((c, i) => `<button class="ts-card ts-wa-card" type="button" data-id="${c.id}" style="--i:${i + 1}" aria-label="${esc(c.profile.name || '名無し')}のシートを開く">
+        <i class="rod"></i><span class="paper"><span class="pic ${pic(c) ? 'has' : ''}">${pic(c) || tokenHtml(c)}</span><b class="tate">${esc(c.profile.name || '名無し')}</b><small class="tate">${meta(c)}</small></span><i class="rod low"></i></button>`).join('')}
+    </div></div>`;
+  if (isDot()) return `<div class="ts-dot"><div class="ts-dot-win"><p class="ts-dot-ttl">▼ ぼうけんのしょ を えらんでください</p><ol>
+      ${chars.map((c, i) => { const d = compute(c); return `<li><button class="ts-card ts-dot-row" type="button" data-id="${c.id}" style="--i:${i}" aria-label="${esc(c.profile.name || '名無し')}のシートを開く">
+        <span class="cur" aria-hidden="true">▶</span><span class="no">${String(i + 1).padStart(2, '0')}</span>${tokenHtml(c)}<span class="nm">${esc(c.profile.name || '名無し')}</span><span class="job">${meta(c)}</span><span class="hp">HP ${d.hp}/${d.hpMax}　SAN ${d.san}</span></button></li>`; }).join('')}
+      <li><button class="ts-dot-row new" type="button" id="sel-new" style="--i:${chars.length}"><span class="cur" aria-hidden="true">▶</span><span class="no">＋</span><span class="nm">あたらしく ぼうけんを はじめる</span></button></li>
+    </ol></div></div>`;
+  if (isAqua()) return `<div class="ts-aq">
+      <button class="ts-aq-new" type="button" id="sel-new"><span class="bub"><b>＋</b></span><span class="plate"><b>新規作成</b><small>NEW</small></span></button>
+      ${chars.map((c, i) => `<button class="ts-card ts-aq-bub" type="button" data-id="${c.id}" style="--i:${i};--y:${[0, 38, 12, 52, 4, 30][i % 6]}px;--s:${[1, .86, .94, .8, 1.04, .9][i % 6]};--d:${(5 + (i % 4) * .8).toFixed(1)}s" aria-label="${esc(c.profile.name || '名無し')}のシートを開く">
+        <span class="bub">${pic(c) || tokenHtml(c)}</span><span class="plate"><b>${esc(c.profile.name || '名無し')}</b><small>${meta(c)}</small></span></button>`).join('')}
+    </div>`;
+  return '';
+}

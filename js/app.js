@@ -1361,18 +1361,21 @@ function bookCover(mid) {
   const nLeaf = canHover.matches ? 3 : 2;
   const ov = document.createElement('div'); ov.className = 'bk-trans'; ov.setAttribute('aria-hidden', 'true');
   const shapes = '<circle cx="100" cy="100" r="96"/><circle class="th" cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="77"/><polygon points="100.0,24.0 144.7,161.5 27.7,76.5 172.3,76.5 55.3,161.5"/><circle class="th" cx="100" cy="100" r="21"/>';
-  ov.innerHTML = '<i class="bt-dim"></i>' + '<i class="bt-leaf"><b class="bt-ls"></b></i>'.repeat(nLeaf) + `
+  // 本は画面いっぱいにせず、本まるごとが見える大きさ（表紙の絵と同じ 760:980）で、まん中に置く
+  ov.innerHTML = '<i class="bt-dim"></i><div class="bt-book"><i class="bt-back"></i>' + '<i class="bt-leaf"><b class="bt-ls"></b></i>'.repeat(nLeaf) + `
     <div class="bt-cover"><i class="bt-frame"></i><i class="bt-glow"></i>
       <svg class="bt-seal" viewBox="0 0 200 200"><g class="h2">${shapes}</g><g class="h1">${shapes}</g><g class="core">${shapes}</g></svg>
-      <div class="bt-title"><span class="bt-kick"></span><b class="bt-name"></b></div><i class="bt-shade"></i></div>`;
+      <div class="bt-title"><span class="bt-kick"></span><b class="bt-name"></b></div><i class="bt-shade"></i></div></div>`;
+  const bw = Math.round(Math.min(innerWidth * .82, innerHeight * .8 * 760 / 980, 620)), bh = Math.round(bw * 980 / 760);
+  ov.style.setProperty('--bw', bw + 'px'); ov.style.setProperty('--bh', bh + 'px');
   document.body.appendChild(ov);
   const cover = ov.querySelector('.bt-cover'), shade = ov.querySelector('.bt-shade'), dim = ov.querySelector('.bt-dim');
   const leaves = [...ov.querySelectorAll('.bt-leaf')].reverse(); // 上の紙からめくる
   // 光る魔法陣を、表紙の絵に彫られた魔法陣に重ねる（表紙の絵は 760×980 で、魔法陣の半径はおよそ 255）
-  ov.style.setProperty('--seal', Math.round(531 * Math.max(innerWidth / 760, innerHeight / 980)) + 'px');
+  ov.style.setProperty('--seal', Math.round(531 * bw / 760) + 'px');
   const lines = [...ov.querySelectorAll('.bt-seal g > *')];
   lines.forEach(el => { const len = Math.ceil(el.getTotalLength ? el.getTotalLength() : 620) + 2; el.style.strokeDasharray = `${len} ${len}`; el.style.strokeDashoffset = len; el.dataset.len = len; });
-  const P = `perspective(${Math.round(Math.max(innerWidth, innerHeight) * 2.4)}px)`;
+  const P = `perspective(${Math.round(bh * 3)}px)`;
   const turn = deg => `${P} rotateY(${deg}deg)`;
   const finish = () => { ov.remove(); bookCoverBusy = false; };
   const fail = () => { finish(); };
@@ -1380,6 +1383,8 @@ function bookCover(mid) {
   sfxFlip(120, 420);
   sfxThud(430);
   dim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'ease-in', fill: 'forwards' });
+  const back = ov.querySelector('.bt-back');
+  back.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'ease-in', fill: 'forwards' });
   shade.animate([{ opacity: .9 }, { opacity: 0 }], { duration: 470, easing: 'cubic-bezier(.6, 0, .9, .5)', fill: 'forwards' });
   cover.animate([{ transform: turn(-89) }, { transform: turn(-40), offset: .55 }, { transform: turn(0) }],
     { duration: 470, easing: 'cubic-bezier(.55, 0, .85, .4)', fill: 'forwards' }).finished.then(() => {
@@ -1400,6 +1405,7 @@ function bookCover(mid) {
       setTimeout(() => {
         // ③ 表紙をひらき、紙をめくる
         dim.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 800, delay: 300, easing: 'ease-out', fill: 'forwards' });
+        back.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 700, delay: 500, easing: 'ease-out', fill: 'forwards' });
         const dur = 760, gap = 130, wait = 240, ease = 'cubic-bezier(.45, .05, .55, .95)';
         sfxFlip(0, dur + nLeaf * gap + wait, nLeaf + 1, gap);
         const open = [
@@ -3829,6 +3835,7 @@ function renderSortBar() {
   $('sort-key').value = state.sortKey || 'created';
   const lab = SORT_LABEL[state.sortKey || 'created'];
   $('sort-dir').innerHTML = `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4v12M3 13l3 3 3-3M14 16V4M11 7l3-3 3 3"/></svg>${lab[state.sortDesc ? 1 : 0]}`;
+  const ov = document.querySelector('[data-view="orbit"]'); if (ov) ov.textContent = themeSelName() || 'ふよふよ';   // テーマだけの並べ方の名前
   document.querySelectorAll('[data-view]').forEach(b => { const on = b.dataset.view === (state.selView || 'orbit'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
 }
 function listViewHtml(chars) {
@@ -4293,6 +4300,7 @@ $('select').addEventListener('click', e => {
 let selPress = null, selLong = false, selResizeT = null;
 function renderSelect() {
   const stage = $('sel-stage');
+  stage.classList.remove('themev');
   $('sel-rest')?.remove();
   document.querySelectorAll('[data-seltab]').forEach(b => { const on = b.dataset.seltab === selTab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
   $('sel-eyebrow').textContent = { friends: 'FRIENDS', groups: 'GROUPS' }[selTab] || 'SELECT YOUR INVESTIGATOR';
@@ -4302,18 +4310,21 @@ function renderSelect() {
   if (selTab === 'friends') { renderFriendSelect(stage); return; }
   if (selTab === 'groups') { renderGroupSelect(stage); return; }
   if ((state.selView || 'orbit') === 'slide') {
-    stage.classList.remove('grid', 'listv'); stage.classList.add('slidev'); stage.style.height = '';
+    stage.classList.remove('grid', 'listv', 'themev'); stage.classList.add('slidev'); stage.style.height = '';
     stage.innerHTML = slideViewHtml(sortedChars());
     initSlide();
     return;
   }
   stage.classList.remove('slidev');
   if ((state.selView || 'orbit') === 'list') {
-    stage.classList.remove('grid'); stage.classList.add('listv'); stage.style.height = '';
+    stage.classList.remove('grid', 'themev'); stage.classList.add('listv'); stage.style.height = '';
     stage.innerHTML = listViewHtml(sortedChars());
     return;
   }
   stage.classList.remove('listv');
+  const tsel = themeSelHtml(sortedChars());   // 和風・ドット・アクアリウムは、そのテーマだけの並べ方
+  stage.classList.toggle('themev', !!tsel);
+  if (tsel) { stage.classList.remove('grid'); stage.style.height = ''; stage.innerHTML = tsel; return; }
   const W = stage.clientWidth || Math.min(1100, innerWidth - 32);
   const small = W < 560;
   const B = small ? 70 : 100;
@@ -4414,6 +4425,18 @@ function initSlide() {
 function popSelect() {
   if (reduceMotion.matches) return;
   const stage = $('sel-stage');
+  if (stage.classList.contains('themev')) {   // テーマだけの並べ方の出かた
+    const cards = [...stage.querySelectorAll('.ts-wa-card, .ts-dot-row, .ts-aq-bub, .ts-aq-new')];
+    const d0 = (typeof aqWaveBusy !== 'undefined' && aqWaveBusy) ? 900 : 120;
+    if (isWa()) cards.forEach((el, i) => {   // 掛け軸が上からするすると下りる
+      el.animate([{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)' }], { duration: 900, delay: 300 + i * 110, easing: 'cubic-bezier(.5, 0, .2, 1)', fill: 'backwards' });
+      el.animate([{ transform: 'translateY(-8px)' }, { transform: 'rotate(.8deg)', offset: .75 }, { transform: 'none' }], { duration: 1300, delay: 300 + i * 110, easing: 'ease-out', fill: 'backwards' });
+    });
+    else if (isDot()) cards.forEach((el, i) => el.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: 360, delay: 260 + i * 120, easing: 'steps(8, end)', fill: 'backwards' }));
+    else cards.forEach((el, i) => el.animate([{ opacity: 0, transform: 'translateY(60px) scale(.7)' }, { opacity: 1, transform: 'translateY(-6px) scale(1.03)', offset: .7 }, { opacity: 1, transform: 'none' }], { duration: 1000, delay: d0 + i * 90, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'backwards' }));
+    document.querySelector('.sel-head')?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 600, easing: 'ease-out' });
+    return;
+  }
   if (isOrbis()) {   // 星のように、ひとつずつふわっと灯る
     const d0 = obWarpBusy ? 820 : 60;
     stage.querySelectorAll('.sel-char, .sel-row').forEach((el, i) => el.animate(
@@ -4496,7 +4519,7 @@ $('select').addEventListener('click', e => {
   if (nw) { if (nw.classList.contains('sl-card') && !nw.classList.contains('center')) slideTo($('sl-track'), nw, true); else openNewChar(); return; }
   if (e.target.closest('#sel-import')) { $('btn-import').click(); return; }
   if (e.target.closest('#sel-theme')) { $('btn-theme').click(); return; }
-  const ch = e.target.closest('.sel-char, .sel-row'); if (!ch) return;
+  const ch = e.target.closest('.sel-char, .sel-row, .ts-card'); if (!ch) return;
   if (selLong) { selLong = false; return; }
   // スライド：奥にいるキャラを押したら、まず真ん中まで回してくる
   if (ch.classList.contains('sl-card') && !ch.classList.contains('center')) { slideTo($('sl-track'), ch, true); return; }
@@ -4507,7 +4530,7 @@ $('select').addEventListener('click', e => {
 });
 $('select').addEventListener('pointerover', e => {
   if (!canHover.matches) return;
-  const ch = e.target.closest('.sel-char:not(.sel-friend):not(.sl-card), .sel-row');
+  const ch = e.target.closest('.sel-char:not(.sel-friend):not(.sl-card), .sel-row, .ts-card');
   if (ch && ch.dataset.id !== peekId) showPeek(ch);
   if (!ch && peekId) hidePeek();
 });
@@ -4526,6 +4549,31 @@ document.querySelector('.brand').addEventListener('click', () => { selTab = 'min
 document.querySelector('.brand').style.cursor = 'pointer';
 addEventListener('resize', () => { clearTimeout(selResizeT); selResizeT = setTimeout(() => { if (!$('select').hidden) renderSelect(); }, 150); });
 
+/* ---- テーマごとの「探索者をえらぶ」画面（近未来のまるい並び方とは別の形） ----
+   和風：掛け軸が右から左へ並ぶ ／ ドット：昔のRPGの「ぼうけんのしょ」 ／ アクアリウム：泡に入ったキャラが水中にうかぶ
+   押したときは .ts-card の data-id で探索者を開く（下のクリックの処理）。新しい探索者は #sel-new */
+const themeSelName = () => isWa() ? '掛け軸' : isDot() ? 'ぼうけんのしょ' : isAqua() ? '水槽' : '';
+function themeSelHtml(chars) {
+  const pic = c => { const src = portraitSrc(c); return src ? `<img src="${esc(imgSrc(src))}" alt="" draggable="false" onerror="this.remove()">` : ''; };
+  const meta = c => esc([SYS[c.system].short, c.profile.occupation].filter(Boolean).join('・'));
+  if (isWa()) return `<div class="ts-wa"><i class="ts-wa-rail" aria-hidden="true"></i><div class="ts-wa-row">
+      <button class="ts-wa-card new" type="button" id="sel-new" style="--i:0"><i class="rod"></i><span class="paper"><b class="tate">新しき探索者</b><span class="stamp">新</span></span><i class="rod low"></i></button>
+      ${chars.map((c, i) => `<button class="ts-card ts-wa-card" type="button" data-id="${c.id}" style="--i:${i + 1}" aria-label="${esc(c.profile.name || '名無し')}のシートを開く">
+        <i class="rod"></i><span class="paper"><span class="pic ${pic(c) ? 'has' : ''}">${pic(c) || tokenHtml(c)}</span><b class="tate">${esc(c.profile.name || '名無し')}</b><small class="tate">${meta(c)}</small></span><i class="rod low"></i></button>`).join('')}
+    </div></div>`;
+  if (isDot()) return `<div class="ts-dot"><div class="ts-dot-win"><p class="ts-dot-ttl">▼ ぼうけんのしょ を えらんでください</p><ol>
+      ${chars.map((c, i) => { const d = compute(c); return `<li><button class="ts-card ts-dot-row" type="button" data-id="${c.id}" style="--i:${i}" aria-label="${esc(c.profile.name || '名無し')}のシートを開く">
+        <span class="cur" aria-hidden="true">▶</span><span class="no">${String(i + 1).padStart(2, '0')}</span>${tokenHtml(c)}<span class="nm">${esc(c.profile.name || '名無し')}</span><span class="job">${meta(c)}</span><span class="hp">HP ${d.hp}/${d.hpMax}　SAN ${d.san}</span></button></li>`; }).join('')}
+      <li><button class="ts-dot-row new" type="button" id="sel-new" style="--i:${chars.length}"><span class="cur" aria-hidden="true">▶</span><span class="no">＋</span><span class="nm">あたらしく ぼうけんを はじめる</span></button></li>
+    </ol></div></div>`;
+  if (isAqua()) return `<div class="ts-aq">
+      <button class="ts-aq-new" type="button" id="sel-new"><span class="bub"><b>＋</b></span><span class="plate"><b>新規作成</b><small>NEW</small></span></button>
+      ${chars.map((c, i) => `<button class="ts-card ts-aq-bub" type="button" data-id="${c.id}" style="--i:${i};--y:${[0, 38, 12, 52, 4, 30][i % 6]}px;--s:${[1, .86, .94, .8, 1.04, .9][i % 6]};--d:${(5 + (i % 4) * .8).toFixed(1)}s" aria-label="${esc(c.profile.name || '名無し')}のシートを開く">
+        <span class="bub">${pic(c) || tokenHtml(c)}</span><span class="plate"><b>${esc(c.profile.name || '名無し')}</b><small>${meta(c)}</small></span></button>`).join('')}
+    </div>`;
+  return '';
+}
+
 /* ================= オープニング ================= */
 (function intro() {
   // 前に使っていたテーマの見た目を、保存データの読み込みを待たずに先に当てる（最初の画面がそのテーマで出るように）
@@ -4534,12 +4582,38 @@ addEventListener('resize', () => { clearTimeout(selResizeT); selResizeT = setTim
   // 共有リンクから開いたときは、オープニングを飛ばしてすぐにキャラシを見せる
   if (/[?&]share=[0-9a-f]{32}/.test(location.search)) { el.remove(); return; }
   document.documentElement.style.overflow = 'hidden';
-  // 魔法陣：七芒星・六角形・ルーン
-  const pt = (r, deg) => [300 + r * Math.cos(deg * Math.PI / 180), 300 + r * Math.sin(deg * Math.PI / 180)];
-  $('intro-star').setAttribute('points', Array.from({ length: 7 }, (_, i) => pt(232, -90 + (i * 3 % 7) * 360 / 7).map(v => v.toFixed(1)).join(',')).join(' '));
-  $('intro-hex').setAttribute('points', Array.from({ length: 6 }, (_, i) => pt(122, -90 + i * 60).map(v => v.toFixed(1)).join(',')).join(' '));
-  const runes = 'ᚠᚢᚦᚨᚱᚲᚷ';
-  $('intro-runes').innerHTML = [...runes].map((ch, i) => { const [x, y] = pt(205, -90 + (i + .5) * 360 / 7); return `<text class="rune" x="${x.toFixed(1)}" y="${y.toFixed(1)}">${ch}</text>`; }).join('');
+  // はじめの画面は2種類：ORBiS（星空と光。ふつうはこちら）と、魔法陣（前からの画面）。テーマ・背景の小窓で切りかえ（localStorage に覚える）
+  let style = 'orbis';
+  try { style = localStorage.getItem('charasheet-kobo.intro') || 'orbis'; } catch (e) { /* */ }
+  const orbis = style !== 'classic';
+  if (orbis) {
+    const mark = 'assets/brand/mark.webp', logo = 'assets/brand/logo-dark.webp';
+    const star = (cx, cy, r) => `<path class="obi-sp" d="M${cx} ${cy - r}Q${cx + r * .16} ${cy - r * .16} ${cx + r} ${cy}Q${cx + r * .16} ${cy + r * .16} ${cx} ${cy + r}Q${cx - r * .16} ${cy + r * .16} ${cx - r} ${cy}Q${cx - r * .16} ${cy - r * .16} ${cx} ${cy - r}Z"/>`;
+    el.classList.add('ob-intro');
+    el.innerHTML = `<i class="obi-sky" aria-hidden="true"></i><i class="obi-cloud c1" aria-hidden="true"></i><i class="obi-cloud c2" aria-hidden="true"></i>
+      <canvas class="intro-dust" id="intro-dust" aria-hidden="true"></canvas>
+      <svg class="intro-circle obi-orbits" id="intro-circle" viewBox="0 0 600 600" aria-hidden="true">
+        <g class="obi-ring r1"><ellipse cx="300" cy="300" rx="292" ry="104"/></g><g class="obi-ring r2"><ellipse cx="300" cy="300" rx="232" ry="78"/></g><g class="obi-ring r3"><ellipse cx="300" cy="300" rx="270" ry="150"/></g>
+        <path id="obi-path" d="M8 300a292 104 0 1 0 584 0a292 104 0 1 0 -584 0" fill="none"/>
+        <circle r="5" class="obi-sat"><animateMotion dur="9s" repeatCount="indefinite" rotate="0"><mpath href="#obi-path"/></animateMotion></circle>
+        ${star(84, 160, 14)}${star(520, 120, 10)}${star(470, 470, 16)}${star(130, 450, 8)}${star(300, 40, 9)}
+      </svg>
+      <div class="intro-body obi-body">
+        <img class="obi-mark" src="${mark}" alt="" draggable="false">
+        <img class="obi-logo" src="${logo}" alt="ORBiS" draggable="false">
+        <p class="obi-tag">Where Stories Intersect.</p>
+        <h2 class="obi-title" id="intro-title">物語が交わる、星の記録帳へ。</h2>
+        <button class="intro-btn obi-btn" id="intro-enter" type="button"><span>ORBiS をひらく</span></button>
+        <p class="obi-foot">CALL OF CTHULHU ・ CHARACTER SHEET ・ for CCFOLIA</p>
+      </div>`;
+  } else {
+    // 魔法陣：七芒星・六角形・ルーン
+    const pt = (r, deg) => [300 + r * Math.cos(deg * Math.PI / 180), 300 + r * Math.sin(deg * Math.PI / 180)];
+    $('intro-star').setAttribute('points', Array.from({ length: 7 }, (_, i) => pt(232, -90 + (i * 3 % 7) * 360 / 7).map(v => v.toFixed(1)).join(',')).join(' '));
+    $('intro-hex').setAttribute('points', Array.from({ length: 6 }, (_, i) => pt(122, -90 + i * 60).map(v => v.toFixed(1)).join(',')).join(' '));
+    const runes = 'ᚠᚢᚦᚨᚱᚲᚷ';
+    $('intro-runes').innerHTML = [...runes].map((ch, i) => { const [x, y] = pt(205, -90 + (i + .5) * 360 / 7); return `<text class="rune" x="${x.toFixed(1)}" y="${y.toFixed(1)}">${ch}</text>`; }).join('');
+  }
 
   // 火の粉
   const cv = $('intro-dust'), ctx = cv.getContext('2d');
@@ -4555,7 +4629,7 @@ addEventListener('resize', () => { clearTimeout(selResizeT); selResizeT = setTim
       if (p.y < -10) Object.assign(p, spawn(false));
       const a = .35 + .45 * Math.sin(t / 500 + p.ph) ** 2;
       ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283);
-      ctx.fillStyle = p.gold ? `rgba(226,186,110,${a})` : `rgba(120,215,225,${a * .8})`;
+      ctx.fillStyle = orbis ? (p.gold ? `rgba(255,255,255,${a})` : `rgba(170,160,255,${a * .8})`) : p.gold ? `rgba(226,186,110,${a})` : `rgba(120,215,225,${a * .8})`;
       ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 8; ctx.fill();
     }
     raf = requestAnimationFrame(tick);
@@ -4595,6 +4669,19 @@ addEventListener('resize', () => { clearTimeout(selResizeT); selResizeT = setTim
   document.addEventListener('keydown', onKey, true);
   setTimeout(() => $('intro-enter')?.focus({ preventScroll: true }), 50);
 })();
+
+/* ---- はじめの画面の切りかえ（テーマ・背景の小窓） ---- */
+function renderIntroPick() {
+  let cur = 'orbis'; try { cur = localStorage.getItem('charasheet-kobo.intro') || 'orbis'; } catch (e) { /* */ }
+  document.querySelectorAll('[data-intro]').forEach(b => { const on = b.dataset.intro === cur; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+}
+$('intro-pick')?.addEventListener('click', e => {
+  const b = e.target.closest('[data-intro]'); if (!b) return;
+  try { localStorage.setItem('charasheet-kobo.intro', b.dataset.intro); } catch (er) { /* */ }
+  renderIntroPick();
+  toast(b.dataset.intro === 'classic' ? '次に開いたときから、はじめの画面は「魔法陣」になります。' : '次に開いたときから、はじめの画面は「ORBiS」になります。');
+});
+$('btn-theme').addEventListener('click', renderIntroPick);
 
 /* ================= 画面の編集モード（部品の文字・色・画像・形・位置を変える） =================
    ・権限が「マスター」か「編集者」の人がログインすると「テーマ・背景」に「画面を編集する」が出る（Ctrl+Shift+E でも開く）

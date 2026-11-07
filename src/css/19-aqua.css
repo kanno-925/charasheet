@@ -379,3 +379,43 @@
 :root[data-look~="aqua"] .sk-tr .seg-h, :root[data-look~="aqua"] .sw-h { filter: hue-rotate(150deg) saturate(1.3); }
 :root[data-look~="aqua"] .sk-tr .seg-g, :root[data-look~="aqua"] .sw-g { filter: hue-rotate(-70deg) saturate(1.2); }
 :root[data-look~="aqua"] .sw-j, :root[data-look~="aqua"] .sw-h, :root[data-look~="aqua"] .sw-g { background: #4ec3f2; border-radius: 50%; }
+
+/* ---- 広いパソコン（1260px 以上）：まん中の細い1列をやめて、画面を広く使う（左に一覧とコマ、右にキャラシ） ---- */
+@media (min-width: 1260px) {
+  :root[data-look~="aqua"] .app { width: calc(852 * 2 * var(--u) + 64px); }
+  :root[data-look~="aqua"] .layout { display: grid; grid-template-columns: calc(852 * var(--u)) calc(852 * var(--u)); column-gap: 64px; align-items: start;
+    grid-template-areas: "shelf sheet" "tray sheet"; grid-template-rows: auto 1fr; }
+  :root[data-look~="aqua"] .layout > .shelf { grid-area: shelf; }
+  :root[data-look~="aqua"] .layout > .sheet { grid-area: sheet; margin-top: calc(-196 * var(--u)); }
+  :root[data-look~="aqua"] .layout > .tray { grid-area: tray; position: sticky; top: 16px; }
+  :root[data-look~="aqua"] .aq-navrow { width: calc(852 * var(--u)); }
+}
+/* 左上の題字は ORBiS のロゴ（docs/brand.md。暗い地なので、白っぽく光るほう） */
+:root[data-look~="aqua"] .brand { background: url("../assets/brand/logo.webp") left center / contain no-repeat; width: calc(440 * var(--u)); height: calc(128 * var(--u)); top: calc(12 * var(--u));
+  filter: drop-shadow(0 0 10px rgb(150 220 255 / .45)); }
+
+/* ===== アクアリウム：「探索者をえらぶ」は泡に入ったキャラが水中にうかぶ（26-select.js の themeSelHtml） ===== */
+:root[data-look~="aqua"] #sel-stage.themev { min-height: 0; height: auto !important; }
+.ts-aq { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 34px 40px; padding: 30px 10px 50px; }
+.ts-aq-bub, .ts-aq-new { position: relative; display: flex; flex-direction: column; align-items: center; gap: 12px; border: 0; background: none; cursor: pointer; padding: 0;
+  margin-top: var(--y, 0px); animation: ts-aq-float var(--d, 6s) ease-in-out infinite; animation-delay: calc(var(--i, 0) * -.9s); color: #eaf8ff; }
+@keyframes ts-aq-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -12px; } }
+.ts-aq-bub .bub, .ts-aq-new .bub { position: relative; width: calc(138px * var(--s, 1)); height: calc(138px * var(--s, 1)); border-radius: 50%; overflow: hidden; display: grid; place-items: center;
+  background: radial-gradient(circle at 50% 45%, rgb(80 160 220 / .25), rgb(10 40 90 / .55));
+  box-shadow: inset 0 0 0 2px rgb(220 248 255 / .7), inset 0 -16px 30px rgb(140 220 255 / .25), inset 10px 14px 26px rgb(255 255 255 / .25), 0 0 26px rgb(120 210 255 / .35);
+  transition: transform .5s cubic-bezier(.3, 1.5, .5, 1), box-shadow .3s; }
+.ts-aq-bub .bub::after, .ts-aq-new .bub::after { content: ""; position: absolute; left: 18%; top: 12%; width: 30%; height: 18%; border-radius: 50%; transform: rotate(-30deg);
+  background: radial-gradient(closest-side, rgb(255 255 255 / .9), rgb(255 255 255 / 0)); pointer-events: none; }
+.ts-aq-bub .bub img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; opacity: .92; }
+.ts-aq-bub .bub .token { width: 72%; height: 72%; font-size: 34px; }
+.ts-aq-bub .plate, .ts-aq-new .plate { display: flex; flex-direction: column; align-items: center; padding: 6px 16px 7px; min-width: 120px; max-width: 180px;
+  background: linear-gradient(180deg, rgb(10 45 90 / .7), rgb(6 28 60 / .8)); border: 1px solid rgb(190 235 255 / .5); border-radius: 10px; box-shadow: 0 0 14px rgb(120 210 255 / .25); }
+.ts-aq-bub .plate b, .ts-aq-new .plate b { font-family: var(--f-display); font-size: 15px; font-weight: 700; letter-spacing: .08em; text-shadow: var(--aq-glow, none); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.ts-aq-bub .plate small, .ts-aq-new .plate small { font-size: 11px; color: var(--aq-sub, #b9def3); letter-spacing: .06em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.ts-aq-bub:hover .bub, .ts-aq-new:hover .bub { transform: scale(1.07); box-shadow: inset 0 0 0 2px #fff, inset 0 -16px 30px rgb(140 220 255 / .35), inset 10px 14px 26px rgb(255 255 255 / .3), 0 0 40px rgb(140 225 255 / .7); }
+.ts-aq-bub:active .bub, .ts-aq-new:active .bub { transform: scale(.94); }
+.ts-aq-new .bub { width: 110px; height: 110px; margin-top: 14px; }
+.ts-aq-new .bub b { font-size: 46px; font-weight: 300; color: #eaf8ff; text-shadow: 0 0 14px #8fdcff; }
+@media (max-width: 560px) { .ts-aq { gap: 22px 18px; } .ts-aq-bub .bub { width: calc(110px * var(--s, 1)); height: calc(110px * var(--s, 1)); } .ts-aq-bub .plate { min-width: 100px; max-width: 150px; } }
+:root[data-look~="aqua"] .sel-head h2 { font-family: "Pinyon Script", var(--f-display); letter-spacing: .1em; }
+:root[data-look~="aqua"] .sel-head h2::before { content: "Select  "; font-family: "Pinyon Script", cursive; font-weight: 400; color: var(--aq-cyan, #8fdcff); }

@@ -304,18 +304,21 @@ function bookCover(mid) {
   const nLeaf = canHover.matches ? 3 : 2;
   const ov = document.createElement('div'); ov.className = 'bk-trans'; ov.setAttribute('aria-hidden', 'true');
   const shapes = '<circle cx="100" cy="100" r="96"/><circle class="th" cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="77"/><polygon points="100.0,24.0 144.7,161.5 27.7,76.5 172.3,76.5 55.3,161.5"/><circle class="th" cx="100" cy="100" r="21"/>';
-  ov.innerHTML = '<i class="bt-dim"></i>' + '<i class="bt-leaf"><b class="bt-ls"></b></i>'.repeat(nLeaf) + `
+  // 本は画面いっぱいにせず、本まるごとが見える大きさ（表紙の絵と同じ 760:980）で、まん中に置く
+  ov.innerHTML = '<i class="bt-dim"></i><div class="bt-book"><i class="bt-back"></i>' + '<i class="bt-leaf"><b class="bt-ls"></b></i>'.repeat(nLeaf) + `
     <div class="bt-cover"><i class="bt-frame"></i><i class="bt-glow"></i>
       <svg class="bt-seal" viewBox="0 0 200 200"><g class="h2">${shapes}</g><g class="h1">${shapes}</g><g class="core">${shapes}</g></svg>
-      <div class="bt-title"><span class="bt-kick"></span><b class="bt-name"></b></div><i class="bt-shade"></i></div>`;
+      <div class="bt-title"><span class="bt-kick"></span><b class="bt-name"></b></div><i class="bt-shade"></i></div></div>`;
+  const bw = Math.round(Math.min(innerWidth * .82, innerHeight * .8 * 760 / 980, 620)), bh = Math.round(bw * 980 / 760);
+  ov.style.setProperty('--bw', bw + 'px'); ov.style.setProperty('--bh', bh + 'px');
   document.body.appendChild(ov);
   const cover = ov.querySelector('.bt-cover'), shade = ov.querySelector('.bt-shade'), dim = ov.querySelector('.bt-dim');
   const leaves = [...ov.querySelectorAll('.bt-leaf')].reverse(); // 上の紙からめくる
   // 光る魔法陣を、表紙の絵に彫られた魔法陣に重ねる（表紙の絵は 760×980 で、魔法陣の半径はおよそ 255）
-  ov.style.setProperty('--seal', Math.round(531 * Math.max(innerWidth / 760, innerHeight / 980)) + 'px');
+  ov.style.setProperty('--seal', Math.round(531 * bw / 760) + 'px');
   const lines = [...ov.querySelectorAll('.bt-seal g > *')];
   lines.forEach(el => { const len = Math.ceil(el.getTotalLength ? el.getTotalLength() : 620) + 2; el.style.strokeDasharray = `${len} ${len}`; el.style.strokeDashoffset = len; el.dataset.len = len; });
-  const P = `perspective(${Math.round(Math.max(innerWidth, innerHeight) * 2.4)}px)`;
+  const P = `perspective(${Math.round(bh * 3)}px)`;
   const turn = deg => `${P} rotateY(${deg}deg)`;
   const finish = () => { ov.remove(); bookCoverBusy = false; };
   const fail = () => { finish(); };
@@ -323,6 +326,8 @@ function bookCover(mid) {
   sfxFlip(120, 420);
   sfxThud(430);
   dim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'ease-in', fill: 'forwards' });
+  const back = ov.querySelector('.bt-back');
+  back.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'ease-in', fill: 'forwards' });
   shade.animate([{ opacity: .9 }, { opacity: 0 }], { duration: 470, easing: 'cubic-bezier(.6, 0, .9, .5)', fill: 'forwards' });
   cover.animate([{ transform: turn(-89) }, { transform: turn(-40), offset: .55 }, { transform: turn(0) }],
     { duration: 470, easing: 'cubic-bezier(.55, 0, .85, .4)', fill: 'forwards' }).finished.then(() => {
@@ -343,6 +348,7 @@ function bookCover(mid) {
       setTimeout(() => {
         // ③ 表紙をひらき、紙をめくる
         dim.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 800, delay: 300, easing: 'ease-out', fill: 'forwards' });
+        back.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 700, delay: 500, easing: 'ease-out', fill: 'forwards' });
         const dur = 760, gap = 130, wait = 240, ease = 'cubic-bezier(.45, .05, .55, .95)';
         sfxFlip(0, dur + nLeaf * gap + wait, nLeaf + 1, gap);
         const open = [

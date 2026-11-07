@@ -112,3 +112,5 @@
   .bk-head h3 .bk-ht { white-space: normal; max-width: none; text-align: center; }
   .bk-head h3::before, .bk-head h3::after { display: none; }
 }
+/* 探索者をえらぶ画面を出しているあいだは、下の「コマをコピー」の帯を隠す（どのテーマでも） */
+body:has(#select:not([hidden])) .mbar { display: none !important; }

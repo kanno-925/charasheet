@@ -21,3 +21,6 @@
 .bg-slots button.on { background: var(--solid); color: var(--ink); box-shadow: var(--shadow); }
 .bg-hint { font-size: 11.5px; color: var(--muted); }
 .bg-thumb.sm { width: 112px; }
+/* テーマ・背景の小窓：効果音とはじめの画面のボタン */
+.sfx-row, .intro-pick { display: flex; flex-wrap: wrap; gap: 8px; }
+.intro-pick .btn.on { background: linear-gradient(100deg, var(--sky), var(--cyan)); color: #fff; border-color: transparent; }

@@ -46,6 +46,7 @@ function renderSortBar() {
   $('sort-key').value = state.sortKey || 'created';
   const lab = SORT_LABEL[state.sortKey || 'created'];
   $('sort-dir').innerHTML = `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4v12M3 13l3 3 3-3M14 16V4M11 7l3-3 3 3"/></svg>${lab[state.sortDesc ? 1 : 0]}`;
+  const ov = document.querySelector('[data-view="orbit"]'); if (ov) ov.textContent = themeSelName() || 'ふよふよ';   // テーマだけの並べ方の名前
   document.querySelectorAll('[data-view]').forEach(b => { const on = b.dataset.view === (state.selView || 'orbit'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
 }
 function listViewHtml(chars) {
