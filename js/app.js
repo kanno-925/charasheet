@@ -5543,7 +5543,7 @@ function openShare(c) {
 
 /* ---- リンクを貼ったときに出るカードの画像（横1200×縦630の JPEG）。Storage の share-og/合言葉.jpg に置く ---- */
 const loadImg = (src, cors) => new Promise((ok, ng) => { const im = new Image(); if (cors) im.crossOrigin = 'anonymous'; im.onload = () => ok(im); im.onerror = ng; im.src = src; });
-const CARD_VER = 1;   // カードの絵柄を変えたら数字を上げる（みんなの画像が作り直される）
+const CARD_VER = 2;   // カードの絵柄を変えたら数字を上げる（みんなの画像が作り直される）
 const cardSig = c => { const d = compute(c), pic = portraitSrc(c) || c.avatar || ''; return [CARD_VER, c.profile.name, c.profile.kana, c.profile.occupation, c.profile.age, c.profile.sex, c.system, c.profile.color, d.hpMax, d.mpMax, d.san, pic.length, pic.slice(-80)].join('|'); };
 async function makeShareCard(c) {
   const W = 1200, H = 630, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
@@ -5593,8 +5593,9 @@ async function makeShareCard(c) {
     g.fillStyle = col; g.font = `700 24px ${font}`; g.fillText(l, bx + 18, by + 34);
     g.fillStyle = '#ffffff'; g.font = `800 46px ${font}`; g.fillText(String(v), bx + 18, by + 82);
   });
-  g.fillStyle = 'rgba(200, 220, 255, .75)'; g.font = `600 30px Cinzel, ${font}`; g.textAlign = 'right';
-  g.fillText('ORBiS', W - 50, H - 46);
+  // 右下：ORBiS のロゴ（暗い地なので白っぽく光るほう。docs/brand.md）
+  try { const lg = await loadImg('assets/brand/logo.webp'), lw = 200, lh = lg.height * lw / lg.width; g.globalAlpha = .9; g.drawImage(lg, W - 36 - lw, H - 30 - lh, lw, lh); g.globalAlpha = 1; }
+  catch (e) { g.fillStyle = 'rgba(200, 220, 255, .75)'; g.font = `600 30px Cinzel, ${font}`; g.textAlign = 'right'; g.fillText('ORBiS', W - 50, H - 46); }
   let blob = null;
   for (const q of [.86, .75, .62, .5]) { blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', q)); if (blob && blob.size <= 900000) break; }
   return blob;

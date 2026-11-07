@@ -272,10 +272,10 @@ pre.code { margin: 0; padding: 12px 18px; background: var(--code-bg); border-top
 .sample-tag { font-size: 11px; color: var(--orange); border: 1px dashed var(--orange); border-radius: 999px; padding: 0 8px; }
 .new-count { margin: 10px 0 0; font-size: 12px; color: var(--muted); text-align: right; }
 .sheet > .no-char { padding: 60px 20px; text-align: center; font-size: 15px; }
-/* ORBiS のロゴとアイコン（assets/brand/）。明るいテーマは濃い色、暗いテーマは光る色のロゴ */
-.brand-mark { display: block; border-radius: 22%; background: url("../assets/brand/icon-192.png") center / cover no-repeat; box-shadow: 0 4px 12px -4px rgb(20 20 60 / .55), inset 0 0 0 1px rgb(230 210 175 / .5); }
+/* ORBiS のロゴとアイコン（assets/brand/。デザインのきまりは docs/brand.md）。明るいテーマは青→紫の色つき、暗いテーマは白っぽく光るロゴ */
+.brand-mark { display: block; border-radius: 22%; background: url("../assets/brand/icon-192.png") center / cover no-repeat; box-shadow: 0 4px 12px -4px rgb(40 60 160 / .5), inset 0 0 0 1px rgb(255 255 255 / .45); }
 .brand h1 { line-height: 0; }
-.brand-logo { display: block; width: 104px; aspect-ratio: 420 / 218; background: url("../assets/brand/logo-dark.webp") left center / contain no-repeat; }
-:root[data-look~="dark"] .brand-logo { background-image: url("../assets/brand/logo.webp"); filter: drop-shadow(0 0 6px rgb(255 220 170 / .35)); }
+.brand-logo { display: block; width: 132px; aspect-ratio: 480 / 140; margin: -4px 0 -3px -4px; background: url("../assets/brand/logo-dark.webp") left center / contain no-repeat; }
+:root[data-look~="dark"] .brand-logo { background-image: url("../assets/brand/logo.webp"); }
 .brand-text small { margin-top: 2px; letter-spacing: .2em; }
-@media (max-width: 760px) { .brand-logo { width: 84px; } .brand-mark { width: 34px; height: 34px; } }
+@media (max-width: 760px) { .brand-logo { width: 108px; } .brand-mark { width: 34px; height: 34px; } }

@@ -4,7 +4,7 @@
 （細かい変更はコミット履歴 `git log` を見る）
 
 ## 2026-11-07
-- ORBiS のロゴと文字を新しいデザインに決定（青→紫の惑星と輪＋四つの光の星、細身の「ORBIS」、i の点が星）。きまりは docs/brand.md、見本は docs/brand/orbis-logo-guide.png。アプリの画像（assets/brand/）の差しかえはまだ。
+- ORBiS のロゴと文字を新しいデザインに決定（青→紫の惑星と輪＋四つの光の星、細身の「ORBIS」、i の点が星）。きまりは docs/brand.md、見本は docs/brand/orbis-logo-guide.png。→ 同じ日にアプリの画像も差しかえた：左上のロゴ（明るいテーマは色つき logo-dark.webp、暗いテーマは光る logo.webp）、タブのアイコン、ホーム画面のアイコン（青いアイコン）、共有カードの右下のロゴ（CARD_VER 2 でカードを作りなおす）。
 - 別の端末で書きかえた内容が反映されないことがある問題を直した（21-cloud.js の refreshFromCloud）：画面にもどったとき・開いているあいだ1分ごとに、サーバーの更新時刻だけ見て新しくなったキャラを読みなおす（入力中のキャラは次の回に）。ほかの端末で削除したキャラも消す。画面を離れるときは待たずにすぐ送る。保存に失敗したらお知らせを出し、30秒後にもう一度送る。保存ボタンは作らない（自動のまま）。別のURL（1ファイル版・Claude の公開版など）や、ログインしていない端末どうしは、保存場所が別なのでそもそも共有されない。
 - 立ち絵の差分（表情・服装など）を最大20枚まで追加できるように（c.faces = [{label, src}]、表示中は c.face。16-portrait.js）：プロフィールの立ち絵の下で追加（画像ファイル・URL）・名前・削除・選ぶ。立ち絵を大きく出す画面の下のボタンでも切りかえ。選んだ差分が全テーマの立ち絵に出る（portraitSrc。アイコンは基本の立ち絵のまま＝basePortrait）。共有・フレンドのキャラシでも差分を見られる。ココフォリアは外のURLの差分を受けつけないので、コマには入れない。
 - 共有リンクを LINE・Discord・X に貼ったとき、立ち絵入りのカードが出るように（準備）：リンクを作る・書きかえて保存するたびに、カードの画像（1200×630の JPEG：立ち絵・名前・職業・HP/MP/SAN）を Storage の share-og/合言葉.jpg に置く（30-share.js の makeShareCard。supabase/11-share-card.sql）。GitHub Pages ではキャラごとのカード情報を出せず、Supabase の関数も HTML を返せない（独自ドメインが有料）ため、Cloudflare Workers の「中継の入口」（cloudflare/share-worker.js）がカード情報を返して公開サイトへ移動させる。入口のURLを 30-share.js の SHARE_PAGE に書くと、共有リンクがその形になる。→ 入口を用意した（https://orbis-share.masakawwwww.workers.dev/s/合言葉）。共有リンクはこの形に。

@@ -46,7 +46,7 @@
 
 ## 4. 残っていること・確認待ち
 
-- **ロゴを新しいデザインに決定**（docs/brand.md）。アプリの画像（assets/brand/ の左上ロゴ・favicon・ホーム画面アイコン）と共有カードの「ORBiS」の差しかえは未着手。オーナーに頼まれたらやる。
+- **ロゴを新しいデザインに決定・差しかえ済み**（docs/brand.md）。左上ロゴ・favicon・ホーム画面アイコン・共有カードの右下。スマホのホーム画面に前のアイコンで追加済みの人は、追加しなおすと新しいアイコンになる。
 
 0. **共有リンクのカード（立ち絵のプレビュー）**：動いている。中継の入口は Cloudflare Workers の `orbis-share`（https://orbis-share.masakawwwww.workers.dev 、オーナーの Cloudflare アカウント）。cloudflare/share-worker.js を変えたときは、オーナーに Cloudflare の「Edit code」で貼りかえて Deploy してもらう必要がある（自動では反映されない）。LINE などで本当にカードが出るかは、オーナーに実際に貼って確かめてもらう。
 
