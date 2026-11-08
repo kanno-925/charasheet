@@ -86,5 +86,7 @@ dist/ORBiS.html           ダブルクリックで開ける1ファイル版（�
 - `09-dice-limit.sql`：ダイスの上限回数
 - `10-share.sql`：キャラシをリンクで共有する
 - `11-share-card.sql`：共有リンクを貼ったときのカード（立ち絵のプレビュー）
+- `12-char-secrets.sql`：キャラシの秘匿欄（自分とグループのキーパーだけが読める）
+- `13-secret-open.sql`：秘匿を「公開する／しない」（公開すると、キャラシを見られる人も読める）
 
 `cloudflare/share-worker.js` は、共有リンクのカードを出すための「中継の入口」です。Cloudflare Workers に貼り付けて使います（GitHub Pages だけではキャラごとのカードを出せないため）。

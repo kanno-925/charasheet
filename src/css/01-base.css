@@ -290,3 +290,9 @@ pre.code { margin: 0; padding: 12px 18px; background: var(--code-bg); border-top
 .secret-body { display: none; margin-top: 8px; }
 .secret-box.open .secret-body { display: block; }
 .sv-secret h4 small { font-weight: 400; font-size: 12px; color: var(--muted); margin-left: 6px; }
+/* 秘匿の「公開する／しない」 */
+.secret-open { display: inline-flex; gap: 4px; margin-top: 8px; padding: 3px; border-radius: 999px; border: 1px solid var(--line); }
+.secret-open .btn { border-color: transparent; background: transparent; box-shadow: none; }
+.secret-open .btn.on { background: linear-gradient(100deg, var(--sky), var(--cyan)) !important; color: #fff !important; border-color: transparent !important; }
+.secret-open .btn:not(.on) { opacity: .75; }
+.secret-note b { color: var(--sky); }

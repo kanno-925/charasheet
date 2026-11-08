@@ -312,6 +312,12 @@ pre.code { margin: 0; padding: 12px 18px; background: var(--code-bg); border-top
 .secret-body { display: none; margin-top: 8px; }
 .secret-box.open .secret-body { display: block; }
 .sv-secret h4 small { font-weight: 400; font-size: 12px; color: var(--muted); margin-left: 6px; }
+/* 秘匿の「公開する／しない」 */
+.secret-open { display: inline-flex; gap: 4px; margin-top: 8px; padding: 3px; border-radius: 999px; border: 1px solid var(--line); }
+.secret-open .btn { border-color: transparent; background: transparent; box-shadow: none; }
+.secret-open .btn.on { background: linear-gradient(100deg, var(--sky), var(--cyan)) !important; color: #fff !important; border-color: transparent !important; }
+.secret-open .btn:not(.on) { opacity: .75; }
+.secret-note b { color: var(--sky); }
 
 /* hub: avatar with floating section bubbles */
 .hub-top { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; justify-content: flex-end; padding: 16px 20px 0; }
@@ -4591,7 +4597,13 @@ const field = (label, path, value, opts = {}) =>
 const secretBox = (c, rows = 5) => `<div class="secret-box">
   <div class="secret-head"><svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg><b>秘匿</b><span class="secret-state">${(c.secret || '').trim() ? '記入済み' : '未記入'}</span>
   <button class="btn small" type="button" data-act="toggle-secret" aria-expanded="false">表示する</button></div>
-  <p class="secret-note">自分と、このキャラで参加しているグループのキーパーだけが読めます。フレンドの閲覧・共有リンク・ココフォリアには出ません。</p>
+  <div class="secret-open" role="group" aria-label="秘匿を公開するか">
+    <button type="button" class="btn small ${c.secretOpen ? '' : 'on'}" data-act="secret-open" data-v="0" aria-pressed="${!c.secretOpen}">公開しない</button>
+    <button type="button" class="btn small ${c.secretOpen ? 'on' : ''}" data-act="secret-open" data-v="1" aria-pressed="${!!c.secretOpen}">公開する</button>
+  </div>
+  <p class="secret-note">${c.secretOpen
+    ? '<b>公開中</b>：このキャラシを見られる人（鍵をかけていなければフレンド、共有リンクを開いた人）も秘匿を読めます。ココフォリアには出ません。'
+    : '自分と、このキャラで参加しているグループのキーパーだけが読めます。フレンドの閲覧・共有リンク・ココフォリアには出ません。'}</p>
   <div class="secret-body">${area('secret', c.secret || '', '秘匿', rows)}</div></div>`;
 const area = (path, value, label, rows = 3, cls = 'inp') =>
   `<textarea class="${cls}" id="${pid(path)}" data-p="${path}" rows="${rows}" aria-label="${label}"${cls.includes('mono') ? ' spellcheck="false"' : ''}>${esc(value)}</textarea>`;
@@ -5730,6 +5742,16 @@ onBoth('click', e => {
       break;
     }
     case 'open-friends': openFriends(); return;
+    case 'secret-open': {   // 秘匿を公開する／しない（公開すると、キャラシを見られる人も読める）
+      const v = b.dataset.v === '1'; if (!!c.secretOpen === v) return;
+      c.secretOpen = v;
+      toast(v ? '秘匿を公開しました。このキャラシを見られる人も読めます。' : '秘匿を非公開にしました。自分とグループのキーパーだけが読めます。');
+      const wasOpen = !!b.closest('.secret-box')?.classList.contains('open');
+      touch(); renderSheet();
+      if (panelKey && !$('panel-ov').hidden) fillPanel(panelKey);
+      if (wasOpen) document.querySelectorAll('.secret-box').forEach(x => { x.classList.add('open'); const t = x.querySelector('[data-act="toggle-secret"]'); if (t) { t.textContent = '隠す'; t.setAttribute('aria-expanded', 'true'); } });   // 開いていた秘匿は開いたまま
+      return;
+    }
     case 'toggle-secret': {
       const box = b.closest('.secret-box'); if (!box) return;
       const open = box.classList.toggle('open');
@@ -7005,13 +7027,18 @@ const myChars = () => state.chars.filter(c => !c.sample && (!c.owner || c.owner 
 let retryTimer = null;
 /* 秘匿はキャラシ本体（characters.data）には入れず、char_secrets に分けて送る（フレンドや共有リンクに出さないため） */
 let secretsOff = false;   // 12-char-secrets.sql をまだ実行していないとき
+let secretOpenOff = false;   // 13-secret-open.sql（秘匿の公開）をまだ実行していないとき
 const withoutSecret = c => { const { secret, ...rest } = c; return rest; };
 async function pushSecrets(list) {
   if (secretsOff || !list.length) return;
   const has = list.filter(c => (c.secret || '').trim()), empty = list.filter(c => !(c.secret || '').trim()).map(c => c.id);
   try {
     if (has.length) {
-      const { error } = await sb.from('char_secrets').upsert(has.map(c => ({ char_id: c.id, owner: me.id, body: c.secret, updated_at: new Date().toISOString() })));
+      const rows = has.map(c => Object.assign({ char_id: c.id, owner: me.id, body: c.secret, updated_at: new Date().toISOString() }, secretOpenOff ? {} : { is_open: !!c.secretOpen }));
+      let { error } = await sb.from('char_secrets').upsert(rows);
+      if (error && /is_open/.test(String(error.message))) {   // 13-secret-open.sql をまだ実行していない：公開の設定なしで送る
+        secretOpenOff = true; rows.forEach(r => { delete r.is_open; }); ({ error } = await sb.from('char_secrets').upsert(rows));
+      }
       if (error) throw error;
     }
     if (empty.length) { const { error } = await sb.from('char_secrets').delete().in('char_id', empty); if (error) throw error; }
@@ -7494,7 +7521,7 @@ function sheetViewHtml(c, shared) {   // shared：共有リンクから開いた
     ${list(c.items || [], it => `<span class="sv-chip">${esc(it.name)}${it.count ? ' ×' + esc(it.count) : ''}</span>`) ? `<div class="sv-sec"><h4>所持品</h4><div class="sv-chips">${list(c.items || [], it => `<span class="sv-chip">${esc(it.name)}${it.count ? ' ×' + esc(it.count) : ''}</span>`)}</div></div>` : ''}
     ${list(c.scenarios || [], sc => `<span class="sv-chip">「${esc(sc.name)}」${sc.date ? ' ' + esc(sc.date) : ''}</span>`) ? `<div class="sv-sec"><h4>通過シナリオ</h4><div class="sv-chips">${list(c.scenarios || [], sc => `<span class="sv-chip">「${esc(sc.name)}」${sc.date ? ' ' + esc(sc.date) : ''}</span>`)}</div></div>` : ''}
     ${c.backstory ? `<div class="sv-sec"><h4>経歴</h4><p class="sv-text">${esc(c.backstory)}</p></div>` : ''}
-    ${shared ? '' : '<div id="sv-secret"></div>'}
+    <div id="sv-secret"></div>
     ${c.memo ? `<div class="sv-sec"><h4>メモ</h4><p class="sv-text">${esc(c.memo)}</p></div>` : ''}
   </div>`;
 }
@@ -7502,10 +7529,15 @@ let fviewCur = null;
 /* グループのKPがメンバーのキャラシを見たとき、秘匿も見せる（読めるかどうかはサーバーが決める） */
 async function loadKpSecret(c) {
   if (!sb || !me || !c || secretsOff) return;
-  const { data, error } = await sb.from('char_secrets').select('body').eq('char_id', c.id).maybeSingle();
-  const box = $('sv-secret');
-  if (error || !data || !(data.body || '').trim() || !box || fviewCur !== c) return;
-  box.innerHTML = `<div class="sv-sec sv-secret"><h4>秘匿 <small>キーパーのあなたにだけ見えています</small></h4><p class="sv-text">${esc(data.body)}</p></div>`;
+  let { data, error } = await sb.from('char_secrets').select('body,is_open').eq('char_id', c.id).maybeSingle();
+  if (error && /is_open/.test(String(error.message))) ({ data, error } = await sb.from('char_secrets').select('body').eq('char_id', c.id).maybeSingle());
+  if (error || !data || !(data.body || '').trim() || fviewCur !== c) return;
+  showSecretBox(data.body, data.is_open ? '持ち主が公開しています' : 'キーパーのあなたにだけ見えています');
+}
+/* 見るだけの画面（フレンド・KP・共有リンク）の秘匿の欄 */
+function showSecretBox(body, note) {
+  const box = $('sv-secret'); if (!box || !(body || '').trim()) return;
+  box.innerHTML = `<div class="sv-sec sv-secret"><h4>秘匿 <small>${esc(note)}</small></h4><p class="sv-text">${esc(body)}</p></div>`;
 }
 $('fview-body').addEventListener('click', e => {
   const card = e.target.closest('[data-fv]');
@@ -9895,6 +9927,7 @@ async function openSharedView(token) {
     fviewCur = c;
     $('fview-title').innerHTML = `<span class="share-from">${sharedOwner ? esc(sharedOwner) + 'さんが共有' : '共有されたキャラシ'}</span> ${esc(c.profile.name || '名無し')}`;
     $('fview-body').innerHTML = sheetViewHtml(c, true);
+    if (data.secret) showSecretBox(data.secret, '持ち主が公開しています');
     $('fview-body').scrollTop = 0;
   } catch (er) { $('fview-body').innerHTML = `<p class="err">${esc(jaErr(er))}</p>`; }
 }
@@ -9903,7 +9936,7 @@ function takeShared(btn) {
   const src = fviewCur; if (!src || !canAddChar()) return;
   const c = JSON.parse(JSON.stringify(src));
   c.id = uid(); c.updatedAt = Date.now();
-  delete c.sample; delete c.owner; c.locked = false;
+  delete c.sample; delete c.owner; c.locked = false; c.secretOpen = false; delete c.secret;
   if (c.bgm && c.bgm.src === 'idb') delete c.bgm;
   if (c.dice) c.dice.used = 0;
   (c.scenarios || []).forEach(sc => { sc.friends = []; });

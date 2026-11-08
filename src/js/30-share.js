@@ -219,6 +219,7 @@ async function openSharedView(token) {
     fviewCur = c;
     $('fview-title').innerHTML = `<span class="share-from">${sharedOwner ? esc(sharedOwner) + 'さんが共有' : '共有されたキャラシ'}</span> ${esc(c.profile.name || '名無し')}`;
     $('fview-body').innerHTML = sheetViewHtml(c, true);
+    if (data.secret) showSecretBox(data.secret, '持ち主が公開しています');
     $('fview-body').scrollTop = 0;
   } catch (er) { $('fview-body').innerHTML = `<p class="err">${esc(jaErr(er))}</p>`; }
 }
@@ -227,7 +228,7 @@ function takeShared(btn) {
   const src = fviewCur; if (!src || !canAddChar()) return;
   const c = JSON.parse(JSON.stringify(src));
   c.id = uid(); c.updatedAt = Date.now();
-  delete c.sample; delete c.owner; c.locked = false;
+  delete c.sample; delete c.owner; c.locked = false; c.secretOpen = false; delete c.secret;
   if (c.bgm && c.bgm.src === 'idb') delete c.bgm;
   if (c.dice) c.dice.used = 0;
   (c.scenarios || []).forEach(sc => { sc.friends = []; });

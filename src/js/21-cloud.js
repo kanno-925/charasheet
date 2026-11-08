@@ -82,13 +82,18 @@ const myChars = () => state.chars.filter(c => !c.sample && (!c.owner || c.owner 
 let retryTimer = null;
 /* 秘匿はキャラシ本体（characters.data）には入れず、char_secrets に分けて送る（フレンドや共有リンクに出さないため） */
 let secretsOff = false;   // 12-char-secrets.sql をまだ実行していないとき
+let secretOpenOff = false;   // 13-secret-open.sql（秘匿の公開）をまだ実行していないとき
 const withoutSecret = c => { const { secret, ...rest } = c; return rest; };
 async function pushSecrets(list) {
   if (secretsOff || !list.length) return;
   const has = list.filter(c => (c.secret || '').trim()), empty = list.filter(c => !(c.secret || '').trim()).map(c => c.id);
   try {
     if (has.length) {
-      const { error } = await sb.from('char_secrets').upsert(has.map(c => ({ char_id: c.id, owner: me.id, body: c.secret, updated_at: new Date().toISOString() })));
+      const rows = has.map(c => Object.assign({ char_id: c.id, owner: me.id, body: c.secret, updated_at: new Date().toISOString() }, secretOpenOff ? {} : { is_open: !!c.secretOpen }));
+      let { error } = await sb.from('char_secrets').upsert(rows);
+      if (error && /is_open/.test(String(error.message))) {   // 13-secret-open.sql をまだ実行していない：公開の設定なしで送る
+        secretOpenOff = true; rows.forEach(r => { delete r.is_open; }); ({ error } = await sb.from('char_secrets').upsert(rows));
+      }
       if (error) throw error;
     }
     if (empty.length) { const { error } = await sb.from('char_secrets').delete().in('char_id', empty); if (error) throw error; }
@@ -571,7 +576,7 @@ function sheetViewHtml(c, shared) {   // shared：共有リンクから開いた
     ${list(c.items || [], it => `<span class="sv-chip">${esc(it.name)}${it.count ? ' ×' + esc(it.count) : ''}</span>`) ? `<div class="sv-sec"><h4>所持品</h4><div class="sv-chips">${list(c.items || [], it => `<span class="sv-chip">${esc(it.name)}${it.count ? ' ×' + esc(it.count) : ''}</span>`)}</div></div>` : ''}
     ${list(c.scenarios || [], sc => `<span class="sv-chip">「${esc(sc.name)}」${sc.date ? ' ' + esc(sc.date) : ''}</span>`) ? `<div class="sv-sec"><h4>通過シナリオ</h4><div class="sv-chips">${list(c.scenarios || [], sc => `<span class="sv-chip">「${esc(sc.name)}」${sc.date ? ' ' + esc(sc.date) : ''}</span>`)}</div></div>` : ''}
     ${c.backstory ? `<div class="sv-sec"><h4>経歴</h4><p class="sv-text">${esc(c.backstory)}</p></div>` : ''}
-    ${shared ? '' : '<div id="sv-secret"></div>'}
+    <div id="sv-secret"></div>
     ${c.memo ? `<div class="sv-sec"><h4>メモ</h4><p class="sv-text">${esc(c.memo)}</p></div>` : ''}
   </div>`;
 }
@@ -579,10 +584,15 @@ let fviewCur = null;
 /* グループのKPがメンバーのキャラシを見たとき、秘匿も見せる（読めるかどうかはサーバーが決める） */
 async function loadKpSecret(c) {
   if (!sb || !me || !c || secretsOff) return;
-  const { data, error } = await sb.from('char_secrets').select('body').eq('char_id', c.id).maybeSingle();
-  const box = $('sv-secret');
-  if (error || !data || !(data.body || '').trim() || !box || fviewCur !== c) return;
-  box.innerHTML = `<div class="sv-sec sv-secret"><h4>秘匿 <small>キーパーのあなたにだけ見えています</small></h4><p class="sv-text">${esc(data.body)}</p></div>`;
+  let { data, error } = await sb.from('char_secrets').select('body,is_open').eq('char_id', c.id).maybeSingle();
+  if (error && /is_open/.test(String(error.message))) ({ data, error } = await sb.from('char_secrets').select('body').eq('char_id', c.id).maybeSingle());
+  if (error || !data || !(data.body || '').trim() || fviewCur !== c) return;
+  showSecretBox(data.body, data.is_open ? '持ち主が公開しています' : 'キーパーのあなたにだけ見えています');
+}
+/* 見るだけの画面（フレンド・KP・共有リンク）の秘匿の欄 */
+function showSecretBox(body, note) {
+  const box = $('sv-secret'); if (!box || !(body || '').trim()) return;
+  box.innerHTML = `<div class="sv-sec sv-secret"><h4>秘匿 <small>${esc(note)}</small></h4><p class="sv-text">${esc(body)}</p></div>`;
 }
 $('fview-body').addEventListener('click', e => {
   const card = e.target.closest('[data-fv]');

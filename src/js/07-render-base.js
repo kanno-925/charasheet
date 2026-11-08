@@ -31,7 +31,13 @@ const field = (label, path, value, opts = {}) =>
 const secretBox = (c, rows = 5) => `<div class="secret-box">
   <div class="secret-head"><svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg><b>秘匿</b><span class="secret-state">${(c.secret || '').trim() ? '記入済み' : '未記入'}</span>
   <button class="btn small" type="button" data-act="toggle-secret" aria-expanded="false">表示する</button></div>
-  <p class="secret-note">自分と、このキャラで参加しているグループのキーパーだけが読めます。フレンドの閲覧・共有リンク・ココフォリアには出ません。</p>
+  <div class="secret-open" role="group" aria-label="秘匿を公開するか">
+    <button type="button" class="btn small ${c.secretOpen ? '' : 'on'}" data-act="secret-open" data-v="0" aria-pressed="${!c.secretOpen}">公開しない</button>
+    <button type="button" class="btn small ${c.secretOpen ? 'on' : ''}" data-act="secret-open" data-v="1" aria-pressed="${!!c.secretOpen}">公開する</button>
+  </div>
+  <p class="secret-note">${c.secretOpen
+    ? '<b>公開中</b>：このキャラシを見られる人（鍵をかけていなければフレンド、共有リンクを開いた人）も秘匿を読めます。ココフォリアには出ません。'
+    : '自分と、このキャラで参加しているグループのキーパーだけが読めます。フレンドの閲覧・共有リンク・ココフォリアには出ません。'}</p>
   <div class="secret-body">${area('secret', c.secret || '', '秘匿', rows)}</div></div>`;
 const area = (path, value, label, rows = 3, cls = 'inp') =>
   `<textarea class="${cls}" id="${pid(path)}" data-p="${path}" rows="${rows}" aria-label="${label}"${cls.includes('mono') ? ' spellcheck="false"' : ''}>${esc(value)}</textarea>`;

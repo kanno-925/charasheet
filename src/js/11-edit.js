@@ -62,6 +62,16 @@ onBoth('click', e => {
       break;
     }
     case 'open-friends': openFriends(); return;
+    case 'secret-open': {   // 秘匿を公開する／しない（公開すると、キャラシを見られる人も読める）
+      const v = b.dataset.v === '1'; if (!!c.secretOpen === v) return;
+      c.secretOpen = v;
+      toast(v ? '秘匿を公開しました。このキャラシを見られる人も読めます。' : '秘匿を非公開にしました。自分とグループのキーパーだけが読めます。');
+      const wasOpen = !!b.closest('.secret-box')?.classList.contains('open');
+      touch(); renderSheet();
+      if (panelKey && !$('panel-ov').hidden) fillPanel(panelKey);
+      if (wasOpen) document.querySelectorAll('.secret-box').forEach(x => { x.classList.add('open'); const t = x.querySelector('[data-act="toggle-secret"]'); if (t) { t.textContent = '隠す'; t.setAttribute('aria-expanded', 'true'); } });   // 開いていた秘匿は開いたまま
+      return;
+    }
     case 'toggle-secret': {
       const box = b.closest('.secret-box'); if (!box) return;
       const open = box.classList.toggle('open');
