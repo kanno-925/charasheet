@@ -2,7 +2,7 @@
 /* 持ち主：ログインしてクラウドに保存されたキャラに「共有リンク」を作る（サーバーの char_shares。supabase/10-share.sql）。
    見る人：リンク（…/?share=合言葉）を開くと、ログインしていなくても読み取り専用で見られる。自分の探索者として取り込むこともできる。
    リンク先はいつも公開サイト（1ファイル版や Claude の公開版から作っても、送った相手が開けるように）。 */
-const SHARE_BASE = 'https://kanno-925.github.io/charasheet/';
+const SHARE_BASE = 'https://orbis-locus.github.io/';   // 2026-11-08 に kanno-925.github.io/charasheet から引っ越し
 /* LINE・Discord・X に貼ったとき立ち絵入りのカードを出すための「中継の入口」（Cloudflare Workers。cloudflare/share-worker.js）。
    そのURL（最後の /s/ まで）をここに書く。空にすると公開サイトのリンクにもどる（カードは出ない）。
    前に作った ?share= の形のリンクも、そのまま開ける */

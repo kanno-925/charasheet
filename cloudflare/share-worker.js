@@ -7,7 +7,7 @@
    ここに書いてあるサーバーの鍵は publishable key（公開してよいもの）。 */
 const SUPA = 'https://umrouqvbmnttirdzixvc.supabase.co';
 const KEY = 'sb_publishable_9GwpXgDVVrzCeWjihR6yzQ_uKQsxbia';
-const APP = 'https://kanno-925.github.io/charasheet/';
+const APP = 'https://orbis-locus.github.io/';
 const SYS_LABEL = { coc6: 'クトゥルフ神話TRPG（6版）', coc7: 'クトゥルフ神話TRPG（7版）' };
 
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));

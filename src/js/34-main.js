@@ -7,5 +7,6 @@ load().catch(() => {}).finally(() => {
   ueApply();
   initCloud();
   if (sharedToken) openSharedView(sharedToken);   // 共有リンクから開いた
+  moveListen();   // 前のURLの引っ越しページから開かれた
 });
 if (!$('intro')) document.documentElement.style.overflow = 'hidden';
