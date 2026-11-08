@@ -80,6 +80,28 @@ function setSync(st, msg) {
 function scheduleSync() { if (!me) return; clearTimeout(syncTimer); syncTimer = setTimeout(flushSync, 1500); if (syncState !== 'pending') setSync('pending'); }
 const myChars = () => state.chars.filter(c => !c.sample && (!c.owner || c.owner === me.id));
 let retryTimer = null;
+/* 秘匿はキャラシ本体（characters.data）には入れず、char_secrets に分けて送る（フレンドや共有リンクに出さないため） */
+let secretsOff = false;   // 12-char-secrets.sql をまだ実行していないとき
+const withoutSecret = c => { const { secret, ...rest } = c; return rest; };
+async function pushSecrets(list) {
+  if (secretsOff || !list.length) return;
+  const has = list.filter(c => (c.secret || '').trim()), empty = list.filter(c => !(c.secret || '').trim()).map(c => c.id);
+  try {
+    if (has.length) {
+      const { error } = await sb.from('char_secrets').upsert(has.map(c => ({ char_id: c.id, owner: me.id, body: c.secret, updated_at: new Date().toISOString() })));
+      if (error) throw error;
+    }
+    if (empty.length) { const { error } = await sb.from('char_secrets').delete().in('char_id', empty); if (error) throw error; }
+  } catch (e) { if (groupMissing(e) || /char_secrets/.test(String(e && e.message))) secretsOff = true; else throw e; }
+}
+async function pullSecrets(ids) {
+  const m = new Map();
+  if (secretsOff || !ids.length) return m;
+  const { data, error } = await sb.from('char_secrets').select('char_id,body').in('char_id', ids);
+  if (error) { if (/char_secrets|does not exist|Could not find/i.test(String(error.message))) secretsOff = true; return m; }
+  (data || []).forEach(r => m.set(r.char_id, r.body || ''));
+  return m;
+}
 async function flushSync() {
   if (!sb || !me) return;
   clearTimeout(syncTimer); syncTimer = null;
@@ -93,8 +115,9 @@ async function flushSync() {
     const batches = [];
     rows.forEach(r => { const b = batches[batches.length - 1]; if (b && b.size + r[1].length <= 3e6) { b.rows.push(r); b.size += r[1].length; } else batches.push({ rows: [r], size: r[1].length }); });
     for (const b of batches) {
-      const { error } = await sb.from('characters').upsert(b.rows.map(([c]) => ({ id: c.id, owner: me.id, name: c.profile.name || '', locked: !!c.locked, data: c, updated_at: new Date(c.updatedAt || Date.now()).toISOString() })));
+      const { error } = await sb.from('characters').upsert(b.rows.map(([c]) => ({ id: c.id, owner: me.id, name: c.profile.name || '', locked: !!c.locked, data: withoutSecret(c), updated_at: new Date(c.updatedAt || Date.now()).toISOString() })));
       if (error) throw error;
+      await pushSecrets(b.rows.map(([c]) => c));
       b.rows.forEach(([c, js]) => lastSynced.set(c.id, js));
       b.rows.forEach(([c]) => { if (shares && shares[c.id]) uploadShareCard(c, shares[c.id]); });   // 共有中なら、リンクのカードの画像も新しく
     }
@@ -114,8 +137,10 @@ async function pullAndMerge() {
   const { data, error } = await sb.from('characters').select('id,data,locked,updated_at').eq('owner', me.id);
   if (error) throw error;
   lastSynced.clear();
+  const secrets = await pullSecrets((data || []).map(r => r.id));
   (data || []).forEach(r => {
     const sc = Object.assign({}, r.data, { locked: !!r.locked, owner: me.id });
+    sc.secret = secrets.has(r.id) ? secrets.get(r.id) : (state.chars.find(c => c.id === r.id)?.secret || r.data.secret || '');
     const i = state.chars.findIndex(c => c.id === r.id);
     if (i < 0) { state.chars.push(sc); lastSynced.set(sc.id, JSON.stringify(sc)); }
     else if ((sc.updatedAt || 0) >= (state.chars[i].updatedAt || 0)) { state.chars[i] = sc; lastSynced.set(sc.id, JSON.stringify(sc)); }
@@ -152,9 +177,11 @@ async function refreshFromCloud() {
       if (r.error) throw r.error;
       rows = rows.concat(r.data || []);
     }
+    const secrets = await pullSecrets(rows.map(r => r.id));
     rows.forEach(r => {
       const sc = Object.assign({}, r.data, { locked: !!r.locked, owner: me.id });
       const i = state.chars.findIndex(c => c.id === r.id);
+      sc.secret = secrets.has(r.id) ? secrets.get(r.id) : (i >= 0 ? state.chars[i].secret || '' : '');
       if (i < 0) state.chars.push(sc); else state.chars[i] = sc;
       lastSynced.set(sc.id, JSON.stringify(sc));
     });
@@ -544,10 +571,19 @@ function sheetViewHtml(c, shared) {   // shared：共有リンクから開いた
     ${list(c.items || [], it => `<span class="sv-chip">${esc(it.name)}${it.count ? ' ×' + esc(it.count) : ''}</span>`) ? `<div class="sv-sec"><h4>所持品</h4><div class="sv-chips">${list(c.items || [], it => `<span class="sv-chip">${esc(it.name)}${it.count ? ' ×' + esc(it.count) : ''}</span>`)}</div></div>` : ''}
     ${list(c.scenarios || [], sc => `<span class="sv-chip">「${esc(sc.name)}」${sc.date ? ' ' + esc(sc.date) : ''}</span>`) ? `<div class="sv-sec"><h4>通過シナリオ</h4><div class="sv-chips">${list(c.scenarios || [], sc => `<span class="sv-chip">「${esc(sc.name)}」${sc.date ? ' ' + esc(sc.date) : ''}</span>`)}</div></div>` : ''}
     ${c.backstory ? `<div class="sv-sec"><h4>経歴</h4><p class="sv-text">${esc(c.backstory)}</p></div>` : ''}
+    ${shared ? '' : '<div id="sv-secret"></div>'}
     ${c.memo ? `<div class="sv-sec"><h4>メモ</h4><p class="sv-text">${esc(c.memo)}</p></div>` : ''}
   </div>`;
 }
 let fviewCur = null;
+/* グループのKPがメンバーのキャラシを見たとき、秘匿も見せる（読めるかどうかはサーバーが決める） */
+async function loadKpSecret(c) {
+  if (!sb || !me || !c || secretsOff) return;
+  const { data, error } = await sb.from('char_secrets').select('body').eq('char_id', c.id).maybeSingle();
+  const box = $('sv-secret');
+  if (error || !data || !(data.body || '').trim() || !box || fviewCur !== c) return;
+  box.innerHTML = `<div class="sv-sec sv-secret"><h4>秘匿 <small>キーパーのあなたにだけ見えています</small></h4><p class="sv-text">${esc(data.body)}</p></div>`;
+}
 $('fview-body').addEventListener('click', e => {
   const card = e.target.closest('[data-fv]');
   if (card) {
@@ -555,6 +591,7 @@ $('fview-body').addEventListener('click', e => {
     $('fview-title').innerHTML = `<button class="btn small ghost fv-back" type="button" data-fvback>← 一覧へ</button> ${esc(fviewCur.profile.name || '名無し')}`;
     $('fview-body').innerHTML = sheetViewHtml(fviewCur);
     $('fview-body').scrollTop = 0;
+    loadKpSecret(fviewCur);
     return;
   }
   if (e.target.closest('[data-fvcopy]') && fviewCur) {

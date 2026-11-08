@@ -159,6 +159,7 @@ function subsOf(key, c) {
     ];
     case 'story': return [
       { id: 'backstory', label: '経歴', html: area('backstory', c.backstory, '経歴', 14) },
+      { id: 'secret', label: '秘匿', html: secretBox(c, 10) },
       { id: 'memo', label: '覚え書き（メモ）', html: `<p class="bk-note">ココフォリアのコマのメモ欄に入ります。</p>${area('memo', c.memo, 'メモ', 10)}` },
       { id: 'extra', label: '追加の呪文（コマンド）', html: `<p class="bk-note">1行に1コマンド。チャットパレットの末尾に入ります。</p>${area('extra', c.extra, '追加コマンド', 8, 'inp mono')}` },
     ];

@@ -62,6 +62,13 @@ onBoth('click', e => {
       break;
     }
     case 'open-friends': openFriends(); return;
+    case 'toggle-secret': {
+      const box = b.closest('.secret-box'); if (!box) return;
+      const open = box.classList.toggle('open');
+      b.textContent = open ? '隠す' : '表示する'; b.setAttribute('aria-expanded', open);
+      if (open) box.querySelector('textarea')?.focus();
+      return;
+    }
     case 'share': openShare(c); return;
     case 'face-pick': pickFace(c, +b.dataset.i); return;
     case 'face-del': {

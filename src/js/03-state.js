@@ -19,7 +19,7 @@ function blank(system) {
     items: [{ name: '', count: '', price: '', note: '' }],
     money: { cash: '', deposit: '', assets: '', income: '' },
     tomes: '', entities: '',
-    backstory: '', memo: '', scenarios: [],
+    backstory: '', secret: '', memo: '', scenarios: [],
     extra: '', updatedAt: Date.now(),
   };
   S.abil.forEach(([k]) => { c.abilities[k] = { base: '', adj: '', tmp: '' }; });

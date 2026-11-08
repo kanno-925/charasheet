@@ -98,7 +98,7 @@ function blank(system) {
     items: [{ name: '', count: '', price: '', note: '' }],
     money: { cash: '', deposit: '', assets: '', income: '' },
     tomes: '', entities: '',
-    backstory: '', memo: '', scenarios: [],
+    backstory: '', secret: '', memo: '', scenarios: [],
     extra: '', updatedAt: Date.now(),
   };
   S.abil.forEach(([k]) => { c.abilities[k] = { base: '', adj: '', tmp: '' }; });
@@ -699,6 +699,12 @@ const inp = (path, value, opts = {}) =>
   `<input class="${opts.cls || 'inp'}" id="${pid(path)}" data-p="${path}" value="${esc(value)}"${opts.ph ? ` placeholder="${esc(opts.ph)}"` : ''}${opts.num ? ' inputmode="numeric"' : ''}${opts.label ? ` aria-label="${esc(opts.label)}"` : ''}>`;
 const field = (label, path, value, opts = {}) =>
   `<div class="field ${opts.wrap || ''}"><label for="${pid(path)}">${label}</label>${inp(path, value, opts)}</div>`;
+/* 秘匿欄：ふだんは閉じていて、「表示する」を押したときだけ中身が見える（配信や画面共有でうっかり見せないため） */
+const secretBox = (c, rows = 5) => `<div class="secret-box">
+  <div class="secret-head"><svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg><b>秘匿</b><span class="secret-state">${(c.secret || '').trim() ? '記入済み' : '未記入'}</span>
+  <button class="btn small" type="button" data-act="toggle-secret" aria-expanded="false">表示する</button></div>
+  <p class="secret-note">自分と、このキャラで参加しているグループのキーパーだけが読めます。フレンドの閲覧・共有リンク・ココフォリアには出ません。</p>
+  <div class="secret-body">${area('secret', c.secret || '', '秘匿', rows)}</div></div>`;
 const area = (path, value, label, rows = 3, cls = 'inp') =>
   `<textarea class="${cls}" id="${pid(path)}" data-p="${path}" rows="${rows}" aria-label="${label}"${cls.includes('mono') ? ' spellcheck="false"' : ''}>${esc(value)}</textarea>`;
 
@@ -1046,6 +1052,7 @@ function sectionBody(key, c) {
     case 'story': return `<section class="sec">
       ${sub('経歴')}
       ${area('backstory', c.backstory, '経歴', 6)}
+      ${secretBox(c, 5)}
       ${sub('メモ', 'プロフィールと一緒にコマのメモ欄に入ります')}
       ${area('memo', c.memo, 'メモ', 4)}
       ${sub('追加コマンド', '1行に1コマンド。チャットパレットの末尾に入ります')}
@@ -1216,6 +1223,7 @@ function subsOf(key, c) {
     ];
     case 'story': return [
       { id: 'backstory', label: '経歴', html: area('backstory', c.backstory, '経歴', 14) },
+      { id: 'secret', label: '秘匿', html: secretBox(c, 10) },
       { id: 'memo', label: '覚え書き（メモ）', html: `<p class="bk-note">ココフォリアのコマのメモ欄に入ります。</p>${area('memo', c.memo, 'メモ', 10)}` },
       { id: 'extra', label: '追加の呪文（コマンド）', html: `<p class="bk-note">1行に1コマンド。チャットパレットの末尾に入ります。</p>${area('extra', c.extra, '追加コマンド', 8, 'inp mono')}` },
     ];
@@ -1834,6 +1842,13 @@ onBoth('click', e => {
       break;
     }
     case 'open-friends': openFriends(); return;
+    case 'toggle-secret': {
+      const box = b.closest('.secret-box'); if (!box) return;
+      const open = box.classList.toggle('open');
+      b.textContent = open ? '隠す' : '表示する'; b.setAttribute('aria-expanded', open);
+      if (open) box.querySelector('textarea')?.focus();
+      return;
+    }
     case 'share': openShare(c); return;
     case 'face-pick': pickFace(c, +b.dataset.i); return;
     case 'face-del': {
@@ -3100,6 +3115,28 @@ function setSync(st, msg) {
 function scheduleSync() { if (!me) return; clearTimeout(syncTimer); syncTimer = setTimeout(flushSync, 1500); if (syncState !== 'pending') setSync('pending'); }
 const myChars = () => state.chars.filter(c => !c.sample && (!c.owner || c.owner === me.id));
 let retryTimer = null;
+/* 秘匿はキャラシ本体（characters.data）には入れず、char_secrets に分けて送る（フレンドや共有リンクに出さないため） */
+let secretsOff = false;   // 12-char-secrets.sql をまだ実行していないとき
+const withoutSecret = c => { const { secret, ...rest } = c; return rest; };
+async function pushSecrets(list) {
+  if (secretsOff || !list.length) return;
+  const has = list.filter(c => (c.secret || '').trim()), empty = list.filter(c => !(c.secret || '').trim()).map(c => c.id);
+  try {
+    if (has.length) {
+      const { error } = await sb.from('char_secrets').upsert(has.map(c => ({ char_id: c.id, owner: me.id, body: c.secret, updated_at: new Date().toISOString() })));
+      if (error) throw error;
+    }
+    if (empty.length) { const { error } = await sb.from('char_secrets').delete().in('char_id', empty); if (error) throw error; }
+  } catch (e) { if (groupMissing(e) || /char_secrets/.test(String(e && e.message))) secretsOff = true; else throw e; }
+}
+async function pullSecrets(ids) {
+  const m = new Map();
+  if (secretsOff || !ids.length) return m;
+  const { data, error } = await sb.from('char_secrets').select('char_id,body').in('char_id', ids);
+  if (error) { if (/char_secrets|does not exist|Could not find/i.test(String(error.message))) secretsOff = true; return m; }
+  (data || []).forEach(r => m.set(r.char_id, r.body || ''));
+  return m;
+}
 async function flushSync() {
   if (!sb || !me) return;
   clearTimeout(syncTimer); syncTimer = null;
@@ -3113,8 +3150,9 @@ async function flushSync() {
     const batches = [];
     rows.forEach(r => { const b = batches[batches.length - 1]; if (b && b.size + r[1].length <= 3e6) { b.rows.push(r); b.size += r[1].length; } else batches.push({ rows: [r], size: r[1].length }); });
     for (const b of batches) {
-      const { error } = await sb.from('characters').upsert(b.rows.map(([c]) => ({ id: c.id, owner: me.id, name: c.profile.name || '', locked: !!c.locked, data: c, updated_at: new Date(c.updatedAt || Date.now()).toISOString() })));
+      const { error } = await sb.from('characters').upsert(b.rows.map(([c]) => ({ id: c.id, owner: me.id, name: c.profile.name || '', locked: !!c.locked, data: withoutSecret(c), updated_at: new Date(c.updatedAt || Date.now()).toISOString() })));
       if (error) throw error;
+      await pushSecrets(b.rows.map(([c]) => c));
       b.rows.forEach(([c, js]) => lastSynced.set(c.id, js));
       b.rows.forEach(([c]) => { if (shares && shares[c.id]) uploadShareCard(c, shares[c.id]); });   // 共有中なら、リンクのカードの画像も新しく
     }
@@ -3134,8 +3172,10 @@ async function pullAndMerge() {
   const { data, error } = await sb.from('characters').select('id,data,locked,updated_at').eq('owner', me.id);
   if (error) throw error;
   lastSynced.clear();
+  const secrets = await pullSecrets((data || []).map(r => r.id));
   (data || []).forEach(r => {
     const sc = Object.assign({}, r.data, { locked: !!r.locked, owner: me.id });
+    sc.secret = secrets.has(r.id) ? secrets.get(r.id) : (state.chars.find(c => c.id === r.id)?.secret || r.data.secret || '');
     const i = state.chars.findIndex(c => c.id === r.id);
     if (i < 0) { state.chars.push(sc); lastSynced.set(sc.id, JSON.stringify(sc)); }
     else if ((sc.updatedAt || 0) >= (state.chars[i].updatedAt || 0)) { state.chars[i] = sc; lastSynced.set(sc.id, JSON.stringify(sc)); }
@@ -3172,9 +3212,11 @@ async function refreshFromCloud() {
       if (r.error) throw r.error;
       rows = rows.concat(r.data || []);
     }
+    const secrets = await pullSecrets(rows.map(r => r.id));
     rows.forEach(r => {
       const sc = Object.assign({}, r.data, { locked: !!r.locked, owner: me.id });
       const i = state.chars.findIndex(c => c.id === r.id);
+      sc.secret = secrets.has(r.id) ? secrets.get(r.id) : (i >= 0 ? state.chars[i].secret || '' : '');
       if (i < 0) state.chars.push(sc); else state.chars[i] = sc;
       lastSynced.set(sc.id, JSON.stringify(sc));
     });
@@ -3564,10 +3606,19 @@ function sheetViewHtml(c, shared) {   // shared：共有リンクから開いた
     ${list(c.items || [], it => `<span class="sv-chip">${esc(it.name)}${it.count ? ' ×' + esc(it.count) : ''}</span>`) ? `<div class="sv-sec"><h4>所持品</h4><div class="sv-chips">${list(c.items || [], it => `<span class="sv-chip">${esc(it.name)}${it.count ? ' ×' + esc(it.count) : ''}</span>`)}</div></div>` : ''}
     ${list(c.scenarios || [], sc => `<span class="sv-chip">「${esc(sc.name)}」${sc.date ? ' ' + esc(sc.date) : ''}</span>`) ? `<div class="sv-sec"><h4>通過シナリオ</h4><div class="sv-chips">${list(c.scenarios || [], sc => `<span class="sv-chip">「${esc(sc.name)}」${sc.date ? ' ' + esc(sc.date) : ''}</span>`)}</div></div>` : ''}
     ${c.backstory ? `<div class="sv-sec"><h4>経歴</h4><p class="sv-text">${esc(c.backstory)}</p></div>` : ''}
+    ${shared ? '' : '<div id="sv-secret"></div>'}
     ${c.memo ? `<div class="sv-sec"><h4>メモ</h4><p class="sv-text">${esc(c.memo)}</p></div>` : ''}
   </div>`;
 }
 let fviewCur = null;
+/* グループのKPがメンバーのキャラシを見たとき、秘匿も見せる（読めるかどうかはサーバーが決める） */
+async function loadKpSecret(c) {
+  if (!sb || !me || !c || secretsOff) return;
+  const { data, error } = await sb.from('char_secrets').select('body').eq('char_id', c.id).maybeSingle();
+  const box = $('sv-secret');
+  if (error || !data || !(data.body || '').trim() || !box || fviewCur !== c) return;
+  box.innerHTML = `<div class="sv-sec sv-secret"><h4>秘匿 <small>キーパーのあなたにだけ見えています</small></h4><p class="sv-text">${esc(data.body)}</p></div>`;
+}
 $('fview-body').addEventListener('click', e => {
   const card = e.target.closest('[data-fv]');
   if (card) {
@@ -3575,6 +3626,7 @@ $('fview-body').addEventListener('click', e => {
     $('fview-title').innerHTML = `<button class="btn small ghost fv-back" type="button" data-fvback>← 一覧へ</button> ${esc(fviewCur.profile.name || '名無し')}`;
     $('fview-body').innerHTML = sheetViewHtml(fviewCur);
     $('fview-body').scrollTop = 0;
+    loadKpSecret(fviewCur);
     return;
   }
   if (e.target.closest('[data-fvcopy]') && fviewCur) {

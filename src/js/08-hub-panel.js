@@ -342,6 +342,7 @@ function sectionBody(key, c) {
     case 'story': return `<section class="sec">
       ${sub('経歴')}
       ${area('backstory', c.backstory, '経歴', 6)}
+      ${secretBox(c, 5)}
       ${sub('メモ', 'プロフィールと一緒にコマのメモ欄に入ります')}
       ${area('memo', c.memo, 'メモ', 4)}
       ${sub('追加コマンド', '1行に1コマンド。チャットパレットの末尾に入ります')}

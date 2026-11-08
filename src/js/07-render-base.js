@@ -27,5 +27,11 @@ const inp = (path, value, opts = {}) =>
   `<input class="${opts.cls || 'inp'}" id="${pid(path)}" data-p="${path}" value="${esc(value)}"${opts.ph ? ` placeholder="${esc(opts.ph)}"` : ''}${opts.num ? ' inputmode="numeric"' : ''}${opts.label ? ` aria-label="${esc(opts.label)}"` : ''}>`;
 const field = (label, path, value, opts = {}) =>
   `<div class="field ${opts.wrap || ''}"><label for="${pid(path)}">${label}</label>${inp(path, value, opts)}</div>`;
+/* 秘匿欄：ふだんは閉じていて、「表示する」を押したときだけ中身が見える（配信や画面共有でうっかり見せないため） */
+const secretBox = (c, rows = 5) => `<div class="secret-box">
+  <div class="secret-head"><svg class="lk" viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg><b>秘匿</b><span class="secret-state">${(c.secret || '').trim() ? '記入済み' : '未記入'}</span>
+  <button class="btn small" type="button" data-act="toggle-secret" aria-expanded="false">表示する</button></div>
+  <p class="secret-note">自分と、このキャラで参加しているグループのキーパーだけが読めます。フレンドの閲覧・共有リンク・ココフォリアには出ません。</p>
+  <div class="secret-body">${area('secret', c.secret || '', '秘匿', rows)}</div></div>`;
 const area = (path, value, label, rows = 3, cls = 'inp') =>
   `<textarea class="${cls}" id="${pid(path)}" data-p="${path}" rows="${rows}" aria-label="${label}"${cls.includes('mono') ? ' spellcheck="false"' : ''}>${esc(value)}</textarea>`;
