@@ -26,7 +26,7 @@
 | 10-share.sql | キャラシの共有リンク（char_shares・get_shared_char。見る人はログイン不要なので anon にも実行権を付けている） | 済み（2026-11-07 に確認） |
 | 11-share-card.sql | 共有リンクのカード（get_share_card・Storage の share-og） | 済み（2026-11-07 に確認） |
 | 12-char-secrets.sql | キャラシの秘匿欄（char_secrets・can_read_secret。持ち主とグループのKPだけ読める） | 済み（2026-11-08 にエラーなしで実行） |
-| 13-secret-open.sql | 秘匿の「公開する／しない」（char_secrets.is_open、公開中は「キャラシを読める人」も読める、共有リンクにも出す） | **未実行**（2026-11-08 に追加。実行するまでは公開しても今までどおり非公開のまま） |
+| 13-secret-open.sql | 秘匿の「公開する／しない」（char_secrets.is_open、公開中は「キャラシを読める人」も読める、共有リンクにも出す） | 済み（2026-11-08 に列があることを確認） |
 
 - SQL を渡すときの注意：オーナーがコピーで**途中で切れた**ことがある。短く・英数字だけで書き、「全部消してから貼る」「文字を選択していない状態で Run」と伝える。
 - 新しいサーバー関数は Supabase が anon（ログインしていない人）にも実行権を付ける。`revoke ... from public, anon` と、関数の中で `auth.uid() is null` を止めることを必ず入れる。
