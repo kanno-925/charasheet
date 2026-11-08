@@ -418,7 +418,7 @@
 .ts-aq-new .bub b { font-size: 46px; font-weight: 300; color: #eaf8ff; text-shadow: 0 0 14px #8fdcff; }
 @media (max-width: 560px) { .ts-aq { gap: 22px 18px; } .ts-aq-bub .bub { width: calc(110px * var(--s, 1)); height: calc(110px * var(--s, 1)); } .ts-aq-bub .plate { min-width: 100px; max-width: 150px; } }
 :root[data-look~="aqua"] .sel-head h2 { font-family: "Pinyon Script", var(--f-display); letter-spacing: .1em; }
-:root[data-look~="aqua"] .sel-head h2::before { content: "Select  "; font-family: "Pinyon Script", cursive; font-weight: 400; color: var(--aq-cyan, #8fdcff); }
+:root[data-look~="aqua"] #select:has([data-seltab="mine"].on) .sel-head h2::before { content: "Select  "; font-family: "Pinyon Script", cursive; font-weight: 400; color: var(--aq-cyan, #8fdcff); }
 
 /* ===== アクアリウム：左上のロゴは水の色（assets/brand/logo-aqua.webp） ===== */
 :root[data-look~="aqua"] .brand { background-image: url("../assets/brand/logo-aqua.webp"); }

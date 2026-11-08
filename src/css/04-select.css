@@ -145,3 +145,5 @@
 }
 @media (prefers-reduced-motion: reduce) { .sl-art, .sl-ground { animation: none; } .sl-body { transition: none; } }
 .sel-stage .sl-card:first-child { margin-left: 0; } .sel-stage .sl-card:last-child { margin-right: 0; }
+/* 「まだ探索者／フレンドがいません」の文：せまい画面ではみ出さないように折り返す（どのテーマでも） */
+.sel-empty { white-space: normal; width: min(90%, 460px); text-align: center; line-height: 1.6; }
